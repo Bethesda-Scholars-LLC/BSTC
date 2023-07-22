@@ -17,6 +17,7 @@
         "no-else-return": "warn",
         "no-lonely-if": "warn",
         "no-return-await": "warn",
+        "@typescript-eslint/no-explicit-any": "off",
         "spaced-comment": ["warn", "always"],
         "arrow-spacing": [
             "warn",
