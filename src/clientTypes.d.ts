@@ -52,6 +52,6 @@ export type UpdateClientPayload = {
         email: string
         last_name: string
     }
-    "pipeline-stage"?: null | id
+    pipeline_stage?: null | number
 }
 

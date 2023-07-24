@@ -1,5 +1,7 @@
 import axios from "axios";
 import { ClientObject, UpdateClientPayload } from "./clientTypes";
+import { addTCListener } from "./hook";
+import { TCEvent } from "./types";
 import { apiHeaders, apiUrl } from "./util";
 
 export const updateClient = async (data: UpdateClientPayload) => {
@@ -25,10 +27,16 @@ export const getMinimumClientUpdate = (client: ClientObject): UpdateClientPayloa
 
 export const getClientById = async (id: number): Promise<ClientObject | null> => {
     try {
-        return (await axios(apiUrl(`/clients/${id}`))).data as ClientObject;
+        return (await axios(apiUrl(`/clients/${id}`), {
+            headers: apiHeaders
+        })).data as ClientObject;
     } catch(e) {
         console.log(e);
         return null;
     }
 };
 
+addTCListener("BOOKED_AN_APPOINTMENT", (event: TCEvent<any, any>) => {
+    console.log(event.actor);
+    console.log(event.subject);
+});

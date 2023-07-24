@@ -13,10 +13,10 @@ export const addTCListener = (eventName: string, listener: TCEventListener) => {
 
 hookRouter.all("*", (req: Req, res: Res) => {
     if(req.body?.events){
+        console.log(req.body);
         const events: TCEvent[] = req.body.events;
         for(let i = 0; i < events.length; i++){
             console.log(events[i].action);
-            console.log(events[i].subject);
             const cb = listeners[events[i].action];
             if(!cb)
                 continue;

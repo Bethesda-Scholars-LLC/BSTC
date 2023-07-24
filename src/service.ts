@@ -5,6 +5,8 @@ import { JobObject, UpdateServicePayload } from "./serviceTypes";
 import { TCEvent } from "./types";
 import { apiHeaders, apiUrl } from "./util";
 
+const matchedNotBooked = 37478;
+
 const updateServiceById = async (id: number, data: UpdateServicePayload) => {
     try{
         await axios(apiUrl(`/services/${id}/`), {
@@ -84,7 +86,7 @@ addTCListener("ADDED_CONTRACTOR_TO_SERVICE", async (event: TCEvent<any, JobObjec
                 return;
             updateClient({
                 ...getMinimumClientUpdate(client),
-                "pipeline-stage": ""
+                pipeline_stage: matchedNotBooked
             });
         });
     }
