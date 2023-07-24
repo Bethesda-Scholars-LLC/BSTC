@@ -1,25 +1,34 @@
 import axios from "axios";
+import { getClientById, getMinimumClientUpdate, updateClient } from "./client";
 import { addTCListener } from "./hook";
-import { JobObject, TCEvent } from "./types";
+import { JobObject, UpdateServicePayload } from "./serviceTypes";
+import { TCEvent } from "./types";
 import { apiHeaders, apiUrl } from "./util";
 
-const updateServiceById = (id: number, data: any) => {
-    axios(apiUrl(`/services/${id}/`), {
-        method: "PUT",
-        headers: apiHeaders,
-        data: data
-    }).then(v => {
-        console.log(v);
-    }).catch(err => {
-        console.error(err);
-        console.error("ERROR");
-    });
+const updateServiceById = async (id: number, data: UpdateServicePayload) => {
+    try{
+        await axios(apiUrl(`/services/${id}/`), {
+            method: "PUT",
+            headers: apiHeaders,
+            data: data
+        });
+    } catch(e){
+        console.log(e);
+    }
 };
 
-const fixJobName = (job: JobObject) => {
+const getMinimumJobUpdate = (job: JobObject): UpdateServicePayload => {
+    return {
+        name: job.name,
+        dft_charge_rate: job.dft_charge_rate,
+        dft_contractor_rate: job.dft_contractor_rate,
+    };
+};
+
+const fixJobName = (job: JobObject): JobObject | null => {
     // if name has only one word in it, return and exit
     if(job.name.split("from")[1].trim().split(" ").length === 1)
-        return;
+        return null;
 
     const name = job.name.split("from")[1]
         .trim()
@@ -33,19 +42,55 @@ const fixJobName = (job: JobObject) => {
         }).join(" ");
 
     job.name = job.name.split("from")[0]+"from "+name;
-    updateServiceById(job.id, {
-        name: job.name,
-        "dft_charge_rate": job.dft_charge_rate,
-        "dft_contractor_rate": job.dft_contractor_rate
-    });
+    return job;
 };
 
-const setDftLocation = (job: JobObject) => {
-    /**/
+const setDftLocation = (job: JobObject): UpdateServicePayload => {
+    const jobLocation = job.description.toLowerCase()
+        .split("lesson location:**\n")[1]
+        .split("\n**")[0]
+        .trim();
+
+    const oldJob = getMinimumJobUpdate(job);
+    // in person job
+    if(jobLocation.includes("in-person")){
+        oldJob.dft_location = 107916;
+    // if its not in person, its online
+    } else {
+        oldJob.dft_location = 106892;
+    }
+    return oldJob;
 };
 
+/**
+ * @description update job name to only include first name and last initial
+ */
 addTCListener("REQUESTED_A_SERVICE", async (event: TCEvent<any, JobObject>) => {
+    let job = event.subject;
+    //    keep current job object unless fixJobName returns a new one
+    job = fixJobName(job) ?? job;
+
+    updateServiceById(job.id, setDftLocation(job));
+});
+
+/**
+ * @description update status to in progress when contract added
+ */
+addTCListener("ADDED_CONTRACTOR_TO_SERVICE", async (event: TCEvent<any, JobObject>) => {
     const job = event.subject;
-    fixJobName(job);
-    setDftLocation(job);
+    if(job.rcrs.length > 0){
+        getClientById(job.rcrs[0].paying_client).then(client => {
+            if(!client)
+                return;
+            updateClient({
+                ...getMinimumClientUpdate(client),
+                "pipeline-stage": ""
+            });
+        });
+    }
+
+    updateServiceById(job.id, {
+        ...getMinimumJobUpdate(job),
+        status: "in-progress"
+    });
 });
