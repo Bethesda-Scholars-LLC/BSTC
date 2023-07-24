@@ -4,7 +4,7 @@ import { addTCListener } from "./hook";
 import { TCEvent } from "./types";
 import { apiHeaders, apiUrl } from "./util";
 
-const updateContractorById = async (id: number, data: UpdateContractorPayload)=>{
+const updateContractorById = async (id: number, data: UpdateContractorPayload) => {
     try {
         await axios(apiUrl(`/contractors/${id}`), {
             method: "POST",
