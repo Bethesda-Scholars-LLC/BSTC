@@ -1,8 +1,8 @@
 import axios from "axios";
+import { TCEvent } from "../types";
+import { apiHeaders, apiUrl } from "../util";
 import { ClientObject, UpdateClientPayload } from "./clientTypes";
 import { addTCListener } from "./hook";
-import { TCEvent } from "./types";
-import { apiHeaders, apiUrl } from "./util";
 
 export const updateClient = async (data: UpdateClientPayload) => {
     try {

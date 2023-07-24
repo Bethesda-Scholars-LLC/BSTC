@@ -1,8 +1,8 @@
 import cors from "cors";
 import express, { json } from "express";
-import "./contractor";
-import hookRouter from "./hook";
-import "./service";
+import "./integration/contractor";
+import hookRouter from "./integration/hook";
+import "./integration/service";
 const app = express();
 app.use(cors());
 app.use(json());

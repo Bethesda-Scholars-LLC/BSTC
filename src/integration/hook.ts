@@ -1,5 +1,5 @@
 import express from "express";
-import { Req, Res, TCEvent, TCEventListener } from "./types";
+import { Req, Res, TCEvent, TCEventListener } from "../types";
 const hookRouter = express.Router();
 
 

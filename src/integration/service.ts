@@ -1,9 +1,9 @@
 import axios from "axios";
+import { TCEvent } from "../types";
+import { apiHeaders, apiUrl } from "../util";
 import { getClientById, getMinimumClientUpdate, updateClient } from "./client";
 import { addTCListener } from "./hook";
 import { JobObject, UpdateServicePayload } from "./serviceTypes";
-import { TCEvent } from "./types";
-import { apiHeaders, apiUrl } from "./util";
 
 const matchedNotBooked = 37478;
 
