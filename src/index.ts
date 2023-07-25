@@ -3,6 +3,7 @@ import express, { json } from "express";
 import "./integration/contractor";
 import hookRouter from "./integration/hook";
 import "./integration/service";
+import "./mail/mail";
 const app = express();
 app.use(cors());
 app.use(json());

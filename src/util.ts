@@ -1,9 +1,22 @@
 import dotenv from "dotenv";
-import nodemailer from "nodemailer";
+import fs from "fs";
 dotenv.config();
 
-if(!process.env.API_KEY){
-    console.log("Please add 'API_KEY' to .env");
+const requiredEnvs = ["API_KEY", "EMAIL_FROM", "EMAIL_ADDRESS", "EMAIL_PASSWORD"];
+const envKeys = Object.keys(process.env);
+
+if(requiredEnvs.reduce((prev, val) => {
+        return prev || !envKeys.includes(val);
+    }, false)
+){
+    const missingFields = requiredEnvs.filter(v => !envKeys.includes(v));
+    if(missingFields.length === 1){
+        console.log(missingFields[0]+" is required in the env and it is missing");
+    } else {
+        console.log(missingFields.reduce(
+            (prev: string, v: string, i: number, arr: string[]) => prev+(i === arr.length-1 ? `and ${v}` : `${v}, `), ""
+        )+" are required in the .env and they are missing");
+    }
     process.exit(-1);
 }
 
@@ -23,30 +36,32 @@ const baseUrl = "https://secure.tutorcruncher.com/api/";
  */
 export const apiUrl = (path: string) => baseUrl + path.padStart(1, "/").substring(1);
 
-export const mailTransporter = () => {                      // where emails will be sent from
-    const transporter = nodemailer.createTransport({
-        service: "gmail",                                 // service provider for this email
-        auth: {
-            user: process.env.EMAIL_ADDRESS,               // username and password for the email
-            pass: process.env.EMAIL_PASSWORD
-        }
+/**
+ * @param date
+ * @returns If the given date is invalid
+ */
+export const invalidDate = (date: Date) => isNaN(date.getUTCMilliseconds());
+
+export const readFile = (flName: string): Promise<Buffer> => {
+    return new Promise((resolve, reject) => {
+        fs.readFile(flName, (err, data) => {
+            if(err){
+                reject(err);
+                return;
+            }
+            resolve(data);
+        });
     });
-    return transporter;
 };
 
-export const sendVerification = (user: any) => {        // sends verification email
-    const transporter = mailTransporter();
-
-    const mailOptions = {
-        from: '"FFSD Email Verification" <`process.env.EMAIL_ADDRESS`>',    // change title and email here
-        to: "pascalbell16@gmail.com",
-        subject: "",                                // change subject here
-        html: `<h>Hello ${user.first_name}</h>
-            <p> Thank you for registering! Please click below to verify your email adress and proceed to payment:</p>`
-    };
-
-    transporter.sendMail(mailOptions, (error, info) => {
-        if (error) return console.log(error);
-        console.log("verification sent");
+export const writeFile = (flName: string, data: string | Buffer): Promise<null> => {
+    return new Promise((resolve, reject) => {
+        fs.writeFile(flName, data, (err) => {
+            if(err){
+                reject(err);
+                return;
+            }
+            resolve(null);
+        });
     });
-}
+};
