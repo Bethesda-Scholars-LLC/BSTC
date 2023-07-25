@@ -23,7 +23,7 @@ export type ClientObject = {
         email: string
         url: string
     }
-    "pipeline-stage": {
+    pipeline_stage: {
         id: number
         name: string
         sort_index: number

@@ -4,6 +4,7 @@ import { apiHeaders, apiUrl } from "../util";
 import { getClientById, getMinimumClientUpdate, updateClient } from "./client";
 import { addTCListener } from "./hook";
 import { JobObject, UpdateServicePayload } from "./serviceTypes";
+import { queueFirstLessonComplete } from "../mail/firstLesson";
 
 const matchedNotBooked = 37478;
 
@@ -84,6 +85,9 @@ addTCListener("ADDED_CONTRACTOR_TO_SERVICE", async (event: TCEvent<any, JobObjec
         getClientById(job.rcrs[0].paying_client).then(client => {
             if(!client)
                 return;
+            if(client.pipeline_stage.id !== 35326) {
+                return;
+            }
             updateClient({
                 ...getMinimumClientUpdate(client),
                 pipeline_stage: matchedNotBooked
@@ -95,4 +99,26 @@ addTCListener("ADDED_CONTRACTOR_TO_SERVICE", async (event: TCEvent<any, JobObjec
         ...getMinimumJobUpdate(job),
         status: "in-progress"
     });
+});
+
+addTCListener("ADDED_A_LABEL_TO_A_SERVICE", async (event: TCEvent<any, JobObject>) => {
+    const job = event.subject;
+    let i: number;
+    if(job.rcrs.length > 0){
+        getClientById(job.rcrs[0].paying_client).then(client => {
+            if(!client)
+                return;
+            
+            // matched and booked stage
+            if (client.pipeline_stage.id === 35328) {
+                for (i = 0; i < job.labels.length; i++) {
+                    // first lesson is complete
+                    if (job.labels[i].id === 169932) {
+                        queueFirstLessonComplete(job);
+                        return;
+                    }
+                }
+            }
+        });
+    }
 });

@@ -1,17 +1,21 @@
+import { getClientById } from "../integration/client";
+import { JobObject } from "../integration/serviceTypes";
 import { queueEmail } from "./queueMail";
 
 const day = 86400000;
-export const queueFirstLessonComplete = async (job: any) => {
-    const tutorName = "t_name";
-    const userEmail = "colinhoscheit@gmail.com";
-    const userFirstName = "user_first";
-    const tutorFirstName = "tutor_first";
+export const queueFirstLessonComplete = async (job: JobObject) => {
+    if (!job.conjobs)
+        return;
+    const tutorFirstName = job.conjobs[0].name.split(" ")[0];
+    const client = await getClientById(job.rcrs[0].paying_client);
+    const userEmail = client?.user.email;
+    const userFirstName = !client?.user.first_name ? client?.user.last_name : client?.user.first_name;
 
-    queueEmail((Date.now()+day), {
+    queueEmail((Date.now() + day), {
         from: `"${process.env.EMAIL_FROM}" <${process.env.EMAIL_ADDRESS}>`, // eslint-disable-line
         to: userEmail,
         cc: "services@bethesdascholars.com",
-        subject: `Lesson with ${tutorName}`,
+        subject: `Lesson with ${tutorFirstName}`,
         html: `<p1>Hi ${userFirstName},
                     <br>
                     <br>
