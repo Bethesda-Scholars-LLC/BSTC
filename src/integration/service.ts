@@ -5,6 +5,7 @@ import { getClientById, getMinimumClientUpdate, updateClient } from "./client";
 import { addTCListener } from "./hook";
 import { JobObject, UpdateServicePayload } from "./serviceTypes";
 import { queueFirstLessonComplete } from "../mail/firstLesson";
+import { getContractorById, setLookingForJob } from "./contractor";
 
 const matchedNotBooked = 37478;
 
@@ -82,6 +83,12 @@ addTCListener("REQUESTED_A_SERVICE", async (event: TCEvent<any, JobObject>) => {
 addTCListener("ADDED_CONTRACTOR_TO_SERVICE", async (event: TCEvent<any, JobObject>) => {
     const job = event.subject;
     if(job.rcrs.length > 0){
+        if (job.conjobs) {
+            getContractorById(job.conjobs[0].contractor).then(contractor => {
+                setLookingForJob(contractor, false);
+            });
+        }
+
         getClientById(job.rcrs[0].paying_client).then(client => {
             if(!client)
                 return;

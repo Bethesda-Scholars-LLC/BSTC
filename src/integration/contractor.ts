@@ -4,9 +4,20 @@ import { apiHeaders, apiUrl } from "../util";
 import { ContractorObject, UpdateContractorPayload } from "./contractorTypes";
 import { addTCListener } from "./hook";
 
-const updateContractorById = async (id: number, data: UpdateContractorPayload) => {
+export const getContractorById = async (id: number): Promise<ContractorObject | null> => {
     try {
-        await axios(apiUrl(`/contractors/${id}`), {
+        return (await axios(apiUrl(`/contractors/${id}`), {
+            headers: apiHeaders
+        })).data as ContractorObject;
+    } catch(e) {
+        console.log(e);
+        return null;
+    }
+};
+
+const updateContractor = async (data: UpdateContractorPayload) => {
+    try {
+        await axios(apiUrl("/contractors/"), {
             method: "POST",
             headers: apiHeaders,
             data
@@ -21,11 +32,25 @@ const getDefaultContractorUpdate = (tutor: ContractorObject): UpdateContractorPa
         user: {
             email: tutor.user.email,
             last_name: tutor.user.last_name
-        }
+        },
     };
+};
+
+export const setLookingForJob = (contractor: ContractorObject | null, value: boolean) => {
+    if (!contractor) {
+        console.log("null contractor");
+        return;
+    }
+    const defaultTutor = getDefaultContractorUpdate(contractor);
+    defaultTutor.extra_attrs = { "looking_for_job": value };
+    updateContractor(defaultTutor);
+    return;
 };
 
 addTCListener("CHANGED_CONTRACTOR_STATUS", (event: TCEvent<any, ContractorObject>) => {
     const contractor = event.subject;
-    console.log(contractor);
+    if (contractor.status === "approved") {
+        setLookingForJob(contractor, true);
+    }
+    return contractor;
 });

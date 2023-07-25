@@ -45,6 +45,8 @@ export type ContractorObject = {
 export type UpdateContractorPayload = {
     user: {
         email: string,
-        last_name: string
-    }
+        last_name: string,
+        extra_attrs?: object,
+    },
+    extra_attrs?: object
 };
