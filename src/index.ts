@@ -30,8 +30,10 @@ const editAllContractors = async () => {
     try {
         const allContractors: any = await getAllContractors();
         let i;
-        // length = allContractors.results.length
-        for (i = 30; i < 67; i++) {
+        
+        // change the lenght of iteration so API limit doesnt get hit 
+        // also change page in get request after 100
+        for (i = 0; i < allContractors.results.length; i++) {
             getContractorById(allContractors.results[i].id).then(contractor => {
                 // this should be the function that each contractor
                 // setContractorPhone(contractor);
