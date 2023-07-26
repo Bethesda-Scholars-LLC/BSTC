@@ -57,7 +57,7 @@ const editAllContractors = async () => {
 // editAllContractors();
 
 app.get("/api", (_req: Req, res: Res) => {
-    res.send("HELLO!");
+    res.send("HELLO FROM JAWASCRIPT!");
 });
 
 app.listen(80);
