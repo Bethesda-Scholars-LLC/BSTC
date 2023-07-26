@@ -47,6 +47,19 @@ export const setLookingForJob = (contractor: ContractorObject | null, value: boo
     return;
 };
 
+export const setContractorPhone = (contractor: ContractorObject | null) => {
+    if (!contractor) {
+        console.log("null contractor");
+        return;
+    }
+    const defaultTutor = getDefaultContractorUpdate(contractor);
+    if (!contractor.extra_attrs.find(field => field.machine_name === "phone_number"))
+        return;
+    defaultTutor.user.mobile = contractor.extra_attrs.find(field => field.machine_name === "phone_number").value;
+    updateContractor(defaultTutor);
+    return;
+};
+
 addTCListener("CHANGED_CONTRACTOR_STATUS", (event: TCEvent<any, ContractorObject>) => {
     const contractor = event.subject;
     if (contractor.status === "approved") {
