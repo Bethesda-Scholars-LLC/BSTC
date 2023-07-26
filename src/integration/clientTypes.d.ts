@@ -53,5 +53,6 @@ export type UpdateClientPayload = {
         last_name: string
     }
     pipeline_stage?: null | number
+    extra_attrs?: {[key: string]: string}
 }
 

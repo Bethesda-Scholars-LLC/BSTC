@@ -65,3 +65,16 @@ export const writeFile = (flName: string, data: string | Buffer): Promise<null> 
         });
     });
 };
+
+export const stallFor = async (ms: number) => new Promise((resolve, _reject) => {
+    setTimeout(resolve, ms);
+});
+
+export const getAttrByMachineName = (name: string, extra_attrs: {machine_name: string}[]): any | undefined =>
+    extra_attrs.filter(v => v.machine_name === name)[0];
+
+export const capitalize = (str: string): string => {
+    if(str.length < 2)
+        return str.toUpperCase();
+    return str.charAt(0).toUpperCase()+str.substring(1);
+};

@@ -46,7 +46,6 @@ export type UpdateContractorPayload = {
     user: {
         email: string,
         last_name: string,
-        extra_attrs?: object,
         mobile?: string
     },
     extra_attrs?: object,

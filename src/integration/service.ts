@@ -1,11 +1,11 @@
 import axios from "axios";
+import { queueFirstLessonComplete } from "../mail/firstLesson";
 import { TCEvent } from "../types";
-import { apiHeaders, apiUrl } from "../util";
+import { apiHeaders, apiUrl, capitalize, getAttrByMachineName } from "../util";
 import { getClientById, getMinimumClientUpdate, updateClient } from "./client";
+import { getContractorById, setLookingForJob } from "./contractor";
 import { addTCListener } from "./hook";
 import { JobObject, UpdateServicePayload } from "./serviceTypes";
-import { queueFirstLessonComplete } from "../mail/firstLesson";
-import { getContractorById, setLookingForJob } from "./contractor";
 
 const matchedNotBooked = 37478;
 
@@ -73,8 +73,22 @@ addTCListener("REQUESTED_A_SERVICE", async (event: TCEvent<any, JobObject>) => {
     let job = event.subject;
     //    keep current job object unless fixJobName returns a new one
     job = fixJobName(job) ?? job;
+    await updateServiceById(job.id, setDftLocation(job));
+    
+    if(job.rcrs.length > 0){
+        const client = await getClientById(job.rcrs[0].paying_client);
+        if(!client)
+            return;
 
-    updateServiceById(job.id, setDftLocation(job));
+        const school = getAttrByMachineName("student_school", client.extra_attrs);
+        if(school){
+            const updatePayload = getMinimumClientUpdate(client);
+            updatePayload.extra_attrs = { student_school: school.value.split(" ").map(capitalize).join(" ")};
+            await updateClient(updatePayload);
+        }
+    }
+    
+
 });
 
 /**
@@ -84,22 +98,22 @@ addTCListener("ADDED_CONTRACTOR_TO_SERVICE", async (event: TCEvent<any, JobObjec
     const job = event.subject;
     if(job.rcrs.length > 0){
         if (job.conjobs) {
-            getContractorById(job.conjobs[0].contractor).then(contractor => {
-                setLookingForJob(contractor, false);
-            });
+            const contractor = await getContractorById(job.conjobs[0].contractor);
+
+            if(!contractor)
+                return console.log(`contractor is null \n ${job.conjobs[0]}`);
+
+            await setLookingForJob(contractor, false);
         }
 
-        getClientById(job.rcrs[0].paying_client).then(client => {
-            if(!client)
-                return;
-            if(client.pipeline_stage.id !== 35326) {
-                return;
-            }
-            updateClient({
+        const client = await getClientById(job.rcrs[0].paying_client);
+
+        if(client && client.pipeline_stage.id === 35326){
+            await updateClient({
                 ...getMinimumClientUpdate(client),
                 pipeline_stage: matchedNotBooked
             });
-        });
+        }
     }
 
     updateServiceById(job.id, {
@@ -110,7 +124,6 @@ addTCListener("ADDED_CONTRACTOR_TO_SERVICE", async (event: TCEvent<any, JobObjec
 
 addTCListener("ADDED_A_LABEL_TO_A_SERVICE", async (event: TCEvent<any, JobObject>) => {
     const job = event.subject;
-    let i: number;
     if(job.rcrs.length > 0){
         getClientById(job.rcrs[0].paying_client).then(client => {
             if(!client)
@@ -118,7 +131,7 @@ addTCListener("ADDED_A_LABEL_TO_A_SERVICE", async (event: TCEvent<any, JobObject
             
             // matched and booked stage
             if (client.pipeline_stage.id === 35328) {
-                for (i = 0; i < job.labels.length; i++) {
+                for (let i = 0; i < job.labels.length; i++) {
                     // first lesson is complete
                     if (job.labels[i].id === 169932) {
                         queueFirstLessonComplete(job);

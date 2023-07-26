@@ -6,10 +6,14 @@ const day = 86400000;
 export const queueFirstLessonComplete = async (job: JobObject) => {
     if (!job.conjobs)
         return;
-    const tutorFirstName = job.conjobs[0].name.split(" ")[0];
+
     const client = await getClientById(job.rcrs[0].paying_client);
-    const userEmail = client?.user.email;
-    const userFirstName = !client?.user.first_name ? client?.user.last_name : client?.user.first_name;
+    if(!client)
+        return;
+    
+    const tutorFirstName = job.conjobs[0].name.split(" ")[0];
+    const userEmail = client.user.email;
+    const userFirstName = client.user.first_name ?? client.user.last_name;
 
     queueEmail((Date.now() + day), {
         from: `"${process.env.EMAIL_FROM}" <${process.env.EMAIL_ADDRESS}>`, // eslint-disable-line

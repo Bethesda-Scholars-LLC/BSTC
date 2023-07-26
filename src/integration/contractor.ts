@@ -1,6 +1,6 @@
 import axios from "axios";
 import { TCEvent } from "../types";
-import { apiHeaders, apiUrl } from "../util";
+import { apiHeaders, apiUrl, getAttrByMachineName } from "../util";
 import { ContractorObject, UpdateContractorPayload } from "./contractorTypes";
 import { addTCListener } from "./hook";
 
@@ -36,34 +36,32 @@ const getDefaultContractorUpdate = (tutor: ContractorObject): UpdateContractorPa
     };
 };
 
-export const setLookingForJob = (contractor: ContractorObject | null, value: boolean) => {
-    if (!contractor) {
-        console.log("null contractor");
-        return;
-    }
+export const setLookingForJob = async (contractor: ContractorObject, value: boolean) => {
     const defaultTutor = getDefaultContractorUpdate(contractor);
-    defaultTutor.extra_attrs = { "looking_for_job": value };
-    updateContractor(defaultTutor);
-    return;
+
+    defaultTutor.extra_attrs = { looking_for_job: value };
+
+    await updateContractor(defaultTutor);
 };
 
-export const setContractorPhone = (contractor: ContractorObject | null) => {
-    if (!contractor) {
-        console.log("null contractor");
-        return;
-    }
+export const setContractorPhone = async (contractor: ContractorObject) => {
     const defaultTutor = getDefaultContractorUpdate(contractor);
-    if (!contractor.extra_attrs.find(field => field.machine_name === "phone_number"))
+    const phoneNumber = getAttrByMachineName("phone_number", contractor.extra_attrs);
+
+    if (!phoneNumber)
         return;
-    defaultTutor.user.mobile = contractor.extra_attrs.find(field => field.machine_name === "phone_number").value;
-    updateContractor(defaultTutor);
-    return;
+
+    defaultTutor.user.mobile = phoneNumber.value;
+    await updateContractor(defaultTutor);
 };
 
-addTCListener("CHANGED_CONTRACTOR_STATUS", (event: TCEvent<any, ContractorObject>) => {
+addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<any, ContractorObject>) => {
     const contractor = event.subject;
+
     if (contractor.status === "approved") {
-        setLookingForJob(contractor, true);
+        await setLookingForJob(contractor, true);
+        await setContractorPhone(contractor);
     }
+
     return contractor;
 });
