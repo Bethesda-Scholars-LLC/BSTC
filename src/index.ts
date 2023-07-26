@@ -7,6 +7,7 @@ import { ContractorObject } from "./integration/contractorTypes";
 import hookRouter from "./integration/hook";
 import "./integration/service";
 import "./mail/mail";
+import { Req, Res } from "./types";
 import { apiHeaders, apiUrl, getAttrByMachineName, stallFor } from "./util";
 const app = express();
 app.use(cors());
@@ -55,5 +56,8 @@ const editAllContractors = async () => {
 
 // editAllContractors();
 
+app.get("/api", (_req: Req, res: Res) => {
+    res.send("HELLO!");
+});
 
 app.listen(80);
