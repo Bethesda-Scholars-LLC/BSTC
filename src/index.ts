@@ -25,6 +25,7 @@ const getAllContractors = async (): Promise<ContractorObject | null> => {
     }
 };
 
+// function that edits all contractors
 const editAllContractors = async () => {
     try {
         const allContractors: any = await getAllContractors();
@@ -32,7 +33,8 @@ const editAllContractors = async () => {
         // length = allContractors.results.length
         for (i = 30; i < 67; i++) {
             getContractorById(allContractors.results[i].id).then(contractor => {
-                setContractorPhone(contractor);
+                // this should be the function that each contractor
+                // setContractorPhone(contractor);
                 console.log(contractor?.user.first_name);
             });
         }
@@ -40,7 +42,7 @@ const editAllContractors = async () => {
         console.log("Error: ", error);
     }
 };
-editAllContractors();
+// editAllContractors();
 
 
 app.listen(80);
