@@ -57,7 +57,7 @@ const editAllContractors = async () => {
 // editAllContractors();
 
 app.get("/api", (_req: Req, res: Res) => {
-    res.send("auto redeploy!");
+    res.send("on other branch, dont redeploy");
 });
 
 app.listen(80);
