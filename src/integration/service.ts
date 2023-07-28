@@ -86,10 +86,11 @@ addTCListener("REQUESTED_A_SERVICE", async (event: TCEvent<any, JobObject>) => {
             updatePayload.pipeline_stage = PipelineStage.NewClient;
             updatePayload.extra_attrs = { student_school: school.value.split(" ").map(capitalize).join(" ")};
             
+            const schoolName = updatePayload.extra_attrs.student_school.toLowerCase();
             // set sophie hansen (blair), pavani (churchill), or mike (other) as client manager
-            if (updatePayload.extra_attrs.student_school.includes("blair")) {
+            if (schoolName.includes("blair")) {
                 updatePayload.associated_admin = ClientManager.Sophie;
-            } else if (updatePayload.extra_attrs.student_school.includes("churchill")) {
+            } else if (schoolName.includes("churchill")) {
                 updatePayload.associated_admin = ClientManager.Pavani;
             } else {
                 updatePayload.associated_admin = ClientManager.Mike;
