@@ -8,6 +8,8 @@ import { addTCListener } from "./hook";
 import { JobObject, UpdateServicePayload } from "./serviceTypes";
 
 const matchedNotBooked = 37478;
+const newClient = 35326;
+const matchedAndBooked = 35328;
 
 const updateServiceById = async (id: number, data: UpdateServicePayload) => {
     try{
@@ -83,12 +85,12 @@ addTCListener("REQUESTED_A_SERVICE", async (event: TCEvent<any, JobObject>) => {
         const school = getAttrByMachineName("student_school", client.extra_attrs);
         if(school){
             const updatePayload = getMinimumClientUpdate(client);
+            updatePayload.status = "prospect";
+            updatePayload.pipeline_stage = newClient;
             updatePayload.extra_attrs = { student_school: school.value.split(" ").map(capitalize).join(" ")};
             await updateClient(updatePayload);
         }
     }
-    
-
 });
 
 /**
@@ -108,7 +110,7 @@ addTCListener("ADDED_CONTRACTOR_TO_SERVICE", async (event: TCEvent<any, JobObjec
 
         const client = await getClientById(job.rcrs[0].paying_client);
 
-        if(client && client.pipeline_stage.id === 35326){
+        if(client && client.status === "prospect" && client.pipeline_stage.id === newClient){
             await updateClient({
                 ...getMinimumClientUpdate(client),
                 pipeline_stage: matchedNotBooked
@@ -130,11 +132,12 @@ addTCListener("ADDED_A_LABEL_TO_A_SERVICE", async (event: TCEvent<any, JobObject
                 return;
             
             // matched and booked stage
-            if (client.pipeline_stage.id === 35328) {
+            if (client.status === "prospect" && client.pipeline_stage.id === matchedAndBooked) {
                 for (let i = 0; i < job.labels.length; i++) {
                     // first lesson is complete
                     if (job.labels[i].id === 169932) {
                         queueFirstLessonComplete(job);
+                        // MOVE CLIENT DOWN PIPELINE TO FEEDBACK REQUESTED STAGE NOW
                         return;
                     }
                 }
