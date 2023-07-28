@@ -88,6 +88,16 @@ addTCListener("REQUESTED_A_SERVICE", async (event: TCEvent<any, JobObject>) => {
             updatePayload.status = "prospect";
             updatePayload.pipeline_stage = newClient;
             updatePayload.extra_attrs = { student_school: school.value.split(" ").map(capitalize).join(" ")};
+            
+            // set sophie hansen (blair), pavani (churchill), or mike (other) as client manager
+            if (updatePayload.extra_attrs.student_school.includes("blair")) {
+                updatePayload.associated_admin = 2255450;
+            } else if (updatePayload.extra_attrs.student_school.includes("churchill")) {
+                updatePayload.associated_admin = 2255169;
+            } else {
+                updatePayload.associated_admin = 2182255;
+            }
+
             await updateClient(updatePayload);
         }
     }
@@ -117,7 +127,6 @@ addTCListener("ADDED_CONTRACTOR_TO_SERVICE", async (event: TCEvent<any, JobObjec
             });
         }
     }
-
     updateServiceById(job.id, {
         ...getMinimumJobUpdate(job),
         status: "in-progress"

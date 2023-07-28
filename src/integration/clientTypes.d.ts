@@ -55,5 +55,6 @@ export type UpdateClientPayload = {
     pipeline_stage?: null | number
     extra_attrs?: {[key: string]: string}
     status?: string
+    associated_admin?: number
 }
 
