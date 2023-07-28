@@ -3,13 +3,10 @@ import { queueFirstLessonComplete } from "../mail/firstLesson";
 import { TCEvent } from "../types";
 import { apiHeaders, apiUrl, capitalize, getAttrByMachineName } from "../util";
 import { getClientById, getMinimumClientUpdate, updateClient } from "./client";
+import { ClientManager } from "./clientTypes";
 import { getContractorById, setLookingForJob } from "./contractor";
 import { addTCListener } from "./hook";
-import { JobObject, UpdateServicePayload } from "./serviceTypes";
-
-const matchedNotBooked = 37478;
-const newClient = 35326;
-const matchedAndBooked = 35328;
+import { JobObject, PipelineStage, SessionLocation, UpdateServicePayload } from "./serviceTypes";
 
 const updateServiceById = async (id: number, data: UpdateServicePayload) => {
     try{
@@ -60,10 +57,10 @@ const setDftLocation = (job: JobObject): UpdateServicePayload => {
     const oldJob = getMinimumJobUpdate(job);
     // in person job
     if(jobLocation.includes("in-person")){
-        oldJob.dft_location = 107916;
+        oldJob.dft_location = SessionLocation.InPerson;
     // if its not in person, its online
     } else {
-        oldJob.dft_location = 106892;
+        oldJob.dft_location = SessionLocation.Online;
     }
     return oldJob;
 };
@@ -86,16 +83,16 @@ addTCListener("REQUESTED_A_SERVICE", async (event: TCEvent<any, JobObject>) => {
         if(school){
             const updatePayload = getMinimumClientUpdate(client);
             updatePayload.status = "prospect";
-            updatePayload.pipeline_stage = newClient;
+            updatePayload.pipeline_stage = PipelineStage.NewClient;
             updatePayload.extra_attrs = { student_school: school.value.split(" ").map(capitalize).join(" ")};
             
             // set sophie hansen (blair), pavani (churchill), or mike (other) as client manager
             if (updatePayload.extra_attrs.student_school.includes("blair")) {
-                updatePayload.associated_admin = 2255450;
+                updatePayload.associated_admin = ClientManager.Sophie;
             } else if (updatePayload.extra_attrs.student_school.includes("churchill")) {
-                updatePayload.associated_admin = 2255169;
+                updatePayload.associated_admin = ClientManager.Pavani;
             } else {
-                updatePayload.associated_admin = 2182255;
+                updatePayload.associated_admin = ClientManager.Mike;
             }
 
             await updateClient(updatePayload);
@@ -120,10 +117,10 @@ addTCListener("ADDED_CONTRACTOR_TO_SERVICE", async (event: TCEvent<any, JobObjec
 
         const client = await getClientById(job.rcrs[0].paying_client);
 
-        if(client && client.status === "prospect" && client.pipeline_stage.id === newClient){
+        if(client && client.status === "prospect" && client.pipeline_stage.id === PipelineStage.NewClient){
             await updateClient({
                 ...getMinimumClientUpdate(client),
-                pipeline_stage: matchedNotBooked
+                pipeline_stage: PipelineStage.MatchedNotBooked
             });
         }
     }
@@ -141,7 +138,7 @@ addTCListener("ADDED_A_LABEL_TO_A_SERVICE", async (event: TCEvent<any, JobObject
                 return;
             
             // matched and booked stage
-            if (client.status === "prospect" && client.pipeline_stage.id === matchedAndBooked) {
+            if (client.status === "prospect" && client.pipeline_stage.id === PipelineStage.MatchedAndBooked) {
                 for (let i = 0; i < job.labels.length; i++) {
                     // first lesson is complete
                     if (job.labels[i].id === 169932) {

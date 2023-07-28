@@ -66,3 +66,14 @@ export type UpdateServicePayload = {
     status?: string
     extra_attrs?: {[key: string]: string}
 };
+
+export const enum PipelineStage {
+    NewClient = 35326,
+    MatchedNotBooked = 37478,
+    MatchedAndBooked = 35328
+}
+
+export const enum SessionLocation {
+    InPerson=107916,
+    Online = 106892
+}

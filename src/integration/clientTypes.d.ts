@@ -58,3 +58,8 @@ export type UpdateClientPayload = {
     associated_admin?: number
 }
 
+export const enum ClientManager {
+    Mike=2182255,
+    Sophie=2255450,
+    Pavani=2255169
+}
