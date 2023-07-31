@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import fs from "fs";
 dotenv.config();
 
-const requiredEnvs = ["API_KEY", "EMAIL_FROM", "EMAIL_ADDRESS", "EMAIL_PASSWORD"];
+const requiredEnvs = ["API_KEY", "EMAIL_FROM", "EMAIL_ADDRESS", "EMAIL_PASSWORD", "SIGNATURE_DESCRIPTION"];
 const envKeys = Object.keys(process.env);
 
 if(requiredEnvs.reduce((prev, val) => {
