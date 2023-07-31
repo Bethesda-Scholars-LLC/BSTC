@@ -1,6 +1,6 @@
 import { Mutex } from "async-mutex";
 import { MailOptions } from "nodemailer/lib/sendmail-transport";
-import { readFile, writeFile } from "../util";
+import { DEV, readFile, writeFile } from "../util";
 import { transporter } from "./mail";
 
 
@@ -65,4 +65,4 @@ setInterval(async () => {
     } finally {
         release();
     }
-}, 60000);
+}, DEV ? 1000 : 60000);

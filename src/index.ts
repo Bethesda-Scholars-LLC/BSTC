@@ -14,4 +14,6 @@ app.use("/hook", hookRouter);
 
 // editAllContractors();
 
-app.listen(80);
+app.listen(80, () => {
+    console.log("Ready to go");
+});

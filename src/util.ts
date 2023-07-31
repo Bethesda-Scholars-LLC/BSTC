@@ -4,6 +4,7 @@ dotenv.config();
 
 const requiredEnvs = ["API_KEY", "EMAIL_FROM", "EMAIL_ADDRESS", "EMAIL_PASSWORD", "SIGNATURE_DESCRIPTION"];
 const envKeys = Object.keys(process.env);
+export const DEV = ["development", "dev"].includes(process.env.NODE_ENV?.toLowerCase() ?? ""); // eslint-disable-line
 
 if(requiredEnvs.reduce((prev, val) => {
         return prev || !envKeys.includes(val);

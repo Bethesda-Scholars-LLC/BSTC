@@ -80,26 +80,28 @@ addTCListener("REQUESTED_A_SERVICE", async (event: TCEvent<any, JobObject>) => {
             return;
 
         const school = getAttrByMachineName("student_school", client.extra_attrs);
-        if(school){
-            const updatePayload = getMinimumClientUpdate(client);
-            updatePayload.status = "prospect";
-            updatePayload.pipeline_stage = PipelineStage.NewClient;
-            updatePayload.extra_attrs = { student_school: school.value.split(" ").map(capitalize).join(" ")};
-            
-            const schoolName = updatePayload.extra_attrs.student_school.toLowerCase();
-            const blairSchools = ["argyle", "eastern", "loiederman", "newport mill", "odessa shannon", "parkland", "parkland", "silver spring international", "takoma park", "blair"];
 
-            // set sophie hansen (blair), pavani (churchill), or mike (other) as client manager
-            if (blairSchools.some(school => schoolName.includes(school))) {
-                updatePayload.associated_admin = ClientManager.Sophie;
-            } else if (schoolName.includes("churchill")) {
-                updatePayload.associated_admin = ClientManager.Pavani;
-            } else {
-                updatePayload.associated_admin = ClientManager.Mike;
-            }
+        if(!school)
+            return;
 
-            await updateClient(updatePayload);
+        const updatePayload = getMinimumClientUpdate(client);
+        updatePayload.status = "prospect";
+        updatePayload.pipeline_stage = PipelineStage.NewClient;
+        updatePayload.extra_attrs = { student_school: school.value.split(" ").map(capitalize).join(" ")};
+        
+        const schoolName = updatePayload.extra_attrs.student_school.toLowerCase();
+        const blairSchools = ["argyle", "eastern", "loiederman", "newport mill", "odessa shannon", "parkland", "parkland", "silver spring international", "takoma park", "blair"];
+
+        // set sophie hansen (blair), pavani (churchill), or mike (other) as client manager
+        if (blairSchools.some(school => schoolName.includes(school))) {
+            updatePayload.associated_admin = ClientManager.Sophie;
+        } else if (schoolName.includes("churchill")) {
+            updatePayload.associated_admin = ClientManager.Pavani;
+        } else {
+            updatePayload.associated_admin = ClientManager.Mike;
         }
+
+        await updateClient(updatePayload);
     }
 });
 
@@ -136,7 +138,7 @@ addTCListener("ADDED_CONTRACTOR_TO_SERVICE", async (event: TCEvent<any, JobObjec
 addTCListener("ADDED_A_LABEL_TO_A_SERVICE", async (event: TCEvent<any, JobObject>) => {
     const job = event.subject;
     if(job.rcrs.length > 0){
-        getClientById(job.rcrs[0].paying_client).then(client => {
+        getClientById(job.rcrs[0].paying_client).then(async client => {
             if(!client)
                 return;
             
@@ -145,7 +147,10 @@ addTCListener("ADDED_A_LABEL_TO_A_SERVICE", async (event: TCEvent<any, JobObject
                 for (let i = 0; i < job.labels.length; i++) {
                     // first lesson is complete
                     if (job.labels[i].id === 169932) {
-                        queueFirstLessonComplete(job);
+                        await queueFirstLessonComplete(job);
+                        const updatePayload = getMinimumClientUpdate(client);
+                        updatePayload.pipeline_stage = PipelineStage.FeedbackRequested;
+                        await updateClient(updatePayload);
                         // MOVE CLIENT DOWN PIPELINE TO FEEDBACK REQUESTED STAGE NOW
                         return;
                     }
