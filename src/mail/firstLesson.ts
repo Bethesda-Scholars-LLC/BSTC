@@ -37,8 +37,9 @@ export const queueFirstLessonComplete = async (job: JobObject) => {
     queueEmail((Date.now() + day), {
         from: `"${process.env.EMAIL_FROM}" <${process.env.EMAIL_ADDRESS}>`, // eslint-disable-line
         to: userEmail,
+        cc: "services@bethesdascholars.com",
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        cc: ["services@bethesdascholars.com", process.env.EMAIL_ADDRESS!],
+        bcc: process.env.EMAIL_ADDRESS!,
         subject: `Lesson with ${tutorFirstName}`,
         html: `<p1>Hi ${userFirstName}, 
                     <br> 
