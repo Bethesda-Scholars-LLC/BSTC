@@ -20,16 +20,26 @@ export const queueFirstLessonComplete = async (job: JobObject) => {
         to: userEmail,
         cc: "services@bethesdascholars.com",
         subject: `Lesson with ${tutorFirstName}`,
-        html: `<p1>Hi ${userFirstName},
+        html: `<p1>Hi ${userFirstName}, 
+                    <br> 
+                    <br> 
+                    Just wanted to check in on the lesson with ${tutorFirstName} - how did it go? Would you like to continue lessons with them? Any feedback would be appreciated. 
+                    <br> 
+                    <br> 
+                    Thanks, 
+                    <br> 
+                    -- 
+                    <br> 
+                    <b>${process.env.EMAIL_FROM}</b> 
+                    <br> 
+                    ${process.env.SIGNATURE_DESCRIPTION} 
                     <br>
-                    <br>
-                    Just wanted to check in on the lesson with ${tutorFirstName} - how did it go? Would you like to continue lessons with them? Any feedback would be appreciated.
-                    <br>
-                    <br>
-                    Thanks,
-                    <br>
-                    ${process.env.EMAIL_FROM}
-                </p1>`,
+                    _________________________________ 
+                    <br> 
+                    <b>Website</b>: https://www.bethesdascholars.com 
+                    <br> 
+                    <b>Mobile</b>: 202-294-6538 
+                    </p1>`,
     });
 };
 
