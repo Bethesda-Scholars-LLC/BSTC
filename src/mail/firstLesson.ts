@@ -31,6 +31,7 @@ export const queueFirstLessonComplete = async (job: JobObject) => {
         default:
             tutorPronouns = "them";
     }
+    const tutorEmail = tutor.user.email;
     const userEmail = client.user.email;
     const userFirstName = client.user.first_name ?? client.user.last_name;
 
@@ -44,9 +45,12 @@ export const queueFirstLessonComplete = async (job: JobObject) => {
         html: `<p1>Hi ${userFirstName}, 
                     <br> 
                     <br> 
-                    Just wanted to check in on the lesson with ${tutorFirstName} - how did it go? Would you like to continue lessons with ${tutorPronouns}? Any feedback would be appreciated. 
+                    Just wanted to check in on the lesson with ${tutorFirstName} - how did it go? Would you like to continue lessons with ${tutorPronouns}?
                     <br> 
-                    <br> 
+                    <br>
+                    If you would like to schedule more lessons, ${tutorFirstName}'s email is ${tutorEmail}. It might make scheduling easier, just remember to book the lesson after a time is coordinated.
+                    <br>
+                    <br>
                     Thanks, 
                     <br> 
                     -- 
