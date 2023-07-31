@@ -91,11 +91,12 @@ addTCListener("REQUESTED_A_SERVICE", async (event: TCEvent<any, JobObject>) => {
         
         const schoolName = updatePayload.extra_attrs.student_school.toLowerCase();
         const blairSchools = ["argyle", "eastern", "loiederman", "newport mill", "odessa shannon", "parkland", "parkland", "silver spring international", "takoma park", "blair"];
+        const churchillSchools = ["churchill", "cabin john", "hoover", "bells mill", "seven locks", "stone mill", "cold spring", "potomac", "beverly farms", "wayside"];
 
         // set sophie hansen (blair), pavani (churchill), or mike (other) as client manager
         if (blairSchools.some(school => schoolName.includes(school))) {
             updatePayload.associated_admin = ClientManager.Sophie;
-        } else if (schoolName.includes("churchill")) {
+        } else if (churchillSchools.some(school => schoolName.includes(school))) {
             updatePayload.associated_admin = ClientManager.Pavani;
         } else {
             updatePayload.associated_admin = ClientManager.Mike;
