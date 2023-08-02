@@ -64,7 +64,8 @@ export type UpdateServicePayload = {
     dft_location?: number
     dft_charge_type?: string
     status?: string
-    extra_attrs?: {[key: string]: string}
+    extra_attrs?: {[key: string]: string},
+    conjobs?: any[]
 };
 
 export const enum PipelineStage {
