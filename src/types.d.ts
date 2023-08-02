@@ -26,21 +26,3 @@ export type TCEvent<ActorType=any, SubjectType = any> = {
  * @type Function that takes TCEvent, and does whatever with it
  */
 export type TCEventListener<AT=any, ST=any> = (event: TCEvent<AT, ST>) => any;
-
-export type APIUser = {
-    first_name: string
-    last_name: string
-    email: string
-    mobile: string
-    phone: string
-    street: string
-    state: string
-    town: string
-    country: number
-    postcode: string
-    latitude: number
-    longitude: number
-    date_created: string
-    timezone: string
-};
-

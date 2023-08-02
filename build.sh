@@ -1,3 +1,4 @@
 
 npm i
-sudo pm2 restart src/index.ts || sudo pm2 start src/index.ts
+npm run build
+sudo pm2 startOrRestart ecosystem.config.js --env production

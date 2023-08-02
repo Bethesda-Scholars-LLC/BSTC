@@ -18,6 +18,7 @@
         "no-lonely-if": "warn",
         "no-return-await": "warn",
         "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/no-namespace": "off",
         "spaced-comment": ["warn", "always"],
         "arrow-spacing": [
             "warn",
@@ -32,12 +33,13 @@
                 "allowEmptyCatch": true
             }
         ],
+        "no-console": "error",
         "quotes": "warn",
         "@typescript-eslint/naming-convention": [
             "error",
             {
                 "selector": ["variable", "function"],
-                "format": ["camelCase"],
+                "format": ["PascalCase", "camelCase"],
                 "leadingUnderscore": "allow",
                 "trailingUnderscore": "allow"
             },

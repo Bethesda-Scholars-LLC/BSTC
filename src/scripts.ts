@@ -1,7 +1,7 @@
 import axios from "axios";
 import { getContractorById, setLookingForJob } from "./integration/contractor";
 import { ContractorObject } from "./integration/contractorTypes";
-import { apiHeaders, apiUrl, getAttrByMachineName, stallFor } from "./util";
+import { Log, apiHeaders, apiUrl, getAttrByMachineName, stallFor } from "./util";
 
 const getContractors = async (page?: number): Promise<ContractorObject | null> => {
     try {
@@ -9,7 +9,7 @@ const getContractors = async (page?: number): Promise<ContractorObject | null> =
             headers: apiHeaders
         })).data;
     } catch(e) {
-        console.log(e);
+        Log.error(e);
         return null;
     }
 };
@@ -27,17 +27,17 @@ const _editAllContractors = async () => {
             if(!contractor)
                 return;
 
-            console.log(`checking ${contractor.user.first_name} ${contractor.user.last_name}`);
+            Log.debug(`checking ${contractor.user.first_name} ${contractor.user.last_name}`);
 
             // this should be the function that each contractor
             if(contractor.labels.reduce((prev, v) => prev || v.machine_name === "looking-for-job", false) &&
                 !getAttrByMachineName("looking_for_job", contractor.extra_attrs)){
-                console.log(contractor.user.first_name+" "+contractor.user.last_name);
+                Log.debug(contractor.user.first_name+" "+contractor.user.last_name);
                 await setLookingForJob(contractor, true);
             }
             await stallFor(1000);
         }
     } catch (error) {
-        console.log("Error: ", error);
+        Log.error("Error: ", error);
     }
 };

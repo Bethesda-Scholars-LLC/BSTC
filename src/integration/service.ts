@@ -1,12 +1,15 @@
 import axios from "axios";
 import { queueFirstLessonComplete } from "../mail/firstLesson";
 import { TCEvent } from "../types";
-import { apiHeaders, apiUrl, capitalize, getAttrByMachineName } from "../util";
+import { Log, apiHeaders, apiUrl, capitalize, getAttrByMachineName } from "../util";
 import { getClientById, getMinimumClientUpdate, updateClient } from "./client";
 import { ClientManager } from "./clientTypes";
 import { getContractorById, setLookingForJob } from "./contractor";
 import { addTCListener } from "./hook";
 import { JobObject, PipelineStage, SessionLocation, UpdateServicePayload } from "./serviceTypes";
+
+const blairSchools = ["argyle", "eastern", "loiederman", "newport mill", "odessa shannon", "parkland", "silver spring international", "takoma park", "blair"];
+const churchillSchools = ["churchill", "cabin john", "hoover", "bells mill", "seven locks", "stone mill", "cold spring", "potomac", "beverly farms", "wayside"];
 
 const updateServiceById = async (id: number, data: UpdateServicePayload) => {
     try{
@@ -16,7 +19,7 @@ const updateServiceById = async (id: number, data: UpdateServicePayload) => {
             data: data
         });
     } catch(e){
-        console.log(e);
+        Log.error(e);
     }
 };
 
@@ -41,7 +44,7 @@ const fixJobName = (job: JobObject): JobObject | null => {
         }).map((v: string, i: number) => {
             if(i === 0)
                 return v;
-            return v.charAt(0).toUpperCase()+".";
+            return capitalize(v)+".";
         }).join(" ");
 
     job.name = job.name.split("from")[0]+"from "+name;
@@ -55,13 +58,10 @@ const setDftLocation = (job: JobObject): UpdateServicePayload => {
         .trim();
 
     const oldJob = getMinimumJobUpdate(job);
-    // in person job
-    if(jobLocation.includes("in-person")){
-        oldJob.dft_location = SessionLocation.InPerson;
-    // if its not in person, its online
-    } else {
-        oldJob.dft_location = SessionLocation.Online;
-    }
+
+    // if it's set to in person, default location is in person, otherwise it's online
+    oldJob.dft_location = jobLocation.includes("in-person") ? SessionLocation.InPerson : SessionLocation.Online;
+
     return oldJob;
 };
 
@@ -90,8 +90,6 @@ addTCListener("REQUESTED_A_SERVICE", async (event: TCEvent<any, JobObject>) => {
         updatePayload.extra_attrs = { student_school: school.value.split(" ").map(capitalize).join(" ")};
         
         const schoolName = updatePayload.extra_attrs.student_school.toLowerCase();
-        const blairSchools = ["argyle", "eastern", "loiederman", "newport mill", "odessa shannon", "parkland", "parkland", "silver spring international", "takoma park", "blair"];
-        const churchillSchools = ["churchill", "cabin john", "hoover", "bells mill", "seven locks", "stone mill", "cold spring", "potomac", "beverly farms", "wayside"];
 
         // set sophie hansen (blair), pavani (churchill), or mike (other) as client manager
         if (blairSchools.some(school => schoolName.includes(school))) {
@@ -116,7 +114,7 @@ addTCListener("ADDED_CONTRACTOR_TO_SERVICE", async (event: TCEvent<any, JobObjec
             const contractor = await getContractorById(job.conjobs[0].contractor);
 
             if(!contractor)
-                return console.log(`contractor is null \n ${job.conjobs[0]}`);
+                return Log.debug(`contractor is null \n ${job.conjobs[0]}`);
 
             await setLookingForJob(contractor, false);
         }

@@ -4,7 +4,7 @@ dotenv.config();
 
 const requiredEnvs = ["API_KEY", "EMAIL_FROM", "EMAIL_ADDRESS", "EMAIL_PASSWORD", "SIGNATURE_DESCRIPTION"];
 const envKeys = Object.keys(process.env);
-export const DEV = ["development", "dev"].includes(process.env.NODE_ENV?.toLowerCase() ?? ""); // eslint-disable-line
+export const PROD = ["production", "prod"].includes(process.env.NODE_ENV?.toLowerCase() ?? ""); // eslint-disable-line
 
 if(requiredEnvs.reduce((prev, val) => {
         return prev || !envKeys.includes(val);
@@ -12,9 +12,9 @@ if(requiredEnvs.reduce((prev, val) => {
 ){
     const missingFields = requiredEnvs.filter(v => !envKeys.includes(v));
     if(missingFields.length === 1){
-        console.log(missingFields[0]+" is required in the env and it is missing");
+        Log.debug(missingFields[0]+" is required in the env and it is missing");
     } else {
-        console.log(missingFields.reduce(
+        Log.debug(missingFields.reduce(
             (prev: string, v: string, i: number, arr: string[]) => prev+(i === arr.length-1 ? `and ${v}` : `${v}, `), ""
         )+" are required in the .env and they are missing");
     }
@@ -74,8 +74,26 @@ export const stallFor = async (ms: number) => new Promise((resolve, _reject) => 
 export const getAttrByMachineName = (name: string, extra_attrs: {machine_name: string}[]): any | undefined =>
     extra_attrs.filter(v => v.machine_name === name)[0];
 
+/**
+ * @param str string to capitalize
+ * @returns string with first character upper case
+ */
 export const capitalize = (str: string): string => {
     if(str.length < 2)
         return str.toUpperCase();
     return str.charAt(0).toUpperCase()+str.substring(1);
 };
+
+export namespace Log {
+    /* eslint-disable no-console */
+    export const error = (message?: any, ...optionalParams: any[]) => {
+        console.error(message, ...optionalParams);
+    };
+
+    export const debug = (message?: any, ...optionalParams: any[]) => {
+        if(!PROD)
+            console.debug(message, ...optionalParams);
+    };
+    /* eslint-enable */
+}
+

@@ -1,6 +1,6 @@
 import { Mutex } from "async-mutex";
 import { MailOptions } from "nodemailer/lib/sendmail-transport";
-import { DEV, readFile, writeFile } from "../util";
+import { Log, PROD, readFile, writeFile } from "../util";
 import { transporter } from "./mail";
 
 
@@ -29,7 +29,7 @@ export const queueEmail = async (timestamp: number, mailData: MailOptions) => {
         scheduledMail[timestamp.toString()] = mailData;
         writeScheduledMail(scheduledMail);
     } catch(e) {
-        console.log(e);
+        Log.error(e);
     } finally {
         release();
     }
@@ -52,8 +52,8 @@ setInterval(async () => {
             if(Date.now() >= expiresOn){
                 // send
                 transporter.sendMail(entry[1], (error, _info) => {
-                    if (error) return console.log(error);
-                    console.log("verification sent");
+                    if (error) return Log.error(error);
+                    Log.debug("verification sent");
                 });
                 // delete it
                 delete scheduledMail[entry[0]];
@@ -61,8 +61,8 @@ setInterval(async () => {
         }
         writeScheduledMail(scheduledMail);
     } catch (e){
-        console.log(e);
+        Log.error(e);
     } finally {
         release();
     }
-}, DEV ? 1000 : 60000);
+}, PROD ? 60000 : 1000);

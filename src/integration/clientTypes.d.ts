@@ -1,8 +1,8 @@
-import { APIUser } from "../types";
+import { APIUser } from "./userTypes";
 
 export type ClientObject = {
     id: number
-    user: APIUser
+    user: APIUser,
     status: string
     is_taxable: boolean
     notify_via_email: boolean

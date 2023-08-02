@@ -1,6 +1,6 @@
 import axios from "axios";
 import { TCEvent } from "../types";
-import { apiHeaders, apiUrl, getAttrByMachineName } from "../util";
+import { Log, apiHeaders, apiUrl, getAttrByMachineName } from "../util";
 import { ContractorObject, UpdateContractorPayload } from "./contractorTypes";
 import { addTCListener } from "./hook";
 
@@ -10,7 +10,7 @@ export const getContractorById = async (id: number): Promise<ContractorObject | 
             headers: apiHeaders
         })).data as ContractorObject;
     } catch(e) {
-        console.log(e);
+        Log.error(e);
         return null;
     }
 };
@@ -23,7 +23,7 @@ const updateContractor = async (data: UpdateContractorPayload) => {
             data
         });
     } catch(e) {
-        console.log(e);
+        Log.error(e);
     }
 };
 

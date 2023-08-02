@@ -1,6 +1,6 @@
 import axios from "axios";
 import { TCEvent } from "../types";
-import { apiHeaders, apiUrl } from "../util";
+import { Log, apiHeaders, apiUrl } from "../util";
 import { ClientObject, UpdateClientPayload } from "./clientTypes";
 import { addTCListener } from "./hook";
 
@@ -12,7 +12,7 @@ export const updateClient = async (data: UpdateClientPayload) => {
             data
         });
     } catch(e) {
-        console.log(e);
+        Log.error(e);
     }
 };
 
@@ -31,12 +31,12 @@ export const getClientById = async (id: number): Promise<ClientObject | null> =>
             headers: apiHeaders
         })).data as ClientObject;
     } catch(e) {
-        console.log(e);
+        Log.error(e);
         return null;
     }
 };
 
 addTCListener("BOOKED_AN_APPOINTMENT", (event: TCEvent<any, any>) => {
-    console.log(event.actor);
-    console.log(event.subject);
+    Log.debug(event.actor);
+    Log.debug(event.subject);
 });

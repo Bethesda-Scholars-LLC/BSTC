@@ -5,6 +5,7 @@ import hookRouter from "./integration/hook";
 import "./integration/service";
 import "./mail/mail";
 import "./scripts";
+import { Log } from "./util";
 
 const app = express();
 app.use(cors());
@@ -15,5 +16,5 @@ app.use("/hook", hookRouter);
 // editAllContractors();
 
 app.listen(80, () => {
-    console.log("Ready to go");
+    Log.debug("Ready to go");
 });
