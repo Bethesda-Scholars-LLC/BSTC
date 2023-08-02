@@ -44,35 +44,39 @@ export const setLookingForJob = async (contractor: ContractorObject, value: bool
     await updateContractor(defaultTutor);
 };
 
-export const setContractorDetails = async (contractor: ContractorObject) => {
+export const updateContractorDetails = async (contractor: ContractorObject) => {
     const defaultTutor = getDefaultContractorUpdate(contractor);
     const phoneNumber = getAttrByMachineName("phone_number", contractor.extra_attrs);
     const address = getAttrByMachineName("home_street_address", contractor.extra_attrs);
     const city = getAttrByMachineName("city", contractor.extra_attrs);
     const zipCode = getAttrByMachineName("zipcode", contractor.extra_attrs);
     const school = getAttrByMachineName("school_1", contractor.extra_attrs);
+    const tutorUser = contractor.user;
 
-    // check with colin
-    if (phoneNumber)
-        defaultTutor.user.mobile = phoneNumber.value;
-    if (address)
-        defaultTutor.user.street = address;
-    if (city)
-        defaultTutor.user.town = city;
-    if (zipCode)
-        defaultTutor.user.postcode = zipCode;
-    if (school) {
+    defaultTutor.user = {
+        ...defaultTutor.user,
+        mobile: phoneNumber?.value ?? tutorUser.mobile,
+        street: address?.value ?? tutorUser.street,
+        town: city?.value ?? tutorUser.town,
+        postcode: zipCode?.value ?? tutorUser.postcode
+    };
+
+    if (school)
         defaultTutor.extra_attrs = { school_1: school.value.split(" ").map(capitalize).join(" ")};
-    }
+
     await updateContractor(defaultTutor);
 };
+
+addTCListener("EDITED_A_CONTRACTOR", async (event: TCEvent<any, ContractorObject>) => {
+    await updateContractorDetails(event.subject);
+});
 
 addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<any, ContractorObject>) => {
     const contractor = event.subject;
 
     if (contractor.status === "approved") {
         await setLookingForJob(contractor, true);
-        await setContractorDetails(contractor);
+        await updateContractorDetails(contractor);
     }
 
     return contractor;

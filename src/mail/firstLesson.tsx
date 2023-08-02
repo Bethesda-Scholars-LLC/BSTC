@@ -2,7 +2,7 @@ import { getClientById } from "../integration/client";
 import { getContractorById } from "../integration/contractor";
 import { ContractorObject } from "../integration/contractorTypes";
 import { JobObject } from "../integration/serviceTypes";
-import { Log, getAttrByMachineName } from "../util";
+import { Log, PROD, getAttrByMachineName } from "../util";
 import { queueEmail } from "./queueMail";
 import ReactDOMServer from "react-dom/server";
 import React from "react";
@@ -32,9 +32,9 @@ const FirstLesson = (props: {job: JobObject, tutor: ContractorObject, client: Cl
         <br/>
         --
         <br/>
-        <b>${process.env.EMAIL_FROM}</b>
+        <b>{process.env.EMAIL_FROM}</b>
         <br/>
-        ${process.env.SIGNATURE_DESCRIPTION}
+        {process.env.SIGNATURE_DESCRIPTION}
         <br/>
         _________________________________
         <br/>
@@ -45,7 +45,7 @@ const FirstLesson = (props: {job: JobObject, tutor: ContractorObject, client: Cl
 };
 
 const getTutorPronouns = (tutor: ContractorObject): string => {
-    const tutorGender = getAttrByMachineName("contractor_gender", tutor.extra_attrs).value.toLowerCase();
+    const tutorGender = getAttrByMachineName("contractor_gender", tutor.extra_attrs)?.value.toLowerCase() ?? "";
     if(tutorGender === "male")
         return "him";
     if(tutorGender === "female")
@@ -73,7 +73,7 @@ export const queueFirstLessonComplete = async (job: JobObject) => {
     const tutorFirstName = job.conjobs[0].name.split(" ")[0];
     const userEmail = client.user.email;
 
-    queueEmail((Date.now() + day), {
+    queueEmail((Date.now() + (PROD ? day : 10000)), {
         from: `"${process.env.EMAIL_FROM}" <${process.env.EMAIL_ADDRESS}>`, // eslint-disable-line
         to: userEmail,
         cc: "services@bethesdascholars.com",

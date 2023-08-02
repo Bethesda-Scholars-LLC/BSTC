@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import fs from "fs";
+import { ExtraAttr } from "./types";
 dotenv.config();
 
 const requiredEnvs = ["API_KEY", "EMAIL_FROM", "EMAIL_ADDRESS", "EMAIL_PASSWORD", "SIGNATURE_DESCRIPTION"];
@@ -71,8 +72,8 @@ export const stallFor = async (ms: number) => new Promise((resolve, _reject) => 
     setTimeout(resolve, ms);
 });
 
-export const getAttrByMachineName = (name: string, extra_attrs: {machine_name: string}[]): any | undefined =>
-    extra_attrs.filter(v => v.machine_name === name)[0];
+export const getAttrByMachineName = (name: string, extra_attrs: {machine_name: string}[]): ExtraAttr | undefined =>
+    extra_attrs.filter(v => v.machine_name === name)[0] as ExtraAttr ?? undefined;
 
 /**
  * @param str string to capitalize

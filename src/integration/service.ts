@@ -10,7 +10,7 @@ import { JobObject, PipelineStage, SessionLocation, UpdateServicePayload } from 
 
 const blairSchools = ["argyle", "eastern", "loiederman", "newport mill", "odessa shannon", "parkland", "silver spring international", "takoma park", "blair"];
 const churchillSchools = ["churchill", "cabin john", "hoover", "bells mill", "seven locks", "stone mill", "cold spring", "potomac", "beverly farms", "wayside"];
-const specialContractors = ["sophie hansen", "lily eisenberg"]; // add the rest
+const _specialContractors = [1733309, 1644291]; // add the rest
 
 const updateServiceById = async (id: number, data: UpdateServicePayload) => {
     try{
@@ -45,7 +45,8 @@ const fixJobName = (job: JobObject): JobObject | null => {
         }).map((v: string, i: number) => {
             if(i === 0)
                 return v;
-            return capitalize(v)+".";
+            // last initial
+            return v.charAt(0).toUpperCase()+".";
         }).join(" ");
 
     job.name = job.name.split("from")[0]+"from "+name;
@@ -68,9 +69,9 @@ const setDftLocation = (job: JobObject): UpdateServicePayload => {
 
 const setJobRate = async (client: ClientObject, job: JobObject) => {
     const studentGrade = getAttrByMachineName("student_grade", client.extra_attrs);
-    if (studentGrade !== "1st-5th grade") {
+    if (studentGrade?.value !== "1st-5th grade")
         return;
-    }
+
     const jobUpdate = getMinimumJobUpdate(job);
     jobUpdate.dft_charge_rate = 40.0;
     await updateServiceById(job.id, jobUpdate);
@@ -90,7 +91,6 @@ addTCListener("REQUESTED_A_SERVICE", async (event: TCEvent<any, JobObject>) => {
         if(!client)
             return;
 
-        // CHECK THAT THIS WORKS
         await setJobRate(client, job);
 
         const school = getAttrByMachineName("student_school", client.extra_attrs);
@@ -123,7 +123,7 @@ addTCListener("REQUESTED_A_SERVICE", async (event: TCEvent<any, JobObject>) => {
  */
 addTCListener("ADDED_CONTRACTOR_TO_SERVICE", async (event: TCEvent<any, JobObject>) => {
     const job = event.subject;
-    let tutorRate = null;
+    // let tutorRate = null;
     if(job.rcrs.length > 0){
         if (job.conjobs) {
             const contractor = await getContractorById(job.conjobs[0].contractor);
@@ -132,9 +132,11 @@ addTCListener("ADDED_CONTRACTOR_TO_SERVICE", async (event: TCEvent<any, JobObjec
                 return Log.debug(`contractor is null \n ${job.conjobs[0]}`);
 
             await setLookingForJob(contractor, false);
-            if (specialContractors.includes(`${contractor.user.first_name.toLowerCase()} ${contractor.user.last_name.toLowerCase()}`)) {
-                tutorRate = 28.0;
-            }
+            /*
+                if (specialContractors.includes(contractor.id)) {
+                    tutorRate = 28.0;
+                }
+            */
         }
 
         const client = await getClientById(job.rcrs[0].paying_client);
@@ -149,10 +151,12 @@ addTCListener("ADDED_CONTRACTOR_TO_SERVICE", async (event: TCEvent<any, JobObjec
     updateServiceById(job.id, {
         ...getMinimumJobUpdate(job),
         status: "in-progress",
-        conjobs: [{                         // CHECK THAT THIS GETS POSTED
-            contractor: job.conjobs[0].contractor,
-            pay_rate: tutorRate
-        }]
+        /*
+            conjobs: [{                         // CHECK THAT THIS GETS POSTED
+                contractor: job.conjobs[0].contractor,
+                pay_rate: tutorRate
+            }]
+        */
     });
 });
 

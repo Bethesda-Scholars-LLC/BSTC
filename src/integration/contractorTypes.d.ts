@@ -1,7 +1,7 @@
 import { APIUser } from "./userTypes";
 
 export type ContractorObject = {
-    id: string
+    id: number
     user: APIUser
     status: string
     charge_via_branch: boolean

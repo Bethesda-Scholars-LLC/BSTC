@@ -3,7 +3,9 @@ import { Request, Response } from "express";
 /**
  * @type Alias for Express.Request
  */
-export type Req = Request;
+export type Req = Request & {
+    rawBody?: string
+};
 
 /**
  * @type Alias for Express.Response
@@ -26,3 +28,11 @@ export type TCEvent<ActorType=any, SubjectType = any> = {
  * @type Function that takes TCEvent, and does whatever with it
  */
 export type TCEventListener<AT=any, ST=any> = (event: TCEvent<AT, ST>) => any;
+
+export type ExtraAttr = {
+    id: number
+    type: string
+    value: any
+    machine_name: string
+    name: string
+}

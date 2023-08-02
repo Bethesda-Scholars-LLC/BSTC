@@ -23,6 +23,7 @@ const writeScheduledMail = async (mail: ScheduledMailJSON): Promise<null> => {
 };
 
 export const queueEmail = async (timestamp: number, mailData: MailOptions) => {
+    Log.debug(`Sending in ${(Date.now()-timestamp)/1000} seconds`);
     const release = await scheduledMailMutex.acquire();
     try {
         const scheduledMail = await getScheduledMail();
