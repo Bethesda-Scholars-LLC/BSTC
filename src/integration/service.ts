@@ -1,12 +1,14 @@
 import axios from "axios";
 import { queueFirstLessonComplete } from "../mail/firstLesson";
-import { TCEvent } from "../types";
-import { Log, apiHeaders, apiUrl, capitalize, getAttrByMachineName } from "../util";
+import { ManyResponse, TCEvent } from "../types";
+import { Log, apiHeaders, apiUrl, capitalize, getAttrByMachineName, randomChoice, stallFor } from "../util";
 import { getClientById, getMinimumClientUpdate, updateClient } from "./client";
 import { ClientManager, ClientObject } from "./clientTypes";
 import { getContractorById, setLookingForJob } from "./contractor";
 import { addTCListener } from "./hook";
-import { JobObject, PipelineStage, SessionLocation, UpdateServicePayload } from "./serviceTypes";
+import { DumbJob, JobObject, PipelineStage, SessionLocation, UpdateServicePayload } from "./serviceTypes";
+import AwaitingClient from "../models/clientAwaiting";
+import { ContractorObject } from "./contractorTypes";
 
 const blairSchools = ["argyle", "eastern", "loiederman", "newport mill", "odessa shannon", "parkland", "silver spring international", "takoma park", "blair"];
 const churchillSchools = ["churchill", "cabin john", "hoover", "bells mill", "seven locks", "stone mill", "cold spring", "potomac", "beverly farms", "wayside"];
@@ -22,6 +24,29 @@ const updateServiceById = async (id: number, data: UpdateServicePayload) => {
     } catch(e){
         Log.error(e);
     }
+};
+
+export const getServiceById = async (id: number): Promise<JobObject | null> => {
+    try {
+        return (await axios(apiUrl(`/services/${id}/`), {headers: apiHeaders})).data as JobObject;
+    } catch (e) {
+        Log.error(e);
+    }
+    return null;
+};
+
+export const getRandomService = async (): Promise<JobObject | null> => {
+    try{
+        const services = (await axios(apiUrl("/services"), { headers: apiHeaders })).data as ManyResponse<DumbJob>;
+        
+        if(services.count === 0)
+            return null;
+
+        return await getServiceById(randomChoice(services.results).id);
+    } catch (e) {
+        Log.debug(e);
+    }
+    return null;
 };
 
 const getMinimumJobUpdate = (job: JobObject): UpdateServicePayload => {
@@ -118,28 +143,76 @@ addTCListener("REQUESTED_A_SERVICE", async (event: TCEvent<any, JobObject>) => {
     }
 });
 
+addTCListener("REMOVED_CONTRACTOR_FROM_SERVICE", async (event: TCEvent<any, JobObject>) => {
+    const TCJob = event.subject;
+    const realContractors = TCJob.conjobs.map(v => v.contractor);
+
+    const DBJob = await AwaitingClient.findOne({job_id: TCJob.id});
+    if(!DBJob)
+        return;
+
+    // keep only if tutor_id is in realContractors array
+    DBJob.tutor_ids = DBJob.tutor_ids.filter(v => realContractors.includes(v));
+
+    if(DBJob.tutor_ids.length === 0){
+        await AwaitingClient.findByIdAndDelete(DBJob._id);
+        return;
+    }
+
+    DBJob.save();
+
+
+});
+
 /**
  * @description update status to in progress when contract added
  */
 addTCListener("ADDED_CONTRACTOR_TO_SERVICE", async (event: TCEvent<any, JobObject>) => {
     const job = event.subject;
+
     // let tutorRate = null;
     if(job.rcrs.length > 0){
-        if (job.conjobs) {
-            const contractor = await getContractorById(job.conjobs[0].contractor);
+        const client = await getClientById(job.rcrs[0].paying_client);
+
+        for(let i = 0; i < job.conjobs.length; i++) {
+            const contractor = await getContractorById(job.conjobs[i].contractor);
 
             if(!contractor)
-                return Log.debug(`contractor is null \n ${job.conjobs[0]}`);
+                return Log.debug(`contractor is null \n ${job.conjobs[i]}`);
 
             await setLookingForJob(contractor, false);
-            /*
-                if (specialContractors.includes(contractor.id)) {
-                    tutorRate = 28.0;
-                }
-            */
-        }
 
-        const client = await getClientById(job.rcrs[0].paying_client);
+            try{
+                if(client) {
+                    const hasBeenAdded = (await AwaitingClient.findOne({
+                        tutor_ids: contractor.id,
+                        client_id: client.id,
+                        job_id: job.id
+                    }));
+                    // if current tutor has not been added
+                    if(hasBeenAdded === null) {
+                        const clientJobRelation = (await AwaitingClient.findOne({
+                            client_id: client.id,
+                            job_id: job.id
+                        }));
+                        // if a client job relation has not already been made, create it
+                        if(clientJobRelation === null) {
+                            await new AwaitingClient({
+                                client_id: client.id,
+                                job_id: job.id,
+                                tutor_ids: [contractor.id]
+                            }).save();
+                            // otherwise update current one
+                        } else {
+                            clientJobRelation.tutor_ids.push(contractor.id);
+                            await clientJobRelation.save();
+                        }
+                    }
+                }
+            } catch (e) {
+                Log.error(e);
+            }
+        }
 
         if(client && client.status === "prospect" && client.pipeline_stage.id === PipelineStage.NewClient){
             await updateClient({

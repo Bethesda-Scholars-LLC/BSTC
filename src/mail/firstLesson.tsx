@@ -1,5 +1,5 @@
-import { getClientById } from "../integration/client";
-import { getContractorById } from "../integration/contractor";
+import { getClientById, getRandomClient } from "../integration/client";
+import { getContractorById, getRandomContractor } from "../integration/contractor";
 import { ContractorObject } from "../integration/contractorTypes";
 import { JobObject } from "../integration/serviceTypes";
 import { Log, PROD, getAttrByMachineName } from "../util";
@@ -8,8 +8,9 @@ import ReactDOMServer from "react-dom/server";
 import React from "react";
 import { ClientObject } from "../integration/clientTypes";
 import { getUserFirstName } from "../integration/user";
+import { getRandomService } from "../integration/service";
 
-const FirstLesson = (props: {job: JobObject, tutor: ContractorObject, client: ClientObject}) => {
+export const FirstLesson = (props: {job: JobObject, tutor: ContractorObject, client: ClientObject}) => {
     const tutorFirstName = props.job.conjobs[0].name.split(" ")[0];
     const tutorPhoneNumber = props.tutor.user.mobile;
     const tutorEmailAddress = props.tutor.user.email;
@@ -55,18 +56,14 @@ const getTutorPronouns = (tutor: ContractorObject): string => {
 
 const day = 86400000;
 export const queueFirstLessonComplete = async (job: JobObject) => {
-    if (!job.conjobs || job.conjobs.length === 0){
-        Log.error("No tutor on job");
+    if (!job.conjobs || job.conjobs.length === 0)
         return;
-    }
 
     const client = await getClientById(job.rcrs[0].paying_client);
-    Log.debug(client ? "valid client" : "invalid client");
     if(!client)
         return;
 
     const tutor = await getContractorById(job.conjobs[0].contractor);
-    Log.debug(tutor ? "valid tutor" : "invalid tutor");
     if (!tutor || !tutor.extra_attrs)
         return;
     

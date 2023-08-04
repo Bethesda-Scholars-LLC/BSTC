@@ -5,19 +5,23 @@ import hookRouter from "./integration/hook";
 import "./integration/service";
 import "./mail/mail";
 import "./scripts";
-import { Log } from "./util";
+import { DB_URI, Log, PROD } from "./util";
+import { Req } from "./types";
+import mongoose from "mongoose";
+
+mongoose.connect(DB_URI).then(() => { // eslint-disable-line
+    Log.debug(`Connected to ${(PROD ? process.env.DB_NAME : process.env.DB_TEST_NAME)}`);
+}).catch(Log.error);
 
 const app = express();
 app.use(cors());
 app.use(json({
-    verify: (req: any, _ , buf) => {
+    verify: (req: Req, _, buf) => {
         req.rawBody = buf.toString();
     },
 }));
 
 app.use("/hook", hookRouter);
-
-// editAllContractors();
 
 app.listen(80, () => {
     Log.debug("Ready to go");

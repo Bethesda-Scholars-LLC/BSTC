@@ -36,3 +36,10 @@ export type ExtraAttr = {
     machine_name: string
     name: string
 }
+
+export type ManyResponse<T> = {
+    count: number
+    next: string | null
+    previous: string | null
+    results: T[]
+}

@@ -3,7 +3,19 @@ import fs from "fs";
 import { ExtraAttr } from "./types";
 dotenv.config();
 
-const requiredEnvs = ["API_KEY", "EMAIL_FROM", "EMAIL_ADDRESS", "EMAIL_PASSWORD", "SIGNATURE_DESCRIPTION"];
+/**
+ * @description required fields in the .env
+ */
+const requiredEnvs = [
+    "API_KEY",
+    "EMAIL_FROM",
+    "EMAIL_ADDRESS",
+    "EMAIL_PASSWORD",
+    "SIGNATURE_DESCRIPTION",
+    "DB_URI",
+    "DB_TEST_NAME",
+    "DB_NAME"
+];
 const envKeys = Object.keys(process.env);
 export const PROD = ["production", "prod"].includes(process.env.NODE_ENV?.toLowerCase() ?? ""); // eslint-disable-line
 
@@ -21,6 +33,8 @@ if(requiredEnvs.reduce((prev, val) => {
     }
     process.exit(-1);
 }
+
+export const DB_URI = process.env.DB_URI! + (PROD ? process.env.DB_NAME! : process.env.DB_TEST_NAME); // eslint-disable-line
 
 /**
  * @description Api headers to send to TutorCruncher API
@@ -83,6 +97,10 @@ export const capitalize = (str: string): string => {
     if(str.length < 2)
         return str.toUpperCase();
     return str.charAt(0).toUpperCase()+str.substring(1);
+};
+
+export const randomChoice = <T>(arr: T[]): T => {
+    return arr[Math.floor(Math.random()*arr.length)];
 };
 
 export namespace Log {

@@ -1,34 +1,37 @@
 import { Mutex } from "async-mutex";
 import { MailOptions } from "nodemailer/lib/sendmail-transport";
-import { Log, PROD, readFile, writeFile } from "../util";
+import { Log, PROD } from "../util";
 import { transporter } from "./mail";
-
-
-type ScheduledMailJSON = {
-    [key: string]: MailOptions
-};
+import ScheduleMail, { IScheduledMail } from "../models/scheduledEmail";
+import { Aggregate } from "mongoose";
 
 export const scheduledMailMutex = new Mutex();
 
-const getScheduledMail = async (): Promise<ScheduledMailJSON> => {
+const getExpiredMail = async (): Promise<Aggregate<IScheduledMail[]> | null> => {
     try {
-        return JSON.parse((await readFile("./scheduledMail.json")).toString("utf-8"));
+        return ScheduleMail.aggregate([
+            {
+                $match: {
+                    send_at: { $lte: new Date() }
+                }
+            }
+        ]);
     } catch(e) {
-        return {};
+        Log.error(e);
     }
+    return null;
 };
 
-const writeScheduledMail = async (mail: ScheduledMailJSON): Promise<null> => {
-    return writeFile("./scheduledMail.json", JSON.stringify(mail, undefined, 2));
-};
 
 export const queueEmail = async (timestamp: number, mailData: MailOptions) => {
-    Log.debug(`Sending in ${(Date.now()-timestamp)/1000} seconds`);
+    Log.debug(`Sending in ${(Date.now()-timestamp)} milliseconds`);
     const release = await scheduledMailMutex.acquire();
     try {
-        const scheduledMail = await getScheduledMail();
-        scheduledMail[timestamp.toString()] = mailData;
-        writeScheduledMail(scheduledMail);
+        new ScheduleMail({
+            ...mailData,
+            send_at: timestamp,
+        }).save();
+        Log.debug("saving");
     } catch(e) {
         Log.error(e);
     } finally {
@@ -39,28 +42,22 @@ export const queueEmail = async (timestamp: number, mailData: MailOptions) => {
 setInterval(async () => {
     const release = await scheduledMailMutex.acquire();
     try{
-        const scheduledMail = await getScheduledMail();
-        const scheduledMailArr = Object.entries(scheduledMail);
-        for(let i = 0; i < scheduledMailArr.length; i++) {
-            const entry = scheduledMailArr[i];
-            const expiresOn = parseInt(entry[0]);
-            // if invalid key, delete it
-            if(isNaN(expiresOn)) {
-                delete scheduledMail[entry[0]];
-                continue;
-            }
-            // if expired
-            if(Date.now() >= expiresOn){
-                // send
-                transporter.sendMail(entry[1], (error, _info) => {
-                    if (error) return Log.error(error);
-                    Log.debug("verification sent");
-                });
-                // delete it
-                delete scheduledMail[entry[0]];
-            }
+        const expiredEmails = await getExpiredMail();
+        if(expiredEmails) {
+            expiredEmails.forEach(async v => {
+                Log.debug(v);
+                try {
+                    await transporter.sendMail(v, (err, _) => {
+                        if(err)
+                            Log.error(err);
+                    });
+
+                    await ScheduleMail.findByIdAndDelete(v._id);
+                } catch (e) {
+                    Log.error(e);
+                }
+            });
         }
-        writeScheduledMail(scheduledMail);
     } catch (e){
         Log.error(e);
     } finally {

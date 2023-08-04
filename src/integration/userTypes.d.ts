@@ -14,3 +14,12 @@ export type APIUser = {
     date_created: string
     timezone: string
 };
+
+export type DumbUser = {
+    id: number
+    first_name: string | null
+    last_name: string
+    email: string
+    url: string
+}
+

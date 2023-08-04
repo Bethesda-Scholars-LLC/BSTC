@@ -1,8 +1,10 @@
 import axios from "axios";
-import { TCEvent } from "../types";
-import { Log, apiHeaders, apiUrl } from "../util";
+import { ManyResponse, TCEvent } from "../types";
+import { Log, apiHeaders, apiUrl, randomChoice } from "../util";
 import { ClientObject, UpdateClientPayload } from "./clientTypes";
 import { addTCListener } from "./hook";
+import { ContractorObject } from "./contractorTypes";
+import { DumbUser } from "./userTypes";
 
 export const updateClient = async (data: UpdateClientPayload) => {
     try {
@@ -15,6 +17,21 @@ export const updateClient = async (data: UpdateClientPayload) => {
         Log.error(e);
     }
 };
+
+export const getRandomClient = async (): Promise<ClientObject | null> => {
+    try {
+        const clients = (await axios(apiUrl("/clients"), {headers: apiHeaders})).data as ManyResponse<DumbUser>;
+
+        if(clients.count === 0)
+            return null;
+
+        return (await getClientById(randomChoice(clients.results).id));
+    } catch(e) {
+        Log.error(e);
+    }
+    return null;
+};
+
 
 export const getMinimumClientUpdate = (client: ClientObject): UpdateClientPayload => {
     return {

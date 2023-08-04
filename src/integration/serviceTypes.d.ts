@@ -5,7 +5,12 @@ export type JobObject = {
     branch_tax_setup: string,
     cap: integer,
     colour: string,
-    conjobs: any,
+    conjobs: {
+        contractor: number
+        contractor_permissions: string
+        name: string
+        pay_rate: null | number
+    }[],
     contractor_tax_setup: string,
     created: string,
     description: string,
@@ -34,13 +39,13 @@ export type JobObject = {
     name: string,
     net_gross: string,
     rcrs: {
-        recipient: number
-        recipient_name: string
-        paying_client: number
-        paying_client_name: string
-        charge_rate: string
-        agent: number
-        agent_name: string
+        recipient: number,
+        recipient_name: string,
+        paying_client: number,
+        paying_client_name: string,
+        charge_rate: string,
+        agent: number,
+        agent_name: string,
         agent_percentage: string
     }[],
     require_con_job: boolean,
@@ -51,6 +56,18 @@ export type JobObject = {
     status: string,
     total_apt_units: decimal
 };
+
+export type DumbJob = {
+    id: number,
+    name: string,
+    dft_charge_type: string,
+    created: string,
+    dft_charge_rate: string,
+    dft_contractor_rate: string,
+    last_updated: string,
+    status: string,
+    url: string
+}
 
 /**
  * PUT /services/{id}
@@ -69,10 +86,11 @@ export type UpdateServicePayload = {
 };
 
 export const enum PipelineStage {
-    NewClient = 35326,
-    MatchedNotBooked = 37478,
-    MatchedAndBooked = 35328,
-    FeedbackRequested = 47039
+    NewClient=35326,
+    MatchedNotBooked=37478,
+    AvailabilityNotBooked=47188,
+    MatchedAndBooked=35328,
+    FeedbackRequested=47039
 }
 
 export const enum SessionLocation {
