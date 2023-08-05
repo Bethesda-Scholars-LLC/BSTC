@@ -119,6 +119,7 @@ addTCListener("EDITED_AVAILABILITY", async (event: TCEvent<any, ContractorObject
             */
 
             await AwaitingClient.findByIdAndDelete(awaitingClient._id);
+            // add change the pipeline stage to matched not booked
             continue;
         }
         awaitingClient.save();

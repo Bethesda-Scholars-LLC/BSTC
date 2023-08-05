@@ -217,7 +217,7 @@ addTCListener("ADDED_CONTRACTOR_TO_SERVICE", async (event: TCEvent<any, JobObjec
         if(client && client.status === "prospect" && client.pipeline_stage.id === PipelineStage.NewClient){
             await updateClient({
                 ...getMinimumClientUpdate(client),
-                pipeline_stage: PipelineStage.MatchedNotBooked
+                pipeline_stage: PipelineStage.MatchedNotBooked      // change to AvailabilityNotSet when email set up
             });
         }
     }
