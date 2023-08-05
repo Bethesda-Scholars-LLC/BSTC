@@ -1,8 +1,8 @@
 import cors from "cors";
 import express, { json } from "express";
-import "./integration/contractor";
+import "./integration/tc models/contractor/contractor";
 import hookRouter from "./integration/hook";
-import "./integration/service";
+import "./integration/tc models/service/service";
 import "./mail/mail";
 import "./scripts";
 import { DB_URI, Log, PROD } from "./util";

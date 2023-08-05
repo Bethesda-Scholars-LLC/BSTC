@@ -1,14 +1,13 @@
 import axios from "axios";
-import { queueFirstLessonComplete } from "../mail/firstLesson";
-import { ManyResponse, TCEvent } from "../types";
-import { Log, apiHeaders, apiUrl, capitalize, getAttrByMachineName, randomChoice, stallFor } from "../util";
-import { getClientById, getMinimumClientUpdate, updateClient } from "./client";
-import { ClientManager, ClientObject } from "./clientTypes";
-import { getContractorById, setLookingForJob } from "./contractor";
-import { addTCListener } from "./hook";
-import { DumbJob, JobObject, PipelineStage, SessionLocation, UpdateServicePayload } from "./serviceTypes";
-import AwaitingClient from "../models/clientAwaiting";
-import { ContractorObject } from "./contractorTypes";
+import { DumbJob, JobObject, PipelineStage, SessionLocation, UpdateServicePayload } from "./types";
+import { Log, apiHeaders, apiUrl, capitalize, getAttrByMachineName, randomChoice } from "../../../util";
+import { ManyResponse, TCEvent } from "../../../types";
+import { ClientManager, ClientObject } from "../client/types";
+import { addTCListener } from "../../hook";
+import { getClientById, getMinimumClientUpdate, updateClient } from "../client/client";
+import AwaitingClient from "../../../models/clientAwaiting";
+import { getContractorById, setLookingForJob } from "../contractor/contractor";
+import { queueFirstLessonComplete } from "../../../mail/firstLesson";
 
 const blairSchools = ["argyle", "eastern", "loiederman", "newport mill", "odessa shannon", "parkland", "silver spring international", "takoma park", "blair"];
 const churchillSchools = ["churchill", "cabin john", "hoover", "bells mill", "seven locks", "stone mill", "cold spring", "potomac", "beverly farms", "wayside"];

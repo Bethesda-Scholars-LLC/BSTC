@@ -1,10 +1,9 @@
 import axios from "axios";
-import { ManyResponse, TCEvent } from "../types";
-import { Log, apiHeaders, apiUrl, randomChoice } from "../util";
-import { ClientObject, UpdateClientPayload } from "./clientTypes";
-import { addTCListener } from "./hook";
-import { ContractorObject } from "./contractorTypes";
-import { DumbUser } from "./userTypes";
+import { ManyResponse, TCEvent } from "../../../types";
+import { Log, apiHeaders, apiUrl, randomChoice } from "../../../util";
+import { ClientObject, UpdateClientPayload } from "./types";
+import { addTCListener } from "../../hook";
+import { DumbUser } from "../user/types";
 
 export const updateClient = async (data: UpdateClientPayload) => {
     try {

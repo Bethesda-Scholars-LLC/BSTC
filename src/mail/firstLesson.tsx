@@ -1,13 +1,13 @@
-import { getClientById } from "../integration/client";
-import { getContractorById } from "../integration/contractor";
-import { ContractorObject } from "../integration/contractorTypes";
-import { JobObject } from "../integration/serviceTypes";
+import { getClientById } from "../integration/tc models/client/client";
+import { getContractorById } from "../integration/tc models/contractor/contractor";
+import { ContractorObject } from "../integration/tc models/contractor/types";
+import { JobObject } from "../integration/tc models/service/types";
 import { PROD, getAttrByMachineName } from "../util";
 import { queueEmail } from "./queueMail";
 import ReactDOMServer from "react-dom/server";
 import React from "react";
-import { ClientObject } from "../integration/clientTypes";
-import { getUserFirstName } from "../integration/user";
+import { ClientObject } from "../integration/tc models/client/types";
+import { getUserFirstName } from "../integration/tc models/user/user";
 
 export const FirstLesson = (props: {job: JobObject, tutor: ContractorObject, client: ClientObject}) => {
     const tutorFirstName = props.job.conjobs[0].name.split(" ")[0];

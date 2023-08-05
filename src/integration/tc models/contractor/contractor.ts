@@ -1,14 +1,9 @@
+
 import axios from "axios";
-import { ManyResponse, TCEvent } from "../types";
-import { Log, apiHeaders, capitalize, apiUrl, getAttrByMachineName, randomChoice } from "../util";
-import { ContractorObject, UpdateContractorPayload } from "./contractorTypes";
-import { addTCListener } from "./hook";
-import { DumbUser } from "./userTypes";
-import AwaitingClient, { popTutorFromCA } from "../models/clientAwaiting";
-import ReactDOMServer from "react-dom/server";
-import { ClientMatched } from "../mail/clientMatched";
-import React from "react";
-import { transporter } from "../mail/mail";
+import { TCEvent } from "../../../types";
+import { Log, apiHeaders, capitalize, apiUrl, getAttrByMachineName } from "../../../util";
+import { ContractorObject, UpdateContractorPayload } from "./types";
+import { addTCListener } from "../../hook";
 
 export const getContractorById = async (id: number): Promise<ContractorObject | null> => {
     try {
@@ -19,20 +14,6 @@ export const getContractorById = async (id: number): Promise<ContractorObject | 
         Log.error(e);
         return null;
     }
-};
-
-export const getRandomContractor = async (): Promise<ContractorObject | null> => {
-    try {
-        const contractors = (await axios(apiUrl("/contractors/"), {headers: apiHeaders})).data as ManyResponse<DumbUser>;
-
-        if(contractors.count === 0)
-            return null;
-
-        return await getContractorById(randomChoice(contractors.results).id);
-    } catch(e) {
-        Log.error(e);
-    }
-    return null;
 };
 
 const updateContractor = async (data: UpdateContractorPayload) => {
@@ -57,9 +38,6 @@ const getDefaultContractorUpdate = (tutor: ContractorObject): UpdateContractorPa
 };
 
 export const setLookingForJob = async (contractor: ContractorObject, value: boolean) => {
-    if(getAttrByMachineName("looking_for_job", contractor.extra_attrs)?.value.toLowerCase() === (value ? "true" : "false"))
-        return;
-
     const defaultTutor = getDefaultContractorUpdate(contractor);
 
     defaultTutor.extra_attrs = { looking_for_job: value };
@@ -89,43 +67,6 @@ export const updateContractorDetails = async (contractor: ContractorObject) => {
 
     await updateContractor(defaultTutor);
 };
-
-addTCListener("EDITED_AVAILABILITY", async (event: TCEvent<any, ContractorObject>) => {
-    const contractor = event.subject;
-
-    const dbAwaitings = await AwaitingClient.find({
-        tutor_ids: contractor.id
-    });
-
-    for(let i = 0; i < dbAwaitings.length; i++) {
-        const awaitingClient = popTutorFromCA(dbAwaitings[i], contractor.id);
-
-        if(awaitingClient.tutor_ids.length === 0){
-            // send email
-
-            /*
-                transporter.sendMail({
-                    from: `"${process.env.EMAIL_FROM}" <${process.env.EMAIL_ADDRESS}>`, // eslint-disable-line
-                    to: "colinhoscheit@gmail.com",
-                    cc: "services@bethesdascholars.com",
-                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    bcc: process.env.EMAIL_ADDRESS!,
-                    subject: "Lesson with joe",
-                    html: ReactDOMServer.renderToString(<ClientMatched/>)
-                }, (err) => {
-                    if(err)
-                        Log.error(err);
-                });
-            */
-
-            await AwaitingClient.findByIdAndDelete(awaitingClient._id);
-            // add change the pipeline stage to matched not booked
-            continue;
-        }
-        awaitingClient.save();
-    }
-
-});
 
 addTCListener("EDITED_A_CONTRACTOR", async (event: TCEvent<any, ContractorObject>) => {
     await updateContractorDetails(event.subject);

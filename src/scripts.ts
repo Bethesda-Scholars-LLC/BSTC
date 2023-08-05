@@ -1,6 +1,6 @@
 import axios from "axios";
-import { getContractorById, setLookingForJob } from "./integration/contractor";
-import { ContractorObject } from "./integration/contractorTypes";
+import { getContractorById, setLookingForJob } from "./integration/tc models/contractor/contractor";
+import { ContractorObject } from "./integration/tc models/contractor/types";
 import { Log, apiHeaders, apiUrl, getAttrByMachineName, stallFor } from "./util";
 
 const getContractors = async (page?: number): Promise<ContractorObject | null> => {
