@@ -1,30 +1,30 @@
-import { getClientById, getRandomClient } from "../integration/client";
-import { getContractorById, getRandomContractor } from "../integration/contractor";
+import { getClientById } from "../integration/client";
+import { getContractorById } from "../integration/contractor";
 import { ContractorObject } from "../integration/contractorTypes";
 import { JobObject } from "../integration/serviceTypes";
-import { Log, PROD, getAttrByMachineName } from "../util";
+import { PROD, getAttrByMachineName } from "../util";
 import { queueEmail } from "./queueMail";
 import ReactDOMServer from "react-dom/server";
 import React from "react";
 import { ClientObject } from "../integration/clientTypes";
 import { getUserFirstName } from "../integration/user";
-import { getRandomService } from "../integration/service";
 
 export const FirstLesson = (props: {job: JobObject, tutor: ContractorObject, client: ClientObject}) => {
     const tutorFirstName = props.job.conjobs[0].name.split(" ")[0];
     const tutorPhoneNumber = props.tutor.user.mobile;
     const tutorEmailAddress = props.tutor.user.email;
     const userFirstName = getUserFirstName(props.client.user);
+    const pronouns = getTutorPronouns(props.tutor);
 
     return <p>
         Hi {userFirstName},
         <br/>
         <br/>
-        Just wanted to check in on the lesson with {tutorFirstName} - how did it go? Would you like to continue lessons with {getTutorPronouns(props.tutor)}?
+        Just wanted to check in on the lesson with {tutorFirstName} - how did it go? Would you like to continue lessons with {pronouns.pronouns[1]}?
         {(tutorPhoneNumber || tutorEmailAddress) && <>
             <br/>
             <br/>
-            If you have not got got in contact with {tutorFirstName}, {getTutorPronouns(props.tutor)} {tutorPhoneNumber ? ` phone number is ${tutorPhoneNumber}` : ` email address is ${tutorEmailAddress}`}.
+            If you have not got got in contact with {tutorFirstName}, {pronouns.possesive} {tutorPhoneNumber ? ` phone number is ${tutorPhoneNumber}` : ` email address is ${tutorEmailAddress}`}.
             It might make scheduling easier, just remember to book the lesson after a time is coordinated.
         </>}
         <br/>
@@ -45,13 +45,25 @@ export const FirstLesson = (props: {job: JobObject, tutor: ContractorObject, cli
     </p>;
 };
 
-const getTutorPronouns = (tutor: ContractorObject): string => {
+const getTutorPronouns = (tutor: ContractorObject): {
+    pronouns: [string, string],
+    possesive: string
+} => {
     const tutorGender = getAttrByMachineName("contractor_gender", tutor.extra_attrs)?.value.toLowerCase() ?? "";
     if(tutorGender === "male")
-        return "him";
+        return {
+            pronouns: ["he", "him"],
+            possesive: "his"
+        };
     if(tutorGender === "female")
-        return "her";
-    return "them";
+        return {
+            pronouns: ["she", "her"],
+            possesive: "her"
+        };
+    return {
+        pronouns: ["they", "them"],
+        possesive: "their"
+    };
 };
 
 const day = 86400000;
