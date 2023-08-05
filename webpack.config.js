@@ -1,5 +1,6 @@
 /* eslint-disable */
 const path = require("path");
+const nodeExternals = require("webpack-node-externals");
 
 const PROD = ["production", "prod"].includes(process.env?.NODE_ENV?.toLowerCase() ?? "");
 
@@ -16,6 +17,7 @@ module.exports = {
   resolve: {
     extensions: [".ts", ".tsx", ".js"],
   },
+  externals: [nodeExternals()],
   module: {
     rules: [
       { 
