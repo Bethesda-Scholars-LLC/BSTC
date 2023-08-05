@@ -213,7 +213,9 @@ addTCListener("ADDED_CONTRACTOR_TO_SERVICE", async (event: TCEvent<any, JobObjec
             }
         }
 
+        Log.debug(client);
         if(client && client.status === "prospect" && client.pipeline_stage.id === PipelineStage.NewClient){
+            Log.debug("we in shawty");
             await updateClient({
                 ...getMinimumClientUpdate(client),
                 pipeline_stage: PipelineStage.MatchedNotBooked      // change to AvailabilityNotSet when email set up

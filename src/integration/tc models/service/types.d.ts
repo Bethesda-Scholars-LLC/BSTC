@@ -87,8 +87,8 @@ export type UpdateServicePayload = {
 
 export const enum PipelineStage {
     NewClient=35326,
-    MatchedNotBooked=37478,
-    AvailabilityNotBooked=47188,
+    MatchedNotBooked=47188,
+    AvailabilityNotBooked=37478,
     MatchedAndBooked=35328,
     FeedbackRequested=47039
 }

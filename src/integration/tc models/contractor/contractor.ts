@@ -4,6 +4,7 @@ import { TCEvent } from "../../../types";
 import { Log, apiHeaders, capitalize, apiUrl, getAttrByMachineName } from "../../../util";
 import { ContractorObject, UpdateContractorPayload } from "./types";
 import { addTCListener } from "../../hook";
+import AwaitingClient, { popTutorFromCA } from "../../../models/clientAwaiting";
 
 export const getContractorById = async (id: number): Promise<ContractorObject | null> => {
     try {
@@ -67,6 +68,45 @@ export const updateContractorDetails = async (contractor: ContractorObject) => {
 
     await updateContractor(defaultTutor);
 };
+
+addTCListener("EDITED_AVAILABILITY", async (event: TCEvent<any, ContractorObject>) => {
+    const contractor = event.subject;
+
+    const dbAwaitings = await AwaitingClient.find({
+        tutor_ids: contractor.id
+    });
+
+    for(let i = 0; i < dbAwaitings.length; i++) {
+        const awaitingClient = popTutorFromCA(dbAwaitings[i], contractor.id);
+
+        if(awaitingClient.tutor_ids.length === 0){
+            // send email
+
+            /*
+                transporter.sendMail({
+                    from: `"${process.env.EMAIL_FROM}" <${process.env.EMAIL_ADDRESS}>`, // eslint-disable-line
+                    to: "colinhoscheit@gmail.com",
+                    cc: "services@bethesdascholars.com",
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    bcc: process.env.EMAIL_ADDRESS!,
+                    subject: "Lesson with joe",
+                    html: ReactDOMServer.renderToString(<ClientMatched/>)
+                }, (err) => {
+                    if(err)
+                        Log.error(err);
+                });
+            */
+
+            await AwaitingClient.findByIdAndDelete(awaitingClient._id);
+
+            // Move client down pipeline after sending email
+
+            continue;
+        }
+        awaitingClient.save();
+    }
+
+});
 
 addTCListener("EDITED_A_CONTRACTOR", async (event: TCEvent<any, ContractorObject>) => {
     await updateContractorDetails(event.subject);

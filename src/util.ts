@@ -115,4 +115,3 @@ export namespace Log {
     };
     /* eslint-enable */
 }
-
