@@ -152,6 +152,7 @@ addTCListener("REMOVED_CONTRACTOR_FROM_SERVICE", async (event: TCEvent<any, JobO
 
     // keep only if tutor_id is in realContractors array
     DBJob.tutor_ids = DBJob.tutor_ids.filter(v => realContractors.includes(v));
+    Log.debug("removing tutor");
 
     if(DBJob.tutor_ids.length === 0){
         await AwaitingClient.findByIdAndDelete(DBJob._id);
@@ -159,7 +160,6 @@ addTCListener("REMOVED_CONTRACTOR_FROM_SERVICE", async (event: TCEvent<any, JobO
     }
 
     DBJob.save();
-
 
 });
 
@@ -215,10 +215,9 @@ addTCListener("ADDED_CONTRACTOR_TO_SERVICE", async (event: TCEvent<any, JobObjec
 
         // send email to tutor "youve been matched with client X, here is their number"
         if(client && client.status === "prospect" && client.pipeline_stage.id === PipelineStage.NewClient){
-            Log.debug("we in shawty");
             await updateClient({
                 ...getMinimumClientUpdate(client),
-                pipeline_stage: PipelineStage.MatchedNotBooked      // change to AvailabilityNotSet when email set up
+                pipeline_stage: PipelineStage.AvailabilityNotBooked      // change to AvailabilityNotSet when email set up
             });
         }
     }

@@ -7,8 +7,8 @@ export interface IClientAwaiting {
     tutor_ids: number[]
 }
 
-export const popTutorFromCA = (cAwaiting: any, tId: number): any => {
-    cAwaiting.tutor_ids = (cAwaiting as any).tutor_ids.filter((v: any) => v !== tId);
+export const popTutorFromCA = <T>(cAwaiting: T, tId: number): T => {
+    (cAwaiting as any).tutor_ids = (cAwaiting as any).tutor_ids.filter((v: any) => v !== tId);
     return cAwaiting;
 };
 

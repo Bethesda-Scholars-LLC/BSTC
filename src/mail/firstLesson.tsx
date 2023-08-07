@@ -45,7 +45,7 @@ export const FirstLesson = (props: {job: JobObject, tutor: ContractorObject, cli
     </p>;
 };
 
-const getTutorPronouns = (tutor: ContractorObject): {
+export const getTutorPronouns = (tutor: ContractorObject): {
     pronouns: [string, string],
     possesive: string
 } => {

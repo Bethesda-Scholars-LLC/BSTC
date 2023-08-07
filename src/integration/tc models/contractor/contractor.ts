@@ -5,6 +5,10 @@ import { Log, apiHeaders, capitalize, apiUrl, getAttrByMachineName } from "../..
 import { ContractorObject, UpdateContractorPayload } from "./types";
 import { addTCListener } from "../../hook";
 import AwaitingClient, { popTutorFromCA } from "../../../models/clientAwaiting";
+import { transporter } from "../../../mail/mail";
+import clientMatchedMail from "../../../mail/clientMatched";
+import { getClientById } from "../client/client";
+import { getServiceById } from "../service/service";
 
 export const getContractorById = async (id: number): Promise<ContractorObject | null> => {
     try {
@@ -81,21 +85,18 @@ addTCListener("EDITED_AVAILABILITY", async (event: TCEvent<any, ContractorObject
 
         if(awaitingClient.tutor_ids.length === 0){
             // send email
+            const client = await getClientById(awaitingClient.client_id);
+            if(!client)
+                return;
 
-            /*
-                transporter.sendMail({
-                    from: `"${process.env.EMAIL_FROM}" <${process.env.EMAIL_ADDRESS}>`, // eslint-disable-line
-                    to: "colinhoscheit@gmail.com",
-                    cc: "services@bethesdascholars.com",
-                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    bcc: process.env.EMAIL_ADDRESS!,
-                    subject: "Lesson with joe",
-                    html: ReactDOMServer.renderToString(<ClientMatched/>)
-                }, (err) => {
-                    if(err)
-                        Log.error(err);
-                });
-            */
+            const job = await getServiceById(awaitingClient.job_id);
+            if(!job)
+                return;
+            
+            transporter.sendMail(clientMatchedMail(contractor, client, job), (err) => {
+                if(err)
+                    Log.error(err);
+            });
 
             await AwaitingClient.findByIdAndDelete(awaitingClient._id);
 

@@ -1,4 +1,4 @@
-import { APIUser } from "./userTypes";
+import { APIUser } from "../user/types";
 
 export type ContractorObject = {
     id: number
