@@ -8,6 +8,8 @@ import { getClientById, getMinimumClientUpdate, updateClient } from "../client/c
 import AwaitingClient from "../../../models/clientAwaiting";
 import { getContractorById, setLookingForJob } from "../contractor/contractor";
 import { queueFirstLessonComplete } from "../../../mail/firstLesson";
+import tutorMatchedMail from "../../../mail/tutorMatched";
+import { transporter } from "../../../mail/mail";
 
 const blairSchools = ["argyle", "eastern", "loiederman", "newport mill", "odessa shannon", "parkland", "silver spring international", "takoma park", "blair"];
 const churchillSchools = ["churchill", "cabin john", "hoover", "bells mill", "seven locks", "stone mill", "cold spring", "potomac", "beverly farms", "wayside"];
@@ -180,6 +182,11 @@ addTCListener("ADDED_CONTRACTOR_TO_SERVICE", async (event: TCEvent<any, JobObjec
                 return Log.debug(`contractor is null \n ${job.conjobs[i]}`);
 
             await setLookingForJob(contractor, false);
+            
+            transporter.sendMail(tutorMatchedMail(contractor, client, job), (err) => {
+                if(err)
+                    Log.error(err);
+            });
 
             try{
                 if(client) {

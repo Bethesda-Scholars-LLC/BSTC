@@ -99,6 +99,10 @@ export const capitalize = (str: string): string => {
     return str.charAt(0).toUpperCase()+str.substring(1);
 };
 
+export const calcStripeFee = (lessonPrice: number): string => {
+    return (((lessonPrice + 0.3)/0.961) - lessonPrice).toFixed(2);
+};
+
 export const randomChoice = <T>(arr: T[]): T => {
     return arr[Math.floor(Math.random()*arr.length)];
 };
