@@ -1,7 +1,12 @@
 import axios from "axios";
-import { getContractorById, setLookingForJob } from "./integration/tc models/contractor/contractor";
+import { getContractorById, setLookingForJob, getRandomContractor } from "./integration/tc models/contractor/contractor";
 import { ContractorObject } from "./integration/tc models/contractor/types";
 import { Log, apiHeaders, apiUrl, getAttrByMachineName, stallFor } from "./util";
+import { getRandomClient } from "./integration/tc models/client/client";
+import { getRandomService } from "./integration/tc models/service/service";
+import clientMatchedMail from "./mail/clientMatched";
+import { transporter } from "./mail/mail";
+
 
 const getContractors = async (page?: number): Promise<ContractorObject | null> => {
     try {
@@ -41,3 +46,18 @@ const _editAllContractors = async () => {
         Log.error("Error: ", error);
     }
 };
+
+const _testClientMatchedMail = async () => {
+    const tutor = await getRandomContractor();
+    const client = await getRandomClient();
+    const service = await getRandomService();
+
+    if(!tutor || !client || !service)
+        return Log.debug("One is null");
+
+    transporter.sendMail( clientMatchedMail(tutor, client, service), (err) => {
+        if(err)
+            Log.error(err);
+    });
+};
+

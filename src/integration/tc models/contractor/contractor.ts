@@ -1,14 +1,16 @@
 
 import axios from "axios";
-import { TCEvent } from "../../../types";
-import { Log, apiHeaders, capitalize, apiUrl, getAttrByMachineName } from "../../../util";
+import { ManyResponse, TCEvent } from "../../../types";
+import { Log, apiHeaders, capitalize, apiUrl, getAttrByMachineName, randomChoice } from "../../../util";
 import { ContractorObject, UpdateContractorPayload } from "./types";
 import { addTCListener } from "../../hook";
 import AwaitingClient, { popTutorFromCA } from "../../../models/clientAwaiting";
 import { transporter } from "../../../mail/mail";
 import clientMatchedMail from "../../../mail/clientMatched";
-import { getClientById } from "../client/client";
+import { getClientById, getMinimumClientUpdate, updateClient } from "../client/client";
 import { getServiceById } from "../service/service";
+import { DumbUser } from "../user/types";
+import { PipelineStage } from "../service/types";
 
 export const getContractorById = async (id: number): Promise<ContractorObject | null> => {
     try {
@@ -31,6 +33,20 @@ const updateContractor = async (data: UpdateContractorPayload) => {
     } catch(e) {
         Log.error(e);
     }
+};
+
+export const getRandomContractor = async (): Promise<ContractorObject | null> => {
+    try{
+        const services = (await axios(apiUrl("/contractors"), { headers: apiHeaders })).data as ManyResponse<DumbUser>;
+        
+        if(services.count === 0)
+            return null;
+
+        return await getContractorById(randomChoice(services.results).id);
+    } catch (e) {
+        Log.debug(e);
+    }
+    return null;
 };
 
 const getDefaultContractorUpdate = (tutor: ContractorObject): UpdateContractorPayload => {
@@ -101,6 +117,12 @@ addTCListener("EDITED_AVAILABILITY", async (event: TCEvent<any, ContractorObject
             await AwaitingClient.findByIdAndDelete(awaitingClient._id);
 
             // Move client down pipeline after sending email
+
+            
+            await updateClient({
+                ...getMinimumClientUpdate(client),
+                pipeline_stage: PipelineStage.MatchedNotBooked
+            });
 
             continue;
         }

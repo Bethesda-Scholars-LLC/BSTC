@@ -7,11 +7,11 @@ import { queueEmail } from "./queueMail";
 import ReactDOMServer from "react-dom/server";
 import React from "react";
 import { ClientObject } from "../integration/tc models/client/types";
-import { getUserFirstName } from "../integration/tc models/user/user";
+import { cleanPhoneNumber, getUserFirstName } from "../integration/tc models/user/user";
 
 export const FirstLesson = (props: {job: JobObject, tutor: ContractorObject, client: ClientObject}) => {
     const tutorFirstName = props.job.conjobs[0].name.split(" ")[0];
-    const tutorPhoneNumber = props.tutor.user.mobile;
+    const tutorPhoneNumber = cleanPhoneNumber(props.tutor.user.mobile);
     const tutorEmailAddress = props.tutor.user.email;
     const userFirstName = getUserFirstName(props.client.user);
     const pronouns = getTutorPronouns(props.tutor);
@@ -33,7 +33,7 @@ export const FirstLesson = (props: {job: JobObject, tutor: ContractorObject, cli
         <br/>
         --
         <br/>
-        <b>{process.env.EMAIL_FROM}</b>
+        <b>{process.env.PERSONAL_EMAIL_FROM}</b>
         <br/>
         {process.env.SIGNATURE_DESCRIPTION}
         <br/>
@@ -49,7 +49,7 @@ export const getTutorPronouns = (tutor: ContractorObject): {
     pronouns: [string, string],
     possesive: string
 } => {
-    const tutorGender = getAttrByMachineName("contractor_gender", tutor.extra_attrs)?.value.toLowerCase() ?? "";
+    const tutorGender = getAttrByMachineName("contractor_gender", tutor.extra_attrs)?.value.toLowerCase().trim() ?? "";
     if(tutorGender === "male")
         return {
             pronouns: ["he", "him"],
@@ -83,11 +83,11 @@ export const queueFirstLessonComplete = async (job: JobObject) => {
     const userEmail = client.user.email;
 
     queueEmail((Date.now() + (PROD ? day : 10000)), {
-        from: `"${process.env.EMAIL_FROM}" <${process.env.EMAIL_ADDRESS}>`, // eslint-disable-line
+        from: `"${process.env.PERSONAL_EMAIL_FROM}" <${process.env.PERSONAL_EMAIL_ADDRESS}>`, // eslint-disable-line
         to: userEmail,
         cc: "services@bethesdascholars.com",
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        bcc: process.env.EMAIL_ADDRESS!,
+        bcc: process.env.PERSONAL_EMAIL_ADDRESS!,
         subject: `Lesson with ${tutorFirstName}`,
         html: ReactDOMServer.renderToString(<FirstLesson job={job} client={client} tutor={tutor}/>)
         /*
@@ -104,7 +104,7 @@ export const queueFirstLessonComplete = async (job: JobObject) => {
                     <br>
                     --
                     <br>
-                    <b>${process.env.EMAIL_FROM}</b>
+                    <b>${process.env.PERSONAL_EMAIL_FROM}</b>
                     <br>
                     ${process.env.SIGNATURE_DESCRIPTION}
                     <br>

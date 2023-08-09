@@ -8,14 +8,17 @@ dotenv.config();
  */
 const requiredEnvs = [
     "API_KEY",
-    "EMAIL_FROM",
-    "EMAIL_ADDRESS",
+    "PERSONAL_EMAIL_FROM",
+    "PERSONAL_EMAIL_ADDRESS",
+    "BUSINESS_EMAIL_ADDRESS",
+    "BUSINESS_EMAIL_FROM",
     "EMAIL_PASSWORD",
     "SIGNATURE_DESCRIPTION",
     "DB_URI",
     "DB_TEST_NAME",
     "DB_NAME"
 ];
+
 const envKeys = Object.keys(process.env);
 export const PROD = ["production", "prod"].includes(process.env.NODE_ENV?.toLowerCase() ?? ""); // eslint-disable-line
 
