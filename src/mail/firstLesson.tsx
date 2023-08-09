@@ -24,7 +24,7 @@ export const FirstLesson = (props: {job: JobObject, tutor: ContractorObject, cli
         {(tutorPhoneNumber || tutorEmailAddress) && <>
             <br/>
             <br/>
-            If you have not got got in contact with {tutorFirstName}, {pronouns.possesive} {tutorPhoneNumber ? ` phone number is ${tutorPhoneNumber}` : ` email address is ${tutorEmailAddress}`}.
+            If you have not got in contact with {tutorFirstName}, {pronouns.possesive} {tutorPhoneNumber ? ` phone number is ${tutorPhoneNumber}` : ` email address is ${tutorEmailAddress}`}.
             It might make scheduling easier, just remember to book the lesson after a time is coordinated.
         </>}
         <br/>
@@ -85,9 +85,7 @@ export const queueFirstLessonComplete = async (job: JobObject) => {
     queueEmail((Date.now() + (PROD ? day : 10000)), {
         from: `"${process.env.PERSONAL_EMAIL_FROM}" <${process.env.PERSONAL_EMAIL_ADDRESS}>`, // eslint-disable-line
         to: userEmail,
-        cc: "services@bethesdascholars.com",
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        bcc: process.env.PERSONAL_EMAIL_ADDRESS!,
+        cc: process.env.BUSINESS_EMAIL_ADDRESS,
         subject: `Lesson with ${tutorFirstName}`,
         html: ReactDOMServer.renderToString(<FirstLesson job={job} client={client} tutor={tutor}/>)
         /*

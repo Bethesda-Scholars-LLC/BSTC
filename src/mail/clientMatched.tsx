@@ -21,6 +21,7 @@ export const clientMatchedMail = (tutor: ContractorObject, client: ClientObject,
 const ClientMatched = (props: {tutor: ContractorObject, client: ClientObject, job: JobObject}) => {
     const tutorPronouns = getTutorPronouns(props.tutor);
     const tutorName = getUserFirstName(props.tutor.user);
+    const studentName = props.job.rcrs[0].recipient_name.split(" ")[0];
     const tutorGrade = getAttrByMachineName("grade_1", props.tutor.extra_attrs)?.value;
     const tutorSchool = getAttrByMachineName("school_1", props.tutor.extra_attrs)?.value;
     const stripeFee = calcStripeFee(props.job.dft_charge_rate);
@@ -28,7 +29,7 @@ const ClientMatched = (props: {tutor: ContractorObject, client: ClientObject, jo
         Hi {getUserFirstName(props.client.user)},
         <br/>
         <br/>
-        We have found a tutor for your child! {capitalize(tutorPronouns.possesive)} name is {getUserFullName(props.tutor.user)}.
+        We have found a tutor for {studentName}! {capitalize(tutorPronouns.possesive)} name is {getUserFullName(props.tutor.user)}.
          Here are some brief details about {tutorPronouns.pronouns[1]} - you can view {tutorPronouns.possesive} full bio when booking a lesson.
         <ul style={{listStyleType: "none", marginLeft: "15px", padding: "0"}}>
             {tutorGrade && <li><b>Tutor Grade: </b>{tutorGrade}</li>}
