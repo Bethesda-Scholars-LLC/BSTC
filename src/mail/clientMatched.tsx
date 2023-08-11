@@ -11,7 +11,6 @@ import { capitalize, getAttrByMachineName, calcStripeFee, PROD } from "../util";
 export const clientMatchedMail = (tutor: ContractorObject, client: ClientObject, job: JobObject): MailOptions => {
     return {
         from: `"Bethesda Scholars" <${process.env.BUSINESS_EMAIL_ADDRESS}>`, // eslint-disable-line
-        bcc: "colinhoscheit@gmail.com",
         to: PROD ? client.user.email : (process.env.TEST_EMAIL_ADDRESS ?? client.user.email),
         cc: process.env.BUSINESS_EMAIL_ADDRESS,
         subject: `Tutor Found for ${job.rcrs[0].recipient_name.split(" ")[0]}`,
