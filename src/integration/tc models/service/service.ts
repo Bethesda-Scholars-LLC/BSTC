@@ -10,6 +10,7 @@ import { getContractorById, setLookingForJob } from "../contractor/contractor";
 import { queueFirstLessonComplete } from "../../../mail/firstLesson";
 import tutorMatchedMail from "../../../mail/tutorMatched";
 import { transporter } from "../../../mail/mail";
+import { LessonObject } from "../lesson/types";
 
 const blairSchools = ["argyle", "eastern", "loiederman", "newport mill", "odessa shannon", "parkland", "silver spring international", "takoma park", "blair"];
 const churchillSchools = ["churchill", "cabin john", "hoover", "bells mill", "seven locks", "stone mill", "cold spring", "potomac", "beverly farms", "wayside"];
@@ -240,26 +241,42 @@ addTCListener("ADDED_CONTRACTOR_TO_SERVICE", async (event: TCEvent<any, JobObjec
     });
 });
 
+const onLessonComplete = (job: JobObject, client_id: number)=>{
+    getClientById(client_id).then(async client => {
+        if(!client)
+            return;
+        
+        // matched and booked stage
+        if (client.status === "prospect" && client.pipeline_stage.id === PipelineStage.MatchedAndBooked) {
+            for (let i = 0; i < job.labels.length; i++) {
+                // first lesson is complete
+                if (job.labels[i].id === 169932) {
+                    await queueFirstLessonComplete(job);
+                    const updatePayload = getMinimumClientUpdate(client);
+                    updatePayload.pipeline_stage = PipelineStage.FeedbackRequested;
+                    await updateClient(updatePayload);
+                    return;
+                }
+            }
+        }
+    });
+};
+
 addTCListener("ADDED_A_LABEL_TO_A_SERVICE", async (event: TCEvent<any, JobObject>) => {
     const job = event.subject;
     if(job.rcrs.length > 0){
-        getClientById(job.rcrs[0].paying_client).then(async client => {
-            if(!client)
-                return;
-            
-            // matched and booked stage
-            if (client.status === "prospect" && client.pipeline_stage.id === PipelineStage.MatchedAndBooked) {
-                for (let i = 0; i < job.labels.length; i++) {
-                    // first lesson is complete
-                    if (job.labels[i].id === 169932) {
-                        await queueFirstLessonComplete(job);
-                        const updatePayload = getMinimumClientUpdate(client);
-                        updatePayload.pipeline_stage = PipelineStage.FeedbackRequested;
-                        await updateClient(updatePayload);
-                        return;
-                    }
-                }
-            }
-        });
+        onLessonComplete(job, job.rcrs[0].paying_client);
+    }
+});
+
+addTCListener("MARKED_AN_APPOINTMENT_AS_COMPLETE", async (event: TCEvent<any, LessonObject>) => {
+    const lesson = event.subject;
+    if(lesson.rcras.length > 0){
+        const job = await getServiceById(lesson.service.id);
+
+        if(!job)
+            return;
+
+        onLessonComplete(job, job.rcrs[0].paying_client);
     }
 });

@@ -6,12 +6,13 @@ import { ClientObject } from "../integration/tc models/client/types";
 import { cleanPhoneNumber, getUserFirstName, getUserFullName } from "../integration/tc models/user/user";
 import { JobObject } from "../integration/tc models/service/types";
 import { getTutorPronouns } from "./firstLesson";
-import { capitalize, getAttrByMachineName, calcStripeFee } from "../util";
+import { capitalize, getAttrByMachineName, calcStripeFee, PROD } from "../util";
 
 export const clientMatchedMail = (tutor: ContractorObject, client: ClientObject, job: JobObject): MailOptions => {
     return {
         from: `"Bethesda Scholars" <${process.env.BUSINESS_EMAIL_ADDRESS}>`, // eslint-disable-line
-        to: client.user.email,
+        bcc: "colinhoscheit@gmail.com",
+        to: PROD ? client.user.email : (process.env.TEST_EMAIL_ADDRESS ?? client.user.email),
         cc: process.env.BUSINESS_EMAIL_ADDRESS,
         subject: `Tutor Found for ${job.rcrs[0].recipient_name.split(" ")[0]}`,
         html: ReactDOMServer.renderToString(<ClientMatched tutor={tutor} client={client} job={job}/>)
@@ -48,7 +49,7 @@ const ClientMatched = (props: {tutor: ContractorObject, client: ClientObject, jo
         <b> Make sure to book every coordinated lesson with {tutorName} so we can pay {tutorPronouns.pronouns[1]} accordingly.</b>
         <br/>
         <br/>
-        After the lesson, you will recieve a payment link to enter your card details into our system, and then you will be charged automatically.
+        After the lesson, you will recieve a payment link to enter your card details into our system, and then you will be charged automatically.&nbsp;
         <b>You will be charged ${props.job.dft_charge_rate} per hour.</b> Please note that there is a ${stripeFee} Stripe processing fee per hour per lesson.
         <br/>
         <br/>

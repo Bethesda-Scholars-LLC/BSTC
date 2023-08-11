@@ -1,3 +1,14 @@
+export type Location = {
+    id: number,
+    name: string,
+    description: string,
+    can_conflict: boolean,
+    role: number,
+    latitude: string,
+    longitude: string,
+    address: string
+}
+
 export type JobObject = {
     id: number,
     allow_proposed_rates: boolean,
@@ -18,16 +29,7 @@ export type JobObject = {
     dft_charge_rate: number,
     dft_contractor_permissions: string,
     dft_contractor_rate: number,
-    dft_location: {
-        id: number,
-        name: string,
-        description: string,
-        can_conflict: boolean,
-        role: number,
-        latitude: string,
-        longitude: string,
-        address: string
-    },
+    dft_location: Location,
     dft_max_srs: integer,
     extra_attrs: any,
     extra_fee_per_apt: string,

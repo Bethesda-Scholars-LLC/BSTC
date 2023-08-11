@@ -31,8 +31,6 @@ export const FirstLesson = (props: {job: JobObject, tutor: ContractorObject, cli
         <br/>
         Thanks,
         <br/>
-        --
-        <br/>
         <b>{process.env.PERSONAL_EMAIL_FROM}</b>
         <br/>
         {process.env.SIGNATURE_DESCRIPTION}
@@ -84,7 +82,7 @@ export const queueFirstLessonComplete = async (job: JobObject) => {
 
     queueEmail((Date.now() + (PROD ? day : 10000)), {
         from: `"${process.env.PERSONAL_EMAIL_FROM}" <${process.env.PERSONAL_EMAIL_ADDRESS}>`, // eslint-disable-line
-        to: userEmail,
+        to: PROD ? userEmail : (process.env.TEST_EMAIL_ADDRESS ?? userEmail),
         cc: process.env.BUSINESS_EMAIL_ADDRESS,
         subject: `Lesson with ${tutorFirstName}`,
         html: ReactDOMServer.renderToString(<FirstLesson job={job} client={client} tutor={tutor}/>)

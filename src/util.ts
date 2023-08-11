@@ -8,15 +8,15 @@ dotenv.config();
  */
 const requiredEnvs = [
     "API_KEY",
-    "PERSONAL_EMAIL_FROM",
+    "EMAIL_PASSWORD",
     "PERSONAL_EMAIL_ADDRESS",
+    "PERSONAL_EMAIL_FROM",
     "BUSINESS_EMAIL_ADDRESS",
     "BUSINESS_EMAIL_FROM",
-    "EMAIL_PASSWORD",
     "SIGNATURE_DESCRIPTION",
-    "DB_URI",
+    "DB_NAME",
     "DB_TEST_NAME",
-    "DB_NAME"
+    "DB_URI",
 ];
 
 const envKeys = Object.keys(process.env);
