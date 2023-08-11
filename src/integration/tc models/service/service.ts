@@ -16,7 +16,7 @@ const blairSchools = ["argyle", "eastern", "loiederman", "newport mill", "odessa
 const churchillSchools = ["churchill", "cabin john", "hoover", "bells mill", "seven locks", "stone mill", "cold spring", "potomac", "beverly farms", "wayside"];
 const _specialContractors = [1733309, 1644291]; // add the rest
 
-const updateServiceById = async (id: number, data: UpdateServicePayload) => {
+export const updateServiceById = async (id: number, data: UpdateServicePayload) => {
     try{
         await axios(apiUrl(`/services/${id}/`), {
             method: "PUT",
@@ -37,11 +37,19 @@ export const getServiceById = async (id: number): Promise<JobObject | null> => {
     return null;
 };
 
+export const getManyServices = async (page?: number) : Promise<ManyResponse<DumbJob> | null> => {
+    try{
+        return (await axios(apiUrl(`/services?page=${Math.max(page ?? 1, 1)}`), { headers: apiHeaders })).data as ManyResponse<DumbJob>;
+    } catch (e) {
+        return null;
+    }
+};
+
 export const getRandomService = async (): Promise<JobObject | null> => {
     try{
-        const services = (await axios(apiUrl("/services"), { headers: apiHeaders })).data as ManyResponse<DumbJob>;
+        const services = await getManyServices();
         
-        if(services.count === 0)
+        if(!services || services.count === 0)
             return null;
 
         return await getServiceById(randomChoice(services.results).id);
@@ -51,11 +59,11 @@ export const getRandomService = async (): Promise<JobObject | null> => {
     return null;
 };
 
-const getMinimumJobUpdate = (job: JobObject): UpdateServicePayload => {
+export const getMinimumJobUpdate = (job: JobObject | DumbJob): UpdateServicePayload => {
     return {
         name: job.name,
-        dft_charge_rate: job.dft_charge_rate,
-        dft_contractor_rate: job.dft_contractor_rate,
+        dft_charge_rate: job.dft_charge_rate as any,
+        dft_contractor_rate: job.dft_contractor_rate as any,
     };
 };
 
