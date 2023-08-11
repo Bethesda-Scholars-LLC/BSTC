@@ -49,7 +49,7 @@ const ClientMatched = (props: {tutor: ContractorObject, client: ClientObject, jo
         <b> Make sure to book every coordinated lesson with {tutorName} so we can pay {tutorPronouns.pronouns[1]} accordingly.</b>
         <br/>
         <br/>
-        After the lesson, you will recieve a payment link to enter your card details into our system, and then you will be charged automatically.&nbsp;
+        After the lesson, you will receive a payment link to enter your card details into our system, and then you will be charged automatically.&nbsp;
         <b>You will be charged ${props.job.dft_charge_rate} per hour.</b> Please note that there is a ${stripeFee} Stripe processing fee per hour per lesson.
         <br/>
         <br/>
