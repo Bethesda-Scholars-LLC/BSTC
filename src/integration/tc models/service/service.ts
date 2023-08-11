@@ -280,3 +280,12 @@ addTCListener("MARKED_AN_APPOINTMENT_AS_COMPLETE", async (event: TCEvent<any, Le
         onLessonComplete(job, job.rcrs[0].paying_client);
     }
 });
+
+addTCListener("APPLIED_FOR_SERVICE", async (event: TCEvent<any, any>) => {
+    const contractor = await getContractorById(event.actor.id);
+
+    if(!contractor)
+        return;
+
+    setLookingForJob(contractor, true);
+});

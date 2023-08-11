@@ -6,6 +6,17 @@ Your project must have a `.env` with your integration secret key in the `API_KEY
 An example `.env` file would be:
 ```dotenv
 API_KEY=738f2932aaba69529d1ba1c16f683c212c7178ea
+EMAIL_PASSWORD=my_email_password
+PERSONAL_EMAIL_ADDRESS=email@gmail.com
+PERSONAL_EMAIL_FROM=Me
+BUSINESS_EMAIL_ADDRESS=my@business.com
+BUSINESS_EMAIL_FROM=My Business
+TEST_EMAIL_ADDRESS=test@test.com
+SIGNATURE_DESCRIPTION=Co-Founder and CEO at My Business Inc.
+
+DB_NAME=my_db
+DB_TEST_NAME=test
+DB_URI=mongodb+srv://joe:momma@172.0.0.1/
 ```
 
 ## Development
