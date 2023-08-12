@@ -87,15 +87,3 @@ export type UpdateServicePayload = {
     conjobs?: any[]
 };
 
-export const enum PipelineStage {
-    NewClient=35326,
-    MatchedNotBooked=47188,
-    AvailabilityNotBooked=37478,
-    MatchedAndBooked=35328,
-    FeedbackRequested=47039
-}
-
-export const enum SessionLocation {
-    InPerson=107916,
-    Online = 106892
-}

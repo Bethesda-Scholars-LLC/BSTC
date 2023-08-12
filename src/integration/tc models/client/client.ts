@@ -5,6 +5,12 @@ import { ClientObject, UpdateClientPayload } from "./types";
 import { addTCListener } from "../../hook";
 import { DumbUser } from "../user/types";
 
+export enum ClientManager {
+    Mike=2182255,
+    Sophie=2255450,
+    Pavani=2255169
+}
+
 export const updateClient = async (data: UpdateClientPayload) => {
     try {
         await axios(apiUrl("/clients/"), {

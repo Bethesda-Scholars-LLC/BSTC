@@ -7,13 +7,11 @@ import { addTCListener } from "../../hook";
 import AwaitingClient, { popTutorFromCA } from "../../../models/clientAwaiting";
 import { transporter } from "../../../mail/mail";
 import clientMatchedMail from "../../../mail/clientMatched";
-import { getClientById, getMinimumClientUpdate, updateClient } from "../client/client";
-import { getServiceById } from "../service/service";
+import { ClientManager, getClientById, getMinimumClientUpdate, updateClient } from "../client/client";
+import { PipelineStage, getServiceById } from "../service/service";
 import { DumbUser } from "../user/types";
-import { PipelineStage } from "../service/types";
-import { createAdHocCharge } from "../ad hoc/adHoc";
-import { getUserFirstName, getUserFullName } from "../user/user";
-import { ChargeCat } from "../ad hoc/types";
+import { ChargeCat, createAdHocCharge } from "../ad hoc/adHoc";
+import { getUserFullName } from "../user/user";
 
 export const getContractorById = async (id: number): Promise<ContractorObject | null> => {
     try {
@@ -150,7 +148,7 @@ addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<any, Contractor
         await setLookingForJob(contractor, true);
         await updateContractorDetails(contractor);
         const referrerId = parseInt(getAttrByMachineName("referral", contractor.extra_attrs)?.value);
-        if(!referrerId || isNaN(referrerId))
+        if(!referrerId || isNaN(referrerId) || Object.values(ClientManager).includes(referrerId))
             return;
 
         createAdHocCharge({

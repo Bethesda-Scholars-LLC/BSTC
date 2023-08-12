@@ -1,10 +1,10 @@
 import axios from "axios";
-import { DumbJob, JobObject, PipelineStage, SessionLocation, UpdateServicePayload } from "./types";
+import { DumbJob, JobObject, UpdateServicePayload } from "./types";
 import { Log, apiHeaders, apiUrl, capitalize, getAttrByMachineName, randomChoice } from "../../../util";
 import { ManyResponse, TCEvent } from "../../../types";
-import { ClientManager, ClientObject } from "../client/types";
+import { ClientObject } from "../client/types";
 import { addTCListener } from "../../hook";
-import { getClientById, getMinimumClientUpdate, updateClient } from "../client/client";
+import { ClientManager, getClientById, getMinimumClientUpdate, updateClient } from "../client/client";
 import AwaitingClient from "../../../models/clientAwaiting";
 import { getContractorById, setLookingForJob } from "../contractor/contractor";
 import { queueFirstLessonComplete } from "../../../mail/firstLesson";
@@ -15,6 +15,19 @@ import { LessonObject } from "../lesson/types";
 const blairSchools = ["argyle", "eastern", "loiederman", "newport mill", "odessa shannon", "parkland", "silver spring international", "takoma park", "blair"];
 const churchillSchools = ["churchill", "cabin john", "hoover", "bells mill", "seven locks", "stone mill", "cold spring", "potomac", "beverly farms", "wayside"];
 const _specialContractors = [1733309, 1644291]; // add the rest
+
+export const enum PipelineStage {
+    NewClient=35326,
+    MatchedNotBooked=47188,
+    AvailabilityNotBooked=37478,
+    MatchedAndBooked=35328,
+    FeedbackRequested=47039
+}
+
+export const enum SessionLocation {
+    InPerson=107916,
+    Online = 106892
+}
 
 export const updateServiceById = async (id: number, data: UpdateServicePayload) => {
     try{

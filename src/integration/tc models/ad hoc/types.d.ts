@@ -78,8 +78,3 @@ export type CreateAdHocChargePayload = {
     charge_client: number
 });
 
-export const enum ChargeCat {
-    Referral=78484,
-    Screening=77816,
-    Expense=62144
-}
