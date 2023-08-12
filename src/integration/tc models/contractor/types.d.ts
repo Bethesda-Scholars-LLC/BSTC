@@ -50,6 +50,14 @@ export type UpdateContractorPayload = {
         street?: string,
         postcode?: string,
         town?: string
+        first_name?: string
+        phone?: string
+        state?: string
+        country?: number
+        latitude?: number
+        longitude?: number
+        date_created?: string
+        timezone?: string
     },
     extra_attrs?: object
 };

@@ -11,6 +11,9 @@ import { getClientById, getMinimumClientUpdate, updateClient } from "../client/c
 import { getServiceById } from "../service/service";
 import { DumbUser } from "../user/types";
 import { PipelineStage } from "../service/types";
+import { createAdHocCharge } from "../ad hoc/adHoc";
+import { getUserFirstName, getUserFullName } from "../user/user";
+import { ChargeCat } from "../ad hoc/types";
 
 export const getContractorById = async (id: number): Promise<ContractorObject | null> => {
     try {
@@ -25,7 +28,7 @@ export const getContractorById = async (id: number): Promise<ContractorObject | 
 
 const updateContractor = async (data: UpdateContractorPayload) => {
     try {
-        await axios(apiUrl("/contractors/"), {
+        return await axios(apiUrl("/contractors/"), {
             method: "POST",
             headers: apiHeaders,
             data
@@ -141,7 +144,18 @@ addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<any, Contractor
     if (contractor.status === "approved") {
         await setLookingForJob(contractor, true);
         await updateContractorDetails(contractor);
+        const referrerId = parseInt(getAttrByMachineName("referral", contractor.extra_attrs)?.value);
+        if(!referrerId || isNaN(referrerId))
+            return;
+
+        createAdHocCharge({
+            description: `Thank you for referring ${getUserFullName(contractor.user)} to Bethesda Scholars!`,
+            date_occurred: new Date(Date.now()).toISOString().replace("T", " ").split(".")[0],
+            category: ChargeCat.Referral,
+            contractor: referrerId,
+            pay_contractor: 10.0
+        });
     }
 
-    return contractor;
+    return;
 });

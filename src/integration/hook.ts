@@ -2,6 +2,7 @@ import express from "express";
 import { Req, Res, TCEvent, TCEventListener } from "../types";
 import { Log } from "../util";
 import { createHmac } from "crypto";
+import "./tc models/ad hoc/adHoc";
 const hookRouter = express.Router();
 
 const listeners: {

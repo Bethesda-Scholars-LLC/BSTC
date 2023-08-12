@@ -2,7 +2,7 @@ import axios from "axios";
 import { getContractorById, setLookingForJob, getRandomContractor } from "./integration/tc models/contractor/contractor";
 import { ContractorObject } from "./integration/tc models/contractor/types";
 import { Log, apiHeaders, apiUrl, getAttrByMachineName, stallFor } from "./util";
-import { getMinimumClientUpdate, getRandomClient } from "./integration/tc models/client/client";
+import { getRandomClient } from "./integration/tc models/client/client";
 import { getManyServices, getMinimumJobUpdate, getRandomService, getServiceById, updateServiceById } from "./integration/tc models/service/service";
 import clientMatchedMail from "./mail/clientMatched";
 import { transporter } from "./mail/mail";
