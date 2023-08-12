@@ -19,7 +19,7 @@ mongoose.connect(DB_URI).then(() => { // eslint-disable-line
     Log.debug(`Connected to ${(PROD ? process.env.DB_NAME : process.env.DB_TEST_NAME)}`);
 }).catch(Log.error);
 
-(async () => {
+/* (async () => {
     transporter.sendMail(
         tutorMatchedMail((await getRandomContractor())!, await getRandomClient(), (await getRandomService())!), //eslint-disable-line
         (err) => {
@@ -27,7 +27,7 @@ mongoose.connect(DB_URI).then(() => { // eslint-disable-line
                 Log.error(err);
         }
     );
-})();
+})();*/
 
 
 const app = express();
