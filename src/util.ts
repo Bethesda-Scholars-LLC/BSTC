@@ -3,6 +3,19 @@ import fs from "fs";
 import { ExtraAttr } from "./types";
 dotenv.config();
 
+export namespace Log {
+    /* eslint-disable no-console */
+    export const error = (message?: any, ...optionalParams: any[]) => {
+        console.error(message, ...optionalParams);
+    };
+
+    export const debug = (message?: any, ...optionalParams: any[]) => {
+        if(!PROD)
+            console.debug(message, ...optionalParams);
+    };
+    /* eslint-enable */
+}
+
 /**
  * @description required fields in the .env
  */
@@ -112,15 +125,3 @@ export const randomChoice = <T>(arr: T[]): T => {
     return arr[Math.floor(Math.random()*arr.length)];
 };
 
-export namespace Log {
-    /* eslint-disable no-console */
-    export const error = (message?: any, ...optionalParams: any[]) => {
-        console.error(message, ...optionalParams);
-    };
-
-    export const debug = (message?: any, ...optionalParams: any[]) => {
-        if(!PROD)
-            console.debug(message, ...optionalParams);
-    };
-    /* eslint-enable */
-}

@@ -9,6 +9,7 @@ tutorAvailRouter.get("/", async (req: Req, res: Res) => {
     const tutorId = parseInt(req.query?.code as any);
     if(req.query?.code && !isNaN(tutorId)) {
         const contractor = await getContractorById(tutorId);
+
         if(!contractor)
             return res.redirect("https://google.com");
         

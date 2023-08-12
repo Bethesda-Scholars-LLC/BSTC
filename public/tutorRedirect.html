@@ -1,41 +1,41 @@
 <html>
-        <head>
-            <link href='https://fonts.googleapis.com/css?family=Inter' rel='stylesheet'/>
-            <style>
-                .pop-up-message {
-                    position: absolute;
-                    left: 50%;
-                    top: 50%;
-                    transform: translate(-50%, -50%);
-                    font-family: Inter;
-                    text-align: center;
-                    font-size: 30px;
-                    width: 100%;
-                }
-                .accidental{
-                    margin-top: 30px;
-                }
-            </style>
-            <script defer>
-                setInterval(()=>{
-                    const countdown = document.getElementById("countdown");
-                    if(parseInt(countdown.innerText)-1 === 0)
-                        return window.location.href = "https://secure.tutorcruncher.com/";
-                    countdown.innerText = parseInt(countdown.innerText)-1;
-                }, 1000);
+    <head>
+        <link href='https://fonts.googleapis.com/css?family=Inter' rel='stylesheet'/>
+        <style>
+            .pop-up-message {
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%);
+                font-family: Inter;
+                text-align: center;
+                font-size: 30px;
+                width: 100%;
+            }
+            .accidental{
+                margin-top: 30px;
+            }
+        </style>
+        <script defer>
+            setInterval(()=>{
+                const countdown = document.getElementById("countdown");
+                if(parseInt(countdown.innerText)-1 === 0)
+                    return window.location.href = "https://secure.tutorcruncher.com/";
+                countdown.innerText = parseInt(countdown.innerText)-1;
+            }, 1000);
 
-                function cancelNotification() {
+            function cancelNotification() {
 
-                }
-            </script>
-        </head>
-        <body>
-            <div class="pop-up-message">
-                Thank you!
-                <br>
-                Your client is going to be notified!
-                <br>
-                You will get redirected in <span id="countdown">10</span>s
-            </div>
-        </body>
-    </html>
+            }
+        </script>
+    </head>
+    <body>
+        <div class="pop-up-message">
+            Thank you!
+            <br>
+            Your client is going to be notified!
+            <br>
+            You will get redirected in <span id="countdown">10</span>s
+        </div>
+    </body>
+</html>
