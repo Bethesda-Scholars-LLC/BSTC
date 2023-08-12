@@ -92,9 +92,8 @@ export const updateContractorDetails = async (contractor: ContractorObject) => {
     await updateContractor(defaultTutor);
 };
 
-addTCListener("EDITED_AVAILABILITY", async (event: TCEvent<any, ContractorObject>) => {
-    const contractor = event.subject;
-
+export const popTutorFromCAs = async (contractor: ContractorObject) => {
+    
     const dbAwaitings = await AwaitingClient.find({
         tutor_ids: contractor.id
     });
@@ -131,7 +130,13 @@ addTCListener("EDITED_AVAILABILITY", async (event: TCEvent<any, ContractorObject
         }
         awaitingClient.save();
     }
+    //
+};
 
+addTCListener("EDITED_AVAILABILITY", async (event: TCEvent<any, ContractorObject>) => {
+    const contractor = event.subject;
+
+    await popTutorFromCAs(contractor);
 });
 
 addTCListener("EDITED_A_CONTRACTOR", async (event: TCEvent<any, ContractorObject>) => {
@@ -156,6 +161,4 @@ addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<any, Contractor
             pay_contractor: 10.0
         });
     }
-
-    return;
 });

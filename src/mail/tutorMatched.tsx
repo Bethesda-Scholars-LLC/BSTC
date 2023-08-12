@@ -31,8 +31,10 @@ const TutorMatched = (props: {tutor: ContractorObject, client: ClientObject | nu
         <ol style={smallIndent}>
             <li>
                 Please set your availability in the next 24 hours.&nbsp;
-                <b style={{backgroundColor: "yellow"}}>You must do this for your client to be notified that they have been matched with a tutor.</b>&nbsp;
-                If it is already set, reply to this email so we can notify your client.
+                <b style={{backgroundColor: "yellow"}}>You must do this for your client to be notified that they have been matched with a tutor.
+                If it is already set, please click <a href={
+                    `${PROD ? "https" : "http"}://${process.env.ORIGIN_URL}/tutoravailability?code=${props.tutor.id}`
+                }>here</a> so we can notify your client.</b>
                 <ol style={smallIndent} type="a">
                     <li>To set your availability, first log in <a href="secure.tutorcruncher.com/bethesda-scholars/login">here</a>.</li>
                     <li>Once logged in, click on the blue "Actions" button below your initials and select "Set availability."</li>

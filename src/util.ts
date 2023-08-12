@@ -13,7 +13,9 @@ const requiredEnvs = [
     "PERSONAL_EMAIL_FROM",
     "BUSINESS_EMAIL_ADDRESS",
     "BUSINESS_EMAIL_FROM",
+    "ORIGIN_URL",
     "SIGNATURE_DESCRIPTION",
+
     "DB_NAME",
     "DB_TEST_NAME",
     "DB_URI",
