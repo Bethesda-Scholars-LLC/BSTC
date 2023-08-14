@@ -1,7 +1,8 @@
 import express from "express";
-import { Req, Res } from "../types";
 import path from "path";
 import { getContractorById, popTutorFromCAs } from "../integration/tc models/contractor/contractor";
+import { Req, Res } from "../types";
+import { DIR_ROOT } from "../util";
 const tutorAvailRouter = express.Router();
 
 
@@ -18,7 +19,7 @@ tutorAvailRouter.get("/", async (req: Req, res: Res) => {
         return res.redirect("https://google.com");
     
 
-    res.sendFile(path.join( __dirname, "..", "..", "public", "tutorRedirect.html"));
+    res.sendFile(path.join(DIR_ROOT, "public", "tutorRedirect.html"));
 });
 
 export default tutorAvailRouter;

@@ -1,8 +1,8 @@
 import dotenv from "dotenv";
 import fs from "fs";
+import path from "path";
 import { ExtraAttr } from "./types";
 dotenv.config();
-
 
 export namespace Log {
     /* eslint-disable no-console */
@@ -37,6 +37,8 @@ const requiredEnvs = [
 
 const envKeys = Object.keys(process.env);
 export const PROD = ["production", "prod"].includes(process.env.NODE_ENV?.toLowerCase() ?? ""); // eslint-disable-line
+
+export const DIR_ROOT = path.join(__dirname, ".."); // eslint-disable-line
 
 if(requiredEnvs.reduce((prev, val) => {
         return prev || !envKeys.includes(val);

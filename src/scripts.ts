@@ -1,11 +1,11 @@
 import axios from "axios";
-import { getContractorById, setLookingForJob, getRandomContractor } from "./integration/tc models/contractor/contractor";
-import { ContractorObject } from "./integration/tc models/contractor/types";
-import { Log, apiHeaders, apiUrl, getAttrByMachineName, stallFor } from "./util";
 import { getRandomClient } from "./integration/tc models/client/client";
+import { getContractorById, getRandomContractor, setLookingForJob } from "./integration/tc models/contractor/contractor";
+import { ContractorObject } from "./integration/tc models/contractor/types";
 import { getManyServices, getMinimumJobUpdate, getRandomService, getServiceById, updateServiceById } from "./integration/tc models/service/service";
 import clientMatchedMail from "./mail/clientMatched";
 import { transporter } from "./mail/mail";
+import { Log, apiHeaders, apiUrl, getAttrByMachineName, stallFor } from "./util";
 
 
 const getContractors = async (page?: number): Promise<ContractorObject | null> => {
@@ -62,10 +62,6 @@ const _testClientMatchedMail = async () => {
 };
 
 const _changeDefaultServiceRate = async () => {
-    const service = await getRandomService();
-    if(!service)
-        return;
-
     for(let i = 1; i < 100_000; i++){
         const services = (await getManyServices(i));
         if(!services)
