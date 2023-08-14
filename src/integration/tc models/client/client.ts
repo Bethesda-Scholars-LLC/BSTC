@@ -64,7 +64,7 @@ export const moveToMatchedAndBooked = async (lesson: LessonObject) => {
     // client must be in matched not booked and the job must not have first lesson complete
     // deleted matched not booked check, only checks for prospect now
     const client = await getClientById(lesson.rcras[0].paying_client);
-    if (!client || client.status !== "prospect" || client.pipeline_stage.id === PipelineStage.MatchedNotBooked)
+    if (!client || client.status !== "prospect" || client.pipeline_stage.id === PipelineStage.MatchedAndBooked)
         return;
     
     const job = await getServiceById(lesson.service.id);
