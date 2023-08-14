@@ -29,6 +29,10 @@ export const enum SessionLocation {
     Online = 106892
 }
 
+export const enum Labels {
+    firstLessonComplete=169932
+}
+
 export const updateServiceById = async (id: number, data: UpdateServicePayload) => {
     try{
         await axios(apiUrl(`/services/${id}/`), {
@@ -271,7 +275,7 @@ const onLessonComplete = (job: JobObject, client_id: number)=>{
         if (client.status === "prospect" && client.pipeline_stage.id === PipelineStage.MatchedAndBooked) {
             for (let i = 0; i < job.labels.length; i++) {
                 // first lesson is complete
-                if (job.labels[i].id === 169932) {
+                if (job.labels[i].id === Labels.firstLessonComplete) {
                     await queueFirstLessonComplete(job);
                     const updatePayload = getMinimumClientUpdate(client);
                     updatePayload.pipeline_stage = PipelineStage.FeedbackRequested;

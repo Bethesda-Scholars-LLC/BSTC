@@ -16,7 +16,7 @@ export const FirstLesson = (props: {job: JobObject, tutor: ContractorObject, cli
     const userFirstName = getUserFirstName(props.client.user);
     const pronouns = getTutorPronouns(props.tutor);
 
-    return <p>
+    return <p style={{margin: 0}}>
         Hi {userFirstName},
         <br/>
         <br/>

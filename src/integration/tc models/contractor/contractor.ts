@@ -7,7 +7,7 @@ import { addTCListener } from "../../hook";
 import AwaitingClient, { popTutorFromCA } from "../../../models/clientAwaiting";
 import { transporter } from "../../../mail/mail";
 import clientMatchedMail from "../../../mail/clientMatched";
-import { ClientManager, getClientById, getMinimumClientUpdate, updateClient } from "../client/client";
+import { ClientManager, getClientById, getMinimumClientUpdate, moveToMatchedAndBooked, updateClient } from "../client/client";
 import { PipelineStage, getServiceById } from "../service/service";
 import { DumbUser } from "../user/types";
 import { ChargeCat, createAdHocCharge } from "../ad hoc/adHoc";
@@ -172,5 +172,12 @@ addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<any, Contractor
             contractor: referrerId,
             pay_contractor: 10.0
         });
+    }
+});
+
+addTCListener("CREATED_AN_APPOINTMENT", async (event: TCEvent<any, any>) => {
+    const lesson = event.subject;
+    if (lesson.rcras.length > 0) {
+        moveToMatchedAndBooked(lesson);
     }
 });

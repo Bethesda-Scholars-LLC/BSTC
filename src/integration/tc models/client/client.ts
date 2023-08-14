@@ -4,6 +4,8 @@ import { Log, apiHeaders, apiUrl, randomChoice } from "../../../util";
 import { ClientObject, UpdateClientPayload } from "./types";
 import { addTCListener } from "../../hook";
 import { DumbUser } from "../user/types";
+import { Labels, PipelineStage, getServiceById } from "../service/service";
+import { LessonObject } from "../lesson/types";
 
 export enum ClientManager {
     Mike=2182255,
@@ -58,7 +60,31 @@ export const getClientById = async (id: number): Promise<ClientObject | null> =>
     }
 };
 
-addTCListener("BOOKED_AN_APPOINTMENT", (event: TCEvent<any, any>) => {
-    Log.debug(event.actor);
-    Log.debug(event.subject);
+export const moveToMatchedAndBooked = async (lesson: LessonObject) => {
+    // client must be in matched not booked and the job must not have first lesson complete
+    const client = await getClientById(lesson.rcras[0].paying_client);
+    if (!client || client.status !== "prospect" || client.pipeline_stage.id !== PipelineStage.MatchedNotBooked)
+        return;
+    
+    const job = await getServiceById(lesson.service.id);
+    if (!job)
+        return;
+
+    for (let i = 0; i < job.labels.length; i++) {
+        if (job.labels[i] === Labels.firstLessonComplete) {
+            return;
+        }
+    }
+
+    await updateClient({
+        ...getMinimumClientUpdate(client),
+        pipeline_stage: PipelineStage.MatchedAndBooked
+    });
+};
+
+addTCListener("BOOKED_AN_APPOINTMENT", async (event: TCEvent<any, LessonObject>) => {
+    const lesson = event.subject;
+    if (lesson.rcras.length > 0) {
+        moveToMatchedAndBooked(lesson);
+    }
 });
