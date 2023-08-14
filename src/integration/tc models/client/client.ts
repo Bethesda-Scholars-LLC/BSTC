@@ -62,13 +62,17 @@ export const getClientById = async (id: number): Promise<ClientObject | null> =>
 
 export const moveToMatchedAndBooked = async (lesson: LessonObject) => {
     // client must be in matched not booked and the job must not have first lesson complete
+    // deleted matched not booked check, only checks for prospect now
     const client = await getClientById(lesson.rcras[0].paying_client);
-    if (!client || client.status !== "prospect" || client.pipeline_stage.id !== PipelineStage.MatchedNotBooked)
+    if (!client || client.status !== "prospect" || client.pipeline_stage.id === PipelineStage.MatchedNotBooked)
         return;
     
     const job = await getServiceById(lesson.service.id);
     if (!job)
         return;
+
+    // check job description for "Job created while booking a lesson through TutorCruncher”
+    // and notify if the case
 
     for (let i = 0; i < job.labels.length; i++) {
         if (job.labels[i] === Labels.firstLessonComplete) {
