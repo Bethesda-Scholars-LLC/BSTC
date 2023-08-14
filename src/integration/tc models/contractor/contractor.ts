@@ -1,7 +1,7 @@
 
 import axios from "axios";
 import { ManyResponse, TCEvent } from "../../../types";
-import { Log, apiHeaders, capitalize, apiUrl, getAttrByMachineName, randomChoice } from "../../../util";
+import { Log, apiHeaders, capitalize, apiUrl, getAttrByMachineName, randomChoice, PROD } from "../../../util";
 import { ContractorObject, UpdateContractorPayload } from "./types";
 import { addTCListener } from "../../hook";
 import AwaitingClient, { popTutorFromCA } from "../../../models/clientAwaiting";
@@ -12,6 +12,8 @@ import { PipelineStage, getServiceById } from "../service/service";
 import { DumbUser } from "../user/types";
 import { ChargeCat, createAdHocCharge } from "../ad hoc/adHoc";
 import { getUserFullName } from "../user/user";
+import { queueEmail } from "../../../mail/queueMail";
+import { tutorReferralMail } from "../../../mail/tutorReferral";
 
 export const getContractorById = async (id: number): Promise<ContractorObject | null> => {
     try {
@@ -67,7 +69,7 @@ export const setLookingForJob = async (contractor: ContractorObject, value: bool
     await updateContractor(defaultTutor);
 };
 
-export const updateContractorDetails = async (contractor: ContractorObject) => {
+export const getNewContractorDetails = (contractor: ContractorObject): UpdateContractorPayload => {
     const defaultTutor = getDefaultContractorUpdate(contractor);
     const phoneNumber = getAttrByMachineName("phone_number", contractor.extra_attrs);
     const address = getAttrByMachineName("home_street_address", contractor.extra_attrs);
@@ -87,7 +89,11 @@ export const updateContractorDetails = async (contractor: ContractorObject) => {
     if (school)
         defaultTutor.extra_attrs = { school_1: school.value.split(" ").map(capitalize).join(" ")};
 
-    await updateContractor(defaultTutor);
+    return defaultTutor;
+};
+
+export const updateContractorDetails = async (contractor: ContractorObject) => {
+    await updateContractor(getNewContractorDetails(contractor));
 };
 
 export const popTutorFromCAs = async (contractor: ContractorObject) => {
@@ -141,12 +147,20 @@ addTCListener("EDITED_A_CONTRACTOR", async (event: TCEvent<any, ContractorObject
     await updateContractorDetails(event.subject);
 });
 
+const day = 86400000;
 addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<any, ContractorObject>) => {
     const contractor = event.subject;
 
     if (contractor.status === "approved") {
-        await setLookingForJob(contractor, true);
-        await updateContractorDetails(contractor);
+        const toUpdate = getNewContractorDetails(contractor);
+        toUpdate.extra_attrs = {
+            ...toUpdate.extra_attrs,
+            looking_for_job : true
+        };
+        await updateContractor(toUpdate);
+
+        queueEmail(Date.now() + (PROD ? day*5 : 10000), tutorReferralMail(contractor));
+
         const referrerId = parseInt(getAttrByMachineName("referral", contractor.extra_attrs)?.value);
         if(!referrerId || isNaN(referrerId) || Object.values(ClientManager).includes(referrerId))
             return;

@@ -24,7 +24,7 @@ const getExpiredMail = async (): Promise<Aggregate<IScheduledMail[]> | null> => 
 
 
 export const queueEmail = async (timestamp: number, mailData: MailOptions) => {
-    Log.debug(`Sending in ${(Date.now()-timestamp)} milliseconds`);
+    Log.debug(`Sending in ${(timestamp-Date.now())/1000} seconds`);
     const release = await scheduledMailMutex.acquire();
     try {
         new ScheduleMail({

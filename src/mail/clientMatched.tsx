@@ -6,11 +6,11 @@ import { ClientObject } from "../integration/tc models/client/types";
 import { cleanPhoneNumber, getUserFirstName, getUserFullName } from "../integration/tc models/user/user";
 import { JobObject } from "../integration/tc models/service/types";
 import { getTutorPronouns } from "./firstLesson";
-import { capitalize, getAttrByMachineName, calcStripeFee, PROD } from "../util";
+import { capitalize, getAttrByMachineName, calcStripeFee, PROD, BUSINESS_EMAIL_FROM } from "../util";
 
 export const clientMatchedMail = (tutor: ContractorObject, client: ClientObject, job: JobObject): MailOptions => {
     return {
-        from: `"Bethesda Scholars" <${process.env.BUSINESS_EMAIL_ADDRESS}>`, // eslint-disable-line
+        from: BUSINESS_EMAIL_FROM, // eslint-disable-line
         to: PROD ? client.user.email : (process.env.TEST_EMAIL_ADDRESS ?? client.user.email),
         cc: process.env.BUSINESS_EMAIL_ADDRESS,
         subject: `Tutor Found for ${job.rcrs[0].recipient_name.split(" ")[0]}`,

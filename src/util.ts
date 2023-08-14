@@ -3,6 +3,7 @@ import fs from "fs";
 import { ExtraAttr } from "./types";
 dotenv.config();
 
+
 export namespace Log {
     /* eslint-disable no-console */
     export const error = (message?: any, ...optionalParams: any[]) => {
@@ -51,6 +52,8 @@ if(requiredEnvs.reduce((prev, val) => {
     }
     process.exit(-1);
 }
+
+export const BUSINESS_EMAIL_FROM = `"Bethesda Scholars" <${process.env.BUSINESS_EMAIL_ADDRESS}>`; // eslint-disable-line
 
 export const DB_URI = process.env.DB_URI! + (PROD ? process.env.DB_NAME! : process.env.DB_TEST_NAME); // eslint-disable-line
 

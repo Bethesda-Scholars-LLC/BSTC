@@ -5,11 +5,11 @@ import { ContractorObject } from "../integration/tc models/contractor/types";
 import { ClientObject } from "../integration/tc models/client/types";
 import { JobObject } from "../integration/tc models/service/types";
 import { cleanPhoneNumber, getUserFirstName, getUserFullName } from "../integration/tc models/user/user";
-import { PROD } from "../util";
+import { BUSINESS_EMAIL_FROM, PROD } from "../util";
 
 const tutorMatchedMail = (tutor: ContractorObject, client: ClientObject | null, job: JobObject): MailOptions => {
     return {
-        from: `"Bethesda Scholars" <${process.env.BUSINESS_EMAIL_ADDRESS}>`, // eslint-disable-line
+        from: BUSINESS_EMAIL_FROM, // eslint-disable-line
         to: PROD ? tutor.user.email : (process.env.TEST_EMAIL_ADDRESS ?? tutor.user.email),
         cc: process.env.BUSINESS_EMAIL_ADDRESS,
         subject: "You have been assigned to a client",
