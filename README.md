@@ -40,4 +40,6 @@ The MongoDB databased used in this integration is used for storing client who ar
  `MARKED_AN_APPOINTMENT_AS_COMPLETE` | Checks for first lesson complete and sends feedback email. Moves client down pipeline. |
 `EDITED_AVAILABILITY`           | Removes tutor/service from the database if they are stored there. Sends email to client with tutor details. |
 `APPLIED_FOR_SERVICE`           | Sets tutor `looking_for_job` field to true. |
+`BOOKED_AN_APPOINTMENT`         | Moves client to matched and booked pipeline if the client is in matched not booked and the job does not have first lesson complete label. |
+`CREATED_AN_APPOINTMENT`        | Moves client to matched and booked pipeline if the client is in matched not booked and the job does not have first lesson complete label. |
 
