@@ -22,6 +22,7 @@ const TutorMatched = (props: {tutor: ContractorObject, client: ClientObject | nu
     const smallIndent: CSSProperties = {
         paddingLeft: "10px"
     };
+    const location = props.job.dft_location?.name.includes("online") ? "online. Please send a Zoom link to your client before the lesson." : "at the client's home.";
     
     return <p style={{margin: 0}}>
         Hi {tutorName},
@@ -64,8 +65,9 @@ const TutorMatched = (props: {tutor: ContractorObject, client: ClientObject | nu
             Parent Email: {props.client?.user.email}
         </div>
         <br/>
+        Your lessons will take place {location}.
         <b style={{backgroundColor: "yellow"}}>
-            You can find more details about the location, frequency, and subject under the tab "My Jobs" on your account.
+            You can find more details about the address, frequency, and subject under the tab "My Jobs" on your account.
         </b> If a lesson lasts longer or shorter than one hour, before marking the lesson as complete, click on the blue "Actions" button, then select edit to change the length of the session.
         <br/>
         <br/>
