@@ -3,8 +3,10 @@ import { Schema, model, Types } from "mongoose";
 export interface IClientAwaiting {
     _id: Types.ObjectId
     client_id: number
+    client_name?: string
     job_id: number
     tutor_ids: number[]
+    tutor_names?: string[]
 }
 
 export const popTutorFromCA = <T>(cAwaiting: T, tId: number): T => {
@@ -17,6 +19,10 @@ const clientAwaitingSchema = new Schema<IClientAwaiting>({
         type: Number,
         required: true
     },
+    client_name: {
+        type: String,
+        required: false
+    },
     job_id: {
         type: Number,
         required: true
@@ -24,6 +30,10 @@ const clientAwaitingSchema = new Schema<IClientAwaiting>({
     tutor_ids: {
         type: [Number],
         required: true
+    },
+    tutor_names: {
+        type: [String],
+        required: false
     }
 });
 

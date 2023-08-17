@@ -11,6 +11,7 @@ import { queueFirstLessonComplete } from "../../../mail/firstLesson";
 import tutorMatchedMail from "../../../mail/tutorMatched";
 import { transporter } from "../../../mail/mail";
 import { LessonObject } from "../lesson/types";
+import { getUserFirstName, getUserFullName } from "../user/user";
 
 const blairSchools = ["argyle", "eastern", "loiederman", "newport mill", "odessa shannon", "parkland", "silver spring international", "takoma park", "blair"];
 const churchillSchools = ["churchill", "cabin john", "hoover", "bells mill", "seven locks", "stone mill", "cold spring", "potomac", "beverly farms", "wayside"];
@@ -231,8 +232,10 @@ addTCListener("ADDED_CONTRACTOR_TO_SERVICE", async (event: TCEvent<any, JobObjec
                         if(clientJobRelation === null) {
                             await new AwaitingClient({
                                 client_id: client.id,
+                                client_name: getUserFullName(client.user),
                                 job_id: job.id,
-                                tutor_ids: [contractor.id]
+                                tutor_ids: [contractor.id],
+                                tutor_names: [getUserFirstName(contractor.user)]
                             }).save();
                             // otherwise update current one
                         } else {
