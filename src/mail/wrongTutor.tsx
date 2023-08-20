@@ -1,6 +1,6 @@
 import { MailOptions } from "nodemailer/lib/sendmail-transport";
 import { ContractorObject } from "../integration/tc models/contractor/types";
-import { BUSINESS_EMAIL_FROM, PROD } from "../util";
+import { BUSINESS_EMAIL_FROM, Log, PROD } from "../util";
 import React from "react";
 import { getUserFirstName, getUserFullName } from "../integration/tc models/user/user";
 import ReactDOMServer from "react-dom/server";
@@ -8,6 +8,7 @@ import { JobObject } from "../integration/tc models/service/types";
 import { ClientObject } from "../integration/tc models/client/types";
 
 export const wrongTutorMail = (job: JobObject, client: ClientObject | null, contractor: ContractorObject | null): MailOptions => {
+    Log.debug("email should be sending");
     return {
         from: BUSINESS_EMAIL_FROM,
         to: PROD ? "services@bethesdascholars.com" : (process.env.TEST_EMAIL_ADDRESS ?? "services@bethesdascholars.com"),

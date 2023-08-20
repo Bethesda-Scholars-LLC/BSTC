@@ -90,11 +90,13 @@ addTCListener("BOOKED_AN_APPOINTMENT", async (event: TCEvent<any, LessonObject>)
     // when booking with random tutor, its possible that there is no job created yet, look into that
     if (!job)
         return;
-    
+
     // if booked with wrong tutor notify us and return
-    if (job.description.toLowerCase().includes("job created while booking a lesson through tutorcruncher")) {
+    if (job.description.toLowerCase().includes("job created while booking a lesson through tutorcruncher") &&
+        job.status === "pending") {
         for (let i = 0; i < job.labels.length; i++) {
             if (job.labels[i] === Labels.firstLessonComplete) {
+                Log.debug("first lesson complete");
                 return;
             }
         }
