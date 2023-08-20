@@ -1,13 +1,14 @@
+import React from "react";
+import ReactDOMServer from "react-dom/server";
 import { getClientById } from "../integration/tc models/client/client";
+import { ClientObject } from "../integration/tc models/client/types";
 import { getContractorById } from "../integration/tc models/contractor/contractor";
 import { ContractorObject } from "../integration/tc models/contractor/types";
 import { JobObject } from "../integration/tc models/service/types";
-import { PROD, getAttrByMachineName } from "../util";
-import { queueEmail } from "./queueMail";
-import ReactDOMServer from "react-dom/server";
-import React from "react";
-import { ClientObject } from "../integration/tc models/client/types";
 import { cleanPhoneNumber, getUserFirstName } from "../integration/tc models/user/user";
+import { PROD, getAttrByMachineName } from "../util";
+import { EmailTypes } from "./mail";
+import { queueEmail } from "./queueMail";
 
 export const FirstLesson = (props: {job: JobObject, tutor: ContractorObject, client: ClientObject}) => {
     const tutorFirstName = props.job.conjobs[0].name.split(" ")[0];
@@ -84,6 +85,7 @@ export const queueFirstLessonComplete = async (job: JobObject) => {
         from: `"${process.env.PERSONAL_EMAIL_FROM}" <${process.env.PERSONAL_EMAIL_ADDRESS}>`, // eslint-disable-line
         to: PROD ? userEmail : (process.env.TEST_EMAIL_ADDRESS ?? userEmail),
         cc: "services@bethesdascholars.com",
+        email_type: EmailTypes.Referral,
         subject: `Lesson with ${tutorFirstName}`,
         html: ReactDOMServer.renderToString(<FirstLesson job={job} client={client} tutor={tutor}/>)
         /*

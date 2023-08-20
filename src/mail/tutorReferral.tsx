@@ -1,14 +1,15 @@
-import { MailOptions } from "nodemailer/lib/sendmail-transport";
-import { ContractorObject } from "../integration/tc models/contractor/types";
-import { BUSINESS_EMAIL_FROM, PROD } from "../util";
 import React, { CSSProperties } from "react";
-import { getUserFirstName } from "../integration/tc models/user/user";
 import ReactDOMServer from "react-dom/server";
+import { ContractorObject } from "../integration/tc models/contractor/types";
+import { getUserFirstName } from "../integration/tc models/user/user";
+import { BUSINESS_EMAIL_FROM, PROD } from "../util";
+import { EmailTypes, MailOpts } from "./mail";
 
-export const tutorReferralMail = (contractor: ContractorObject): MailOptions => {
+export const tutorReferralMail = (contractor: ContractorObject): MailOpts => {
     return {
         from: BUSINESS_EMAIL_FROM,
         to: PROD ? contractor.user.email : (process.env.TEST_EMAIL_ADDRESS ?? contractor.user.email),
+        email_type: EmailTypes.Referral,
         cc: process.env.BUSINESS_EMAIL_ADDRESS,
         subject: "Referral Program",
         html: ReactDOMServer.renderToString(<ReferralEmail contractor={contractor}/>)

@@ -1,9 +1,8 @@
 import { Mutex } from "async-mutex";
-import { MailOptions } from "nodemailer/lib/sendmail-transport";
-import { Log, PROD } from "../util";
-import { transporter } from "./mail";
-import ScheduleMail, { IScheduledMail } from "../models/scheduledEmail";
 import { Aggregate } from "mongoose";
+import ScheduleMail, { IScheduledMail } from "../models/scheduledEmail";
+import { Log, PROD } from "../util";
+import { MailOpts, transporter } from "./mail";
 
 export const scheduledMailMutex = new Mutex();
 
@@ -23,7 +22,7 @@ const getExpiredMail = async (): Promise<Aggregate<IScheduledMail[]> | null> => 
 };
 
 
-export const queueEmail = async (timestamp: number, mailData: MailOptions) => {
+export const queueEmail = async (timestamp: number, mailData: MailOpts) => {
     Log.debug(`Sending in ${(timestamp-Date.now())/1000} seconds`);
     const release = await scheduledMailMutex.acquire();
     try {

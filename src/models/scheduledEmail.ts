@@ -1,4 +1,4 @@
-import { Schema, model, Types } from "mongoose";
+import { Schema, Types, model } from "mongoose";
 
 export interface IScheduledMail {
     _id: Types.ObjectId
@@ -9,7 +9,8 @@ export interface IScheduledMail {
     bcc?: string
     subject?: string
     html?: string
-    sender?: string
+    sender?: string,
+    email_type?: string
 }
 
 const scheduledEmailSchema = new Schema<IScheduledMail>({
@@ -34,7 +35,8 @@ const scheduledEmailSchema = new Schema<IScheduledMail>({
     bcc: String,
     subject: String,
     html: String,
-    sender: String
+    sender: String,
+    email_type: String,
 });
 
 const ScheduleMail = model("scheduled_email", scheduledEmailSchema);

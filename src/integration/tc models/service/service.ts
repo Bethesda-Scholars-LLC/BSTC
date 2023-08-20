@@ -1,17 +1,17 @@
 import axios from "axios";
-import { DumbJob, JobObject, UpdateServicePayload } from "./types";
-import { Log, apiHeaders, apiUrl, capitalize, getAttrByMachineName, randomChoice } from "../../../util";
+import { queueFirstLessonComplete } from "../../../mail/firstLesson";
+import { transporter } from "../../../mail/mail";
+import tutorMatchedMail from "../../../mail/tutorMatched";
+import AwaitingClient from "../../../models/clientAwaiting";
 import { ManyResponse, TCEvent } from "../../../types";
-import { ClientObject } from "../client/types";
+import { Log, apiHeaders, apiUrl, capitalize, getAttrByMachineName, randomChoice } from "../../../util";
 import { addTCListener } from "../../hook";
 import { ClientManager, getClientById, getMinimumClientUpdate, updateClient } from "../client/client";
-import AwaitingClient from "../../../models/clientAwaiting";
+import { ClientObject } from "../client/types";
 import { getContractorById, setLookingForJob } from "../contractor/contractor";
-import { queueFirstLessonComplete } from "../../../mail/firstLesson";
-import tutorMatchedMail from "../../../mail/tutorMatched";
-import { transporter } from "../../../mail/mail";
 import { LessonObject } from "../lesson/types";
-import { getUserFirstName, getUserFullName } from "../user/user";
+import { getUserFullName } from "../user/user";
+import { DumbJob, JobObject, UpdateServicePayload } from "./types";
 
 const blairSchools = ["argyle", "eastern", "loiederman", "newport mill", "odessa shannon", "parkland", "silver spring international", "takoma park", "blair"];
 const churchillSchools = ["churchill", "cabin john", "hoover", "bells mill", "seven locks", "stone mill", "cold spring", "potomac", "beverly farms", "wayside"];
@@ -235,7 +235,7 @@ addTCListener("ADDED_CONTRACTOR_TO_SERVICE", async (event: TCEvent<any, JobObjec
                                 client_name: getUserFullName(client.user),
                                 job_id: job.id,
                                 tutor_ids: [contractor.id],
-                                tutor_names: [getUserFirstName(contractor.user)]
+                                tutor_names: [getUserFullName(contractor.user)]
                             }).save();
                             // otherwise update current one
                         } else {
@@ -269,7 +269,7 @@ addTCListener("ADDED_CONTRACTOR_TO_SERVICE", async (event: TCEvent<any, JobObjec
     });
 });
 
-const onLessonComplete = (job: JobObject, client_id: number)=>{
+const onLessonComplete = (job: JobObject, client_id: number) => {
     getClientById(client_id).then(async client => {
         if(!client)
             return;
