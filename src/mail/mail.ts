@@ -7,7 +7,8 @@ import "./firstLesson";
  */
 export enum EmailTypes {
     Referral="referral",
-    FirstLesson="first_lesson"
+    FirstLesson="first_lesson",
+    MatchedNotBooked="matched_not_booked"
 }
 
 export interface MailOpts extends MailOptions {

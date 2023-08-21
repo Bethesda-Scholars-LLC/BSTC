@@ -192,12 +192,7 @@ addTCListener("REMOVED_CONTRACTOR_FROM_SERVICE", async (event: TCEvent<any, JobO
 
 });
 
-/**
- * @description update status to in progress when contract added
- */
-addTCListener("ADDED_CONTRACTOR_TO_SERVICE", async (event: TCEvent<any, JobObject>) => {
-    const job = event.subject;
-
+export const addedContractorToService = async (job: JobObject) => {
     // let tutorRate = null;
     if(job.rcrs.length > 0){
         const client = await getClientById(job.rcrs[0].paying_client);
@@ -267,9 +262,16 @@ addTCListener("ADDED_CONTRACTOR_TO_SERVICE", async (event: TCEvent<any, JobObjec
             }]
         */
     });
+};
+/**
+ * @description update status to in progress when contract added
+ */
+addTCListener("ADDED_CONTRACTOR_TO_SERVICE", async (event: TCEvent<any, JobObject>) => {
+    const job = event.subject;
+    addedContractorToService(job);
 });
 
-const onLessonComplete = (job: JobObject, client_id: number) => {
+export const onLessonComplete = (job: JobObject, client_id: number) => {
     getClientById(client_id).then(async client => {
         if(!client)
             return;

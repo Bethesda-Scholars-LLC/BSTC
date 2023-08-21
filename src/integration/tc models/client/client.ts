@@ -65,7 +65,6 @@ export const getClientById = async (id: number): Promise<ClientObject | null> =>
 };
 
 export const moveToMatchedAndBooked = async (lesson: LessonObject, job: JobObject) => {
-    // client must be in matched not booked and the job must not have first lesson complete
     // deleted matched not booked check, only checks for prospect now
     const client = await getClientById(lesson.rcras[0].paying_client);
     if (!client || client.status !== "prospect" || client.pipeline_stage.id === PipelineStage.MatchedAndBooked)
@@ -81,6 +80,8 @@ export const moveToMatchedAndBooked = async (lesson: LessonObject, job: JobObjec
         ...getMinimumClientUpdate(client),
         pipeline_stage: PipelineStage.MatchedAndBooked
     });
+
+    // remove matched not booked email that is supposed to send after 3 days here
 };
 
 addTCListener("BOOKED_AN_APPOINTMENT", async (event: TCEvent<any, LessonObject>) => {

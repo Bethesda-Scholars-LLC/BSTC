@@ -10,7 +10,7 @@ import { Log, PROD, apiHeaders, apiUrl, capitalize, getAttrByMachineName, random
 import { addTCListener } from "../../hook";
 import { ChargeCat, createAdHocCharge } from "../ad hoc/adHoc";
 import { ClientManager, getClientById, getMinimumClientUpdate, moveToMatchedAndBooked, updateClient } from "../client/client";
-import { PipelineStage, getServiceById } from "../service/service";
+import { PipelineStage, addedContractorToService, getServiceById, onLessonComplete } from "../service/service";
 import { DumbUser } from "../user/types";
 import { getUserFullName } from "../user/user";
 import { ContractorObject, UpdateContractorPayload } from "./types";
@@ -121,14 +121,13 @@ export const popTutorFromCAs = async (contractor: ContractorObject) => {
             });
 
             await AwaitingClient.findByIdAndDelete(awaitingClient._id);
-
-            // Move client down pipeline after sending email
-
             
             await updateClient({
                 ...getMinimumClientUpdate(client),
                 pipeline_stage: PipelineStage.MatchedNotBooked
             });
+
+            // add to scheduled email to send in three days if client has not booked yet
 
             continue;
         }
@@ -184,4 +183,22 @@ addTCListener("CREATED_AN_APPOINTMENT", async (event: TCEvent<any, any>) => {
     if (lesson.rcras.length > 0) {
         moveToMatchedAndBooked(lesson, job);
     }
+});
+
+addTCListener("CREATED_REPORT", async (event: TCEvent<any, any>) => {
+    const report: any = event.subject;
+    const job = await getServiceById(report.appointment.service.id);
+    if (!job)
+        return;
+    
+    onLessonComplete(job, report.client.id);
+});
+
+addTCListener("TENDER_WAS_ACCEPTED", async (event: TCEvent<any, any>) => {
+    const application: any = event.subject;     // add application to types?
+    const job = await getServiceById(application.service.id);
+    if (!job)
+        return;
+
+    addedContractorToService(job);
 });

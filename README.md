@@ -42,4 +42,5 @@ The MongoDB databased used in this integration is used for storing client who ar
 `APPLIED_FOR_SERVICE`           | Sets tutor `looking_for_job` field to true. |
 `BOOKED_AN_APPOINTMENT`         | Moves client to matched and booked pipeline if the client is in matched not booked and the job does not have first lesson complete label. |
 `CREATED_AN_APPOINTMENT`        | Moves client to matched and booked pipeline if the client is in matched not booked and the job does not have first lesson complete label. |
-
+`TENDER_WAS_ACCEPTED`           |  |
+`CREATED_REPORT`                |  |
