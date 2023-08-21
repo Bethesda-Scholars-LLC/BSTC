@@ -14,6 +14,8 @@ import { PipelineStage, addedContractorToService, getServiceById, onLessonComple
 import { DumbUser } from "../user/types";
 import { getUserFullName } from "../user/user";
 import { ContractorObject, UpdateContractorPayload } from "./types";
+import ScheduleMail from "../../../models/scheduledEmail";
+import { awaitingBookingMail } from "../../../mail/awaitingBooking";
 
 export const getContractorById = async (id: number): Promise<ContractorObject | null> => {
     try {
@@ -119,6 +121,16 @@ export const popTutorFromCAs = async (contractor: ContractorObject) => {
                 if(err)
                     Log.error(err);
             });
+            
+            // add to scheduled email to send in three days if client has not booked yet
+            const inDB = await ScheduleMail.findOne(
+                { job_id: job.id },
+                { client_id: client.id },
+                { contractor_id: contractor.id }
+            );
+            if (!inDB) {
+                queueEmail(Date.now() + (PROD ? day*3 : 10000 * 60), awaitingBookingMail(contractor, client, job));
+            }
 
             await AwaitingClient.findByIdAndDelete(awaitingClient._id);
             
@@ -126,8 +138,6 @@ export const popTutorFromCAs = async (contractor: ContractorObject) => {
                 ...getMinimumClientUpdate(client),
                 pipeline_stage: PipelineStage.MatchedNotBooked
             });
-
-            // add to scheduled email to send in three days if client has not booked yet
 
             continue;
         }

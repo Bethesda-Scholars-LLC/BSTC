@@ -8,11 +8,16 @@ import "./firstLesson";
 export enum EmailTypes {
     Referral="referral",
     FirstLesson="first_lesson",
-    MatchedNotBooked="matched_not_booked"
+    AwaitingBooking="awaiting_booking"
 }
 
 export interface MailOpts extends MailOptions {
-    email_type?: EmailTypes
+    email_type?: EmailTypes,
+    client_id?: number,
+    client_name?: string,
+    contractor_id?: number,
+    contractor_name?: string,
+    job_id?: number
 }
 
 export const transporter = nodemailer.createTransport({
