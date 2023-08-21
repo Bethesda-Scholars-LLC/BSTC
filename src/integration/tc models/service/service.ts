@@ -244,7 +244,6 @@ export const addedContractorToService = async (job: JobObject) => {
             }
         }
 
-        // send email to tutor "youve been matched with client X, here is their number"
         if(client && client.status === "prospect" && client.pipeline_stage.id === PipelineStage.NewClient){
             await updateClient({
                 ...getMinimumClientUpdate(client),
@@ -255,12 +254,6 @@ export const addedContractorToService = async (job: JobObject) => {
     updateServiceById(job.id, {
         ...getMinimumJobUpdate(job),
         status: "in-progress",
-        /*
-            conjobs: [{                         // CHECK THAT THIS GETS POSTED
-                contractor: job.conjobs[0].contractor,
-                pay_rate: tutorRate
-            }]
-        */
     });
 };
 /**
