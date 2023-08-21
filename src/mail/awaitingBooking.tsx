@@ -28,6 +28,9 @@ const AwaitingBooking = (props: {contractor: ContractorObject, client: ClientObj
         Hi {getUserFirstName(props.client.user)},
         <br/>
         <br/>
+        Just checking in if you were able to book a lesson with {getUserFirstName(props.contractor.user)}. Let me know if there are any scheduling issues.
+        <br/>
+        <br/>
         Thanks,
         <br/>
         <b>{process.env.PERSONAL_EMAIL_FROM}</b>

@@ -8,7 +8,8 @@ import "./firstLesson";
 export enum EmailTypes {
     Referral="referral",
     FirstLesson="first_lesson",
-    AwaitingBooking="awaiting_booking"
+    AwaitingBooking="awaiting_booking",
+    AwaitingAvail="awaiting_availability"
 }
 
 export interface MailOpts extends MailOptions {

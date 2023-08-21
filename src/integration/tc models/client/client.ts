@@ -7,9 +7,10 @@ import { DumbUser } from "../user/types";
 import { Labels, PipelineStage, getServiceById } from "../service/service";
 import { LessonObject } from "../lesson/types";
 import { JobObject } from "../service/types";
-import { transporter } from "../../../mail/mail";
+import { EmailTypes, transporter } from "../../../mail/mail";
 import { wrongTutorMail } from "../../../mail/wrongTutor";
 import { getContractorById } from "../contractor/contractor";
+import ScheduleMail from "../../../models/scheduledEmail";
 
 export enum ClientManager {
     Mike=2182255,
@@ -67,7 +68,7 @@ export const getClientById = async (id: number): Promise<ClientObject | null> =>
 export const moveToMatchedAndBooked = async (lesson: LessonObject, job: JobObject) => {
     // deleted matched not booked check, only checks for prospect now
     const client = await getClientById(lesson.rcras[0].paying_client);
-    if (!client || client.status !== "prospect" || client.pipeline_stage.id === PipelineStage.MatchedAndBooked)
+    if (!client || client.status !== "prospect")
         return;
 
     for (let i = 0; i < job.labels.length; i++) {
@@ -82,6 +83,20 @@ export const moveToMatchedAndBooked = async (lesson: LessonObject, job: JobObjec
     });
 
     // remove matched not booked email that is supposed to send after 3 days here
+    const contractor = await getContractorById(lesson.cjas[0].contractor);
+    if (!contractor)
+        return;
+
+    const awaitingBookingEmail = await ScheduleMail.findOne(
+        { job_id: job.id,
+            client_id: client.id,
+            contractor_id: contractor.id,
+            email_type: EmailTypes.AwaitingBooking }
+    );
+    
+    if (awaitingBookingEmail) {
+        await ScheduleMail.findByIdAndDelete(awaitingBookingEmail._id);
+    }
 };
 
 addTCListener("BOOKED_AN_APPOINTMENT", async (event: TCEvent<any, LessonObject>) => {

@@ -1,10 +1,10 @@
 import axios from "axios";
 import { queueFirstLessonComplete } from "../../../mail/firstLesson";
-import { transporter } from "../../../mail/mail";
+import { EmailTypes, transporter } from "../../../mail/mail";
 import tutorMatchedMail from "../../../mail/tutorMatched";
 import AwaitingClient from "../../../models/clientAwaiting";
 import { ManyResponse, TCEvent } from "../../../types";
-import { Log, apiHeaders, apiUrl, capitalize, getAttrByMachineName, randomChoice } from "../../../util";
+import { Log, PROD, apiHeaders, apiUrl, capitalize, getAttrByMachineName, randomChoice } from "../../../util";
 import { addTCListener } from "../../hook";
 import { ClientManager, getClientById, getMinimumClientUpdate, updateClient } from "../client/client";
 import { ClientObject } from "../client/types";
@@ -12,10 +12,13 @@ import { getContractorById, setLookingForJob } from "../contractor/contractor";
 import { LessonObject } from "../lesson/types";
 import { getUserFullName } from "../user/user";
 import { DumbJob, JobObject, UpdateServicePayload } from "./types";
+import ScheduleMail from "../../../models/scheduledEmail";
+import { queueEmail } from "../../../mail/queueMail";
+import { awaitingAvailMail } from "../../../mail/awaitingAvail";
 
 const blairSchools = ["argyle", "eastern", "loiederman", "newport mill", "odessa shannon", "parkland", "silver spring international", "takoma park", "blair"];
 const churchillSchools = ["churchill", "cabin john", "hoover", "bells mill", "seven locks", "stone mill", "cold spring", "potomac", "beverly farms", "wayside"];
-const _specialContractors = [1733309, 1644291]; // add the rest
+const day = 86400000;
 
 export const enum PipelineStage {
     NewClient=35326,
@@ -193,7 +196,6 @@ addTCListener("REMOVED_CONTRACTOR_FROM_SERVICE", async (event: TCEvent<any, JobO
 });
 
 export const addedContractorToService = async (job: JobObject) => {
-    // let tutorRate = null;
     if(job.rcrs.length > 0){
         const client = await getClientById(job.rcrs[0].paying_client);
 
@@ -211,7 +213,7 @@ export const addedContractorToService = async (job: JobObject) => {
             });
 
             try{
-                if(client) {
+                if (client) {
                     const hasBeenAdded = (await AwaitingClient.findOne({
                         tutor_ids: contractor.id,
                         client_id: client.id,
@@ -236,6 +238,16 @@ export const addedContractorToService = async (job: JobObject) => {
                         } else {
                             clientJobRelation.tutor_ids.push(contractor.id);
                             await clientJobRelation.save();
+                        }
+                        // now add to schedule mail that sends to us in 1 day if availability not set
+                        const inDB = await ScheduleMail.findOne(
+                            { job_id: job.id,
+                              client_id: client.id,
+                              contractor_id: contractor.id,
+                              email_type: EmailTypes.AwaitingAvail }
+                        );
+                        if (!inDB) {
+                            queueEmail(Date.now() + (PROD ? day : day), awaitingAvailMail(contractor, client, job));
                         }
                     }
                 }

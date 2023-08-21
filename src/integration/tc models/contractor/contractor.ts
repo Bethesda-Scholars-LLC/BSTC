@@ -1,7 +1,7 @@
 
 import axios from "axios";
 import clientMatchedMail from "../../../mail/clientMatched";
-import { transporter } from "../../../mail/mail";
+import { EmailTypes, transporter } from "../../../mail/mail";
 import { queueEmail } from "../../../mail/queueMail";
 import { tutorReferralMail } from "../../../mail/tutorReferral";
 import AwaitingClient, { popTutorFromCA } from "../../../models/clientAwaiting";
@@ -123,21 +123,34 @@ export const popTutorFromCAs = async (contractor: ContractorObject) => {
             });
             
             // add to scheduled email to send in three days if client has not booked yet
-            const inDB = await ScheduleMail.findOne(
-                { job_id: job.id },
-                { client_id: client.id },
-                { contractor_id: contractor.id }
+            const inDBAwaitingBooking = await ScheduleMail.findOne(
+                { job_id: job.id,
+                  client_id: client.id,
+                  contractor_id: contractor.id,
+                  email_type: EmailTypes.AwaitingBooking }
             );
-            if (!inDB) {
-                queueEmail(Date.now() + (PROD ? day*3 : 10000 * 60), awaitingBookingMail(contractor, client, job));
+            if (!inDBAwaitingBooking) {
+                queueEmail(Date.now() + (PROD ? day*3 : day), awaitingBookingMail(contractor, client, job));
+            }
+
+            const inDBAwaitingAvail = await ScheduleMail.findOne(
+                { job_id: job.id,
+                  client_id: client.id,
+                  contractor_id: contractor.id,
+                  email_type: EmailTypes.AwaitingAvail }
+            );
+            if (inDBAwaitingAvail) {
+                await ScheduleMail.findByIdAndDelete(inDBAwaitingAvail._id);
             }
 
             await AwaitingClient.findByIdAndDelete(awaitingClient._id);
             
-            await updateClient({
-                ...getMinimumClientUpdate(client),
-                pipeline_stage: PipelineStage.MatchedNotBooked
-            });
+            if (client.status === "prospect" && client.pipeline_stage.id === PipelineStage.AvailabilityNotBooked) {
+                await updateClient({
+                    ...getMinimumClientUpdate(client),
+                    pipeline_stage: PipelineStage.MatchedNotBooked
+                });
+            }
 
             continue;
         }
