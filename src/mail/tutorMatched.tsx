@@ -11,7 +11,6 @@ const tutorMatchedMail = (tutor: ContractorObject, client: ClientObject | null, 
     return {
         from: BUSINESS_EMAIL_FROM, // eslint-disable-line
         to: PROD ? tutor.user.email : (process.env.TEST_EMAIL_ADDRESS ?? tutor.user.email),
-        cc: process.env.BUSINESS_EMAIL_ADDRESS,
         subject: "You have been assigned to a client",
         html: ReactDOMServer.renderToString(<TutorMatched tutor={tutor} client={client} job={job}/>)
     };

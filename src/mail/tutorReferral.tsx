@@ -10,7 +10,6 @@ export const tutorReferralMail = (contractor: ContractorObject): MailOpts => {
         from: BUSINESS_EMAIL_FROM,
         to: PROD ? contractor.user.email : (process.env.TEST_EMAIL_ADDRESS ?? contractor.user.email),
         email_type: EmailTypes.Referral,
-        cc: process.env.BUSINESS_EMAIL_ADDRESS,
         subject: "Referral Program",
         html: ReactDOMServer.renderToString(<ReferralEmail contractor={contractor}/>)
     };

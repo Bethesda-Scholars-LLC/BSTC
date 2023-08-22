@@ -17,7 +17,7 @@ export const awaitingBookingMail = (contractor: ContractorObject, client: Client
         contractor_id: contractor.id,
         contractor_name: getUserFirstName(contractor.user),
         job_id: job.id,
-        cc: process.env.BUSINESS_EMAIL_ADDRESS,
+        cc: "services@bethesdascholars.com",
         subject: "Booking a Lesson",
         html: ReactDOMServer.renderToString(<AwaitingBooking contractor={contractor} client={client} job={job}/>)
     };

@@ -5,13 +5,12 @@ import { ClientObject } from "../integration/tc models/client/types";
 import { ContractorObject } from "../integration/tc models/contractor/types";
 import { JobObject } from "../integration/tc models/service/types";
 import { getUserFirstName, getUserFullName } from "../integration/tc models/user/user";
-import { BUSINESS_EMAIL_FROM, PROD } from "../util";
+import { BUSINESS_EMAIL_FROM } from "../util";
 
 export const wrongTutorMail = (job: JobObject, client: ClientObject | null, contractor: ContractorObject | null): MailOptions => {
     return {
         from: BUSINESS_EMAIL_FROM,
         to: "services@bethesdascholars.com",
-        cc: PROD ? process.env.TEST_EMAIL_ADDRESS : undefined,
         subject: `${client ? getUserFirstName(client.user) : "Unknown Client" } Booked Wrong Lesson`,
         html: ReactDOMServer.renderToString(<WrongTutor job={job} client={client} contractor={contractor}/>)
     };
