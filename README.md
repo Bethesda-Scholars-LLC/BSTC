@@ -33,14 +33,14 @@ The MongoDB databased used in this integration is used for storing client who ar
 | Event Name                    | Action |
 | ----------------------------- | ------ |
 | `REQUESTED_A_SERVICE`         | Change job's name to only include tutors first name and last initial. And set job default location based on description. Moves client to New Client pipeline and sets client manager accordingly. Capitalizes school name properly. Sets job rate to $40 for elementary school tutoring. |
-| `ADDED_CONTRACTOR_TO_SERVICE` | Change job's status to in progress, and move pipeline stage on client to matched not booked. Also sets `looking_for_job` custom field to false. Sets custom pay rate to $28 for special tutors. Adds tutor/job to database if not already in there. Creates ad hoc payment for referral if tutor profile has referral code. |
+| `ADDED_CONTRACTOR_TO_SERVICE` | Change job's status to in progress, and move pipeline stage on client to availability not set. Also sets `looking_for_job` custom field to false. Sets custom pay rate to $28 for special tutors. Adds tutor/job to database if not already in there. Creates ad hoc payment for referral if tutor profile has referral code. Schedules mail to send to managment if tutor has not set availability in 24 hours. |
 | `REMOVED_CONTRACTOR_FROM_SERVICE` | This removes the tutor from the jobs stored in database if there are any. |
  `CHANGED_CONTRACTOR_STATUS`    | Sets `looking_for_job` custom field to true when tutor is approved. Sets phone number, address, and capitalizes school when approved as well. Sends email with referral instructions and referral code when approved.|
  `ADD_LABEL_TO_SERVICE`         | Checks for first lesson complete and sends feedback email. Moves client down pipeline. |
  `MARKED_AN_APPOINTMENT_AS_COMPLETE` | Checks for first lesson complete and sends feedback email. Moves client down pipeline. |
-`EDITED_AVAILABILITY`           | Removes tutor/service from the database if they are stored there. Sends email to client with tutor details. |
+`EDITED_AVAILABILITY`           | Removes tutor/service from the database if they are stored there. Sends email to client with tutor details. Deletes scheduled mail for email type `awaiting_availability` if one existed. Schedules mail that sends to client if they have not booked in 3 days. |
 `APPLIED_FOR_SERVICE`           | Sets tutor `looking_for_job` field to true. |
-`BOOKED_AN_APPOINTMENT`         | Moves client to matched and booked pipeline if the client is in matched not booked and the job does not have first lesson complete label. |
+`BOOKED_AN_APPOINTMENT`         | Moves client to matched and booked pipeline if the client is in matched not booked and the job does not have first lesson complete label. Deletes scheduled mail for email type `awaiting_booking` if one existed. |
 `CREATED_AN_APPOINTMENT`        | Moves client to matched and booked pipeline if the client is in matched not booked and the job does not have first lesson complete label. |
-`TENDER_WAS_ACCEPTED`           |  |
-`CREATED_REPORT`                |  |
+`TENDER_WAS_ACCEPTED`           | Does the same as `ADDED_CONTRACTOR_TO_SERVICE`. |
+`CREATED_REPORT`                | Does the same as `ADDED_A_LABEL_TO_A_SERVICE`. |
