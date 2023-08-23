@@ -15,6 +15,8 @@ import { DumbJob, JobObject, UpdateServicePayload } from "./types";
 import ScheduleMail from "../../../models/scheduledEmail";
 import { queueEmail } from "../../../mail/queueMail";
 import { awaitingAvailMail } from "../../../mail/awaitingAvail";
+import { goneColdMail } from "../../../mail/goneCold";
+import NotCold from "../../../models/notCold";
 
 const blairSchools = ["argyle", "eastern", "loiederman", "newport mill", "odessa shannon", "parkland", "silver spring international", "takoma park", "blair"];
 const churchillSchools = ["churchill", "cabin john", "hoover", "bells mill", "seven locks", "stone mill", "cold spring", "potomac", "beverly farms", "wayside"];
@@ -323,4 +325,31 @@ addTCListener("APPLIED_FOR_SERVICE", async (event: TCEvent<any, any>) => {
         return;
 
     setLookingForJob(contractor, true);
+});
+
+addTCListener("CHANGED_SERVICE_STATUS",async (event: TCEvent<any, any>) => {
+    const job = event.subject;
+    const client = await getClientById(job.rcrs[0].paying_client);
+    if (!client)
+        return;
+    
+    // add other checks here, maybe time frame near winter break cancel this
+    if (job.status === "gone-cold" && client.status === "live") {
+        const contractor = await getContractorById(job.conjobs[0].contractor);
+        if (!contractor)
+            return;
+
+        const notCold = await NotCold.findOne({
+            job_id: job.id,
+            client_id: client.id,
+            tutor_id: contractor.id
+        });
+        if (notCold) {
+            transporter.sendMail(goneColdMail(job, client, contractor), (err) => {
+                if(err)
+                    Log.error(err);
+            });
+            await NotCold.findByIdAndDelete(notCold.id);
+        }
+    }
 });

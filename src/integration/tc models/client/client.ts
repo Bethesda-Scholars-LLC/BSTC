@@ -11,6 +11,8 @@ import { EmailTypes, transporter } from "../../../mail/mail";
 import { wrongTutorMail } from "../../../mail/wrongTutor";
 import { getContractorById } from "../contractor/contractor";
 import ScheduleMail from "../../../models/scheduledEmail";
+import NotCold from "../../../models/notCold";
+import { getUserFullName } from "../user/user";
 
 export enum ClientManager {
     Mike=2182255,
@@ -96,6 +98,22 @@ export const moveToMatchedAndBooked = async (lesson: LessonObject, job: JobObjec
     
     if (awaitingBookingEmail) {
         await ScheduleMail.findByIdAndDelete(awaitingBookingEmail._id);
+    }
+
+    // add to not cold clients DB if not already there
+    const notCold = await NotCold.findOne({
+        job_id: job.id,
+        client_id: client.id,
+        tutor_id: contractor.id
+    });
+    if (!notCold) {
+        await new NotCold({
+            client_id: client.id,
+            client_name: getUserFullName(client.user),
+            job_id: job.id,
+            tutor_id: contractor.id,
+            tutor_name: getUserFullName(contractor.user)
+        }).save();
     }
 };
 
