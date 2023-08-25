@@ -11,6 +11,7 @@ export const wrongTutorMail = (job: JobObject, client: ClientObject | null, cont
     return {
         from: BUSINESS_EMAIL_FROM,
         to: "services@bethesdascholars.com",
+        cc: "pascal@bethesdascholars.com",
         subject: `${client ? getUserFirstName(client.user) : "Unknown Client" } Booked Wrong Lesson`,
         html: ReactDOMServer.renderToString(<WrongTutor job={job} client={client} contractor={contractor}/>)
     };

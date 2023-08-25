@@ -11,6 +11,7 @@ export const awaitingAvailMail = (contractor: ContractorObject, client: ClientOb
     return {
         from: BUSINESS_EMAIL_FROM,
         to: PROD ? "services@bethesdascholars.com" : (process.env.TEST_EMAIL_ADDRESS),
+        cc: "pascal@bethesdascholars.com",
         email_type: EmailTypes.AwaitingAvail,
         client_id: client.id,
         client_name: getUserFullName(client.user),
