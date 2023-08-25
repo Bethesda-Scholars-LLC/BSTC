@@ -11,13 +11,13 @@ export const awaitingBookingMail = (contractor: ContractorObject, client: Client
     return {
         from: `"${process.env.PERSONAL_EMAIL_FROM}" <${process.env.PERSONAL_EMAIL_ADDRESS}>`, // eslint-disable-line,
         to: PROD ? client.user.email : (process.env.TEST_EMAIL_ADDRESS ?? contractor.user.email),
+        cc: process.env.BUSINESS_EMAIL_ADDRESS,
         email_type: EmailTypes.AwaitingBooking,
         client_id: client.id,
         client_name: getUserFullName(client.user),
         contractor_id: contractor.id,
         contractor_name: getUserFirstName(contractor.user),
         job_id: job.id,
-        cc: "services@bethesdascholars.com",
         subject: "Booking a Lesson",
         html: ReactDOMServer.renderToString(<AwaitingBooking contractor={contractor} client={client} job={job}/>)
     };
