@@ -47,7 +47,7 @@ const ReferralEmail = (props: {contractor: ContractorObject}) => {
                 Be a high school senior.
             </li>
             <li>
-                Attend either Walt Whitman HS or Bethesda Chevy Chase HS in Bethesda, MD.
+                Attend either Walt Whitman HS, Bethesda Chevy Chase HS, or Walter Johnson HS in Bethesda, MD.
             </li>
         </ol>
         If you have any questions, feel free to reply directly to this email.
