@@ -2,7 +2,8 @@ import { Mutex } from "async-mutex";
 import { Aggregate } from "mongoose";
 import ScheduleMail, { IScheduledMail } from "../models/scheduledEmail";
 import { Log, PROD } from "../util";
-import { MailOpts, transporter } from "./mail";
+import { EmailTypes, MailOpts, transporter } from "./mail";
+import { contractorIncompleteVerify } from "./contractorIncomplete";
 
 export const scheduledMailMutex = new Mutex();
 
@@ -45,8 +46,10 @@ setInterval(async () => {
         if(expiredEmails) {
             expiredEmails.forEach(async v => {
                 Log.debug(v);
-                // check if email_type == contractor_incomplete, if not continue
                 try {
+                    if(v.email_type === EmailTypes.ContractorIncomplete && !contractorIncompleteVerify(v))
+                        return await ScheduleMail.findByIdAndDelete(v._id);
+
                     await transporter.sendMail(v, (err, _) => {
                         if(err)
                             Log.error(err);

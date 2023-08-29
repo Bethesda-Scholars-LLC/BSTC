@@ -16,6 +16,7 @@ import { getUserFullName } from "../user/user";
 import { ContractorObject, UpdateContractorPayload } from "./types";
 import ScheduleMail from "../../../models/scheduledEmail";
 import { awaitingBookingMail } from "../../../mail/awaitingBooking";
+import { contractorIncompleteMail } from "../../../mail/contractorIncomplete";
 
 export const getContractorById = async (id: number): Promise<ContractorObject | null> => {
     try {
@@ -230,5 +231,5 @@ addTCListener("CREATED_A_CONTRACTOR", async (event: TCEvent<any, ContractorObjec
     const contractor = event.subject;
 
     // schedule email here
-    
+    queueEmail(Date.now()+day, contractorIncompleteMail(contractor));
 });

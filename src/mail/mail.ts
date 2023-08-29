@@ -9,7 +9,8 @@ export enum EmailTypes {
     Referral="referral",
     FirstLesson="first_lesson",
     AwaitingBooking="awaiting_booking",
-    AwaitingAvail="awaiting_availability"
+    AwaitingAvail="awaiting_availability",
+    ContractorIncomplete="contractor_incomplete"
 }
 
 export interface MailOpts extends MailOptions {
