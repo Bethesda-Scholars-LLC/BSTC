@@ -21,7 +21,7 @@ const TutorMatched = (props: {tutor: ContractorObject, client: ClientObject | nu
     const smallIndent: CSSProperties = {
         paddingLeft: "10px"
     };
-    const location = props.job.dft_location?.name.includes("online") ? "online. Please send a Zoom link to your client before the lesson." : "at the client's home.";
+    const location = props.job.dft_location?.name.includes("online") ? "online. Please send a Zoom link to your client before the lesson (use your school account for Zoom Premium)." : "at the client's home.";
     
     return <p style={{margin: 0}}>
         Hi {tutorName},
