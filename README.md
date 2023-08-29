@@ -45,3 +45,4 @@ The MongoDB databased used in this integration is used for storing client who ar
 `TENDER_WAS_ACCEPTED`           | Does the same as `ADDED_CONTRACTOR_TO_SERVICE`. |
 `CREATED_REPORT`                | Does the same as `ADDED_A_LABEL_TO_A_SERVICE`. |
 `CHANGED_SERVICE_STATUS`        |  |
+`CREATED_A_CONTRACTOR`          |  |

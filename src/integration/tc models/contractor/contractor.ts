@@ -225,3 +225,10 @@ addTCListener("TENDER_WAS_ACCEPTED", async (event: TCEvent<any, any>) => {
 
     addedContractorToService(job);
 });
+
+addTCListener("CREATED_A_CONTRACTOR", async (event: TCEvent<any, ContractorObject>) => {
+    const contractor = event.subject;
+
+    // schedule email here
+    
+});

@@ -45,6 +45,7 @@ setInterval(async () => {
         if(expiredEmails) {
             expiredEmails.forEach(async v => {
                 Log.debug(v);
+                // check if email_type == contractor_incomplete, if not continue
                 try {
                     await transporter.sendMail(v, (err, _) => {
                         if(err)
