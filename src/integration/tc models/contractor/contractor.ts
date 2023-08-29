@@ -1,10 +1,13 @@
 
 import axios from "axios";
+import { awaitingBookingMail } from "../../../mail/awaitingBooking";
 import clientMatchedMail from "../../../mail/clientMatched";
+import { contractorIncompleteMail } from "../../../mail/contractorIncomplete";
 import { EmailTypes, transporter } from "../../../mail/mail";
 import { queueEmail } from "../../../mail/queueMail";
 import { tutorReferralMail } from "../../../mail/tutorReferral";
 import AwaitingClient, { popTutorFromCA } from "../../../models/clientAwaiting";
+import ScheduleMail from "../../../models/scheduledEmail";
 import { ManyResponse, TCEvent } from "../../../types";
 import { Log, PROD, apiHeaders, apiUrl, capitalize, getAttrByMachineName, randomChoice } from "../../../util";
 import { addTCListener } from "../../hook";
@@ -14,16 +17,13 @@ import { PipelineStage, addedContractorToService, getServiceById, onLessonComple
 import { DumbUser } from "../user/types";
 import { getUserFullName } from "../user/user";
 import { ContractorObject, UpdateContractorPayload } from "./types";
-import ScheduleMail from "../../../models/scheduledEmail";
-import { awaitingBookingMail } from "../../../mail/awaitingBooking";
-import { contractorIncompleteMail } from "../../../mail/contractorIncomplete";
 
 export const getContractorById = async (id: number): Promise<ContractorObject | null> => {
     try {
         return (await axios(apiUrl(`/contractors/${id}`), {
             headers: apiHeaders
         })).data as ContractorObject;
-    } catch(e) {
+    } catch (e) {
         Log.error(e);
         return null;
     }
@@ -36,16 +36,16 @@ const updateContractor = async (data: UpdateContractorPayload) => {
             headers: apiHeaders,
             data
         });
-    } catch(e) {
+    } catch (e) {
         Log.error(e);
     }
 };
 
 export const getRandomContractor = async (): Promise<ContractorObject | null> => {
-    try{
+    try {
         const services = (await axios(apiUrl("/contractors"), { headers: apiHeaders })).data as ManyResponse<DumbUser>;
-        
-        if(services.count === 0)
+
+        if (services.count === 0)
             return null;
 
         return await getContractorById(randomChoice(services.results).id);
@@ -90,7 +90,7 @@ export const getNewContractorDetails = (contractor: ContractorObject): UpdateCon
     };
 
     if (school)
-        defaultTutor.extra_attrs = { school_1: school.value.split(" ").map(capitalize).join(" ")};
+        defaultTutor.extra_attrs = { school_1: school.value.split(" ").map(capitalize).join(" ") };
 
     return defaultTutor;
 };
@@ -100,52 +100,56 @@ export const updateContractorDetails = async (contractor: ContractorObject) => {
 };
 
 export const popTutorFromCAs = async (contractor: ContractorObject) => {
-    
+
     const dbAwaitings = await AwaitingClient.find({
         tutor_ids: contractor.id
     });
 
-    for(let i = 0; i < dbAwaitings.length; i++) {
+    for (let i = 0; i < dbAwaitings.length; i++) {
         const awaitingClient = popTutorFromCA(dbAwaitings[i], contractor.id);
 
-        if(awaitingClient.tutor_ids.length === 0){
+        if (awaitingClient.tutor_ids.length === 0) {
             // send email
             const client = await getClientById(awaitingClient.client_id);
-            if(!client)
+            if (!client)
                 return;
 
             const job = await getServiceById(awaitingClient.job_id);
-            if(!job)
+            if (!job)
                 return;
-            
+
             transporter.sendMail(clientMatchedMail(contractor, client, job), (err) => {
-                if(err)
+                if (err)
                     Log.error(err);
             });
-            
+
             // add to scheduled email to send in three days if client has not booked yet
             const inDBAwaitingBooking = await ScheduleMail.findOne(
-                { job_id: job.id,
-                  client_id: client.id,
-                  contractor_id: contractor.id,
-                  email_type: EmailTypes.AwaitingBooking }
+                {
+                    job_id: job.id,
+                    client_id: client.id,
+                    contractor_id: contractor.id,
+                    email_type: EmailTypes.AwaitingBooking
+                }
             );
             if (!inDBAwaitingBooking) {
-                queueEmail(Date.now() + (PROD ? day*3 : day), awaitingBookingMail(contractor, client, job));
+                queueEmail(PROD ? day * 3 : 10000, awaitingBookingMail(contractor, client, job));
             }
 
             const inDBAwaitingAvail = await ScheduleMail.findOne(
-                { job_id: job.id,
-                  client_id: client.id,
-                  contractor_id: contractor.id,
-                  email_type: EmailTypes.AwaitingAvail }
+                {
+                    job_id: job.id,
+                    client_id: client.id,
+                    contractor_id: contractor.id,
+                    email_type: EmailTypes.AwaitingAvail
+                }
             );
             if (inDBAwaitingAvail) {
                 await ScheduleMail.findByIdAndDelete(inDBAwaitingAvail._id);
             }
 
             await AwaitingClient.findByIdAndDelete(awaitingClient._id);
-            
+
             if (client.status === "prospect" && client.pipeline_stage.id === PipelineStage.AvailabilityNotBooked) {
                 await updateClient({
                     ...getMinimumClientUpdate(client),
@@ -178,14 +182,14 @@ addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<any, Contractor
         const toUpdate = getNewContractorDetails(contractor);
         toUpdate.extra_attrs = {
             ...toUpdate.extra_attrs,
-            looking_for_job : true
+            looking_for_job: true
         };
         await updateContractor(toUpdate);
 
-        queueEmail(Date.now() + (PROD ? day*5 : 10000), tutorReferralMail(contractor));
+        queueEmail(PROD ? day * 5 : 10000, tutorReferralMail(contractor));
 
         const referrerId = parseInt(getAttrByMachineName("referral", contractor.extra_attrs)?.value);
-        if(!referrerId || isNaN(referrerId) || Object.values(ClientManager).includes(referrerId))
+        if (!referrerId || isNaN(referrerId) || Object.values(ClientManager).includes(referrerId))
             return;
 
         createAdHocCharge({
@@ -203,7 +207,7 @@ addTCListener("CREATED_AN_APPOINTMENT", async (event: TCEvent<any, any>) => {
     const job = await getServiceById(lesson.service.id);
     if (!job)
         return;
-    
+
     if (lesson.rcras.length > 0) {
         moveToMatchedAndBooked(lesson, job);
     }
@@ -214,7 +218,7 @@ addTCListener("CREATED_REPORT", async (event: TCEvent<any, any>) => {
     const job = await getServiceById(report.appointment.service.id);
     if (!job)
         return;
-    
+
     onLessonComplete(job, report.client.id);
 });
 
@@ -227,9 +231,9 @@ addTCListener("TENDER_WAS_ACCEPTED", async (event: TCEvent<any, any>) => {
     addedContractorToService(job);
 });
 
-addTCListener("CREATED_A_CONTRACTOR", async (event: TCEvent<any, ContractorObject>) => {
+addTCListener("CONTRACTOR_SIGN_UP", async (event: TCEvent<any, ContractorObject>) => {
     const contractor = event.subject;
 
     // schedule email here
-    queueEmail(Date.now()+day, contractorIncompleteMail(contractor));
+    queueEmail(PROD ? day : 10000, contractorIncompleteMail(contractor));
 });

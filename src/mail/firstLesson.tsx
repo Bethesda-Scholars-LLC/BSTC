@@ -10,36 +10,36 @@ import { PROD, getAttrByMachineName } from "../util";
 import { EmailTypes } from "./mail";
 import { queueEmail } from "./queueMail";
 
-export const FirstLesson = (props: {job: JobObject, tutor: ContractorObject, client: ClientObject}) => {
+export const FirstLesson = (props: { job: JobObject, tutor: ContractorObject, client: ClientObject }) => {
     const tutorFirstName = props.job.conjobs[0].name.split(" ")[0];
     const tutorPhoneNumber = cleanPhoneNumber(props.tutor.user.mobile);
     const tutorEmailAddress = props.tutor.user.email;
     const userFirstName = getUserFirstName(props.client.user);
     const pronouns = getTutorPronouns(props.tutor);
 
-    return <p style={{margin: 0}}>
+    return <p style={{ margin: 0 }}>
         Hi {userFirstName},
-        <br/>
-        <br/>
+        <br />
+        <br />
         Just wanted to check in on the lesson with {tutorFirstName} - how did it go? Would you like to continue lessons with {pronouns.pronouns[1]}?
         {(tutorPhoneNumber || tutorEmailAddress) && <>
-            <br/>
-            <br/>
+            <br />
+            <br />
             If you have not got in contact with {tutorFirstName}, {pronouns.possesive} {tutorPhoneNumber ? ` phone number is ${tutorPhoneNumber}` : ` email address is ${tutorEmailAddress}`}.
             It might make scheduling easier, just remember to book the lesson after a time is coordinated.
         </>}
-        <br/>
-        <br/>
+        <br />
+        <br />
         Thanks,
-        <br/>
+        <br />
         <b>{process.env.PERSONAL_EMAIL_FROM}</b>
-        <br/>
+        <br />
         {process.env.SIGNATURE_DESCRIPTION}
-        <br/>
+        <br />
         _________________________________
-        <br/>
+        <br />
         <b>Website</b>: https://www.bethesdascholars.com
-        <br/>
+        <br />
         <b>Mobile</b>: 202-294-6538
     </p>;
 };
@@ -49,12 +49,12 @@ export const getTutorPronouns = (tutor: ContractorObject): {
     possesive: string
 } => {
     const tutorGender = getAttrByMachineName("contractor_gender", tutor.extra_attrs)?.value.toLowerCase().trim() ?? "";
-    if(tutorGender === "male")
+    if (tutorGender === "male")
         return {
             pronouns: ["he", "him"],
             possesive: "his"
         };
-    if(tutorGender === "female")
+    if (tutorGender === "female")
         return {
             pronouns: ["she", "her"],
             possesive: "her"
@@ -71,23 +71,23 @@ export const queueFirstLessonComplete = async (job: JobObject) => {
         return;
 
     const client = await getClientById(job.rcrs[0].paying_client);
-    if(!client)
+    if (!client)
         return;
 
     const tutor = await getContractorById(job.conjobs[0].contractor);
     if (!tutor || !tutor.extra_attrs)
         return;
-    
+
     const tutorFirstName = job.conjobs[0].name.split(" ")[0];
     const userEmail = client.user.email;
 
-    queueEmail((Date.now() + (PROD ? day : 10000)), {
+    queueEmail(PROD ? day : 10000, {
         from: `"${process.env.PERSONAL_EMAIL_FROM}" <${process.env.PERSONAL_EMAIL_ADDRESS}>`, // eslint-disable-line
         to: PROD ? userEmail : (process.env.TEST_EMAIL_ADDRESS ?? userEmail),
         cc: process.env.BUSINESS_EMAIL_ADDRESS,
         email_type: EmailTypes.FirstLesson,
         subject: `Lesson with ${tutorFirstName}`,
-        html: ReactDOMServer.renderToString(<FirstLesson job={job} client={client} tutor={tutor}/>)
+        html: ReactDOMServer.renderToString(<FirstLesson job={job} client={client} tutor={tutor} />)
         /*
         html: `<p1>Hi ${userFirstName},
                     <br>

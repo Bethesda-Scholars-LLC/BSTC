@@ -1,8 +1,13 @@
 import axios from "axios";
+import { awaitingAvailMail } from "../../../mail/awaitingAvail";
 import { queueFirstLessonComplete } from "../../../mail/firstLesson";
+import { goneColdMail } from "../../../mail/goneCold";
 import { EmailTypes, transporter } from "../../../mail/mail";
+import { queueEmail } from "../../../mail/queueMail";
 import tutorMatchedMail from "../../../mail/tutorMatched";
 import AwaitingClient from "../../../models/clientAwaiting";
+import NotCold from "../../../models/notCold";
+import ScheduleMail from "../../../models/scheduledEmail";
 import { ManyResponse, TCEvent } from "../../../types";
 import { Log, PROD, apiHeaders, apiUrl, capitalize, getAttrByMachineName, randomChoice } from "../../../util";
 import { addTCListener } from "../../hook";
@@ -12,56 +17,51 @@ import { getContractorById, setLookingForJob } from "../contractor/contractor";
 import { LessonObject } from "../lesson/types";
 import { getUserFullName } from "../user/user";
 import { DumbJob, JobObject, UpdateServicePayload } from "./types";
-import ScheduleMail from "../../../models/scheduledEmail";
-import { queueEmail } from "../../../mail/queueMail";
-import { awaitingAvailMail } from "../../../mail/awaitingAvail";
-import { goneColdMail } from "../../../mail/goneCold";
-import NotCold from "../../../models/notCold";
 
 const blairSchools = ["argyle", "eastern", "loiederman", "newport mill", "odessa shannon", "parkland", "silver spring international", "takoma park", "blair"];
 const churchillSchools = ["churchill", "cabin john", "hoover", "bells mill", "seven locks", "stone mill", "cold spring", "potomac", "beverly farms", "wayside"];
 const day = 86400000;
 
 export const enum PipelineStage {
-    NewClient=35326,
-    MatchedNotBooked=47188,
-    AvailabilityNotBooked=37478,
-    MatchedAndBooked=35328,
-    FeedbackRequested=47039
+    NewClient = 35326,
+    MatchedNotBooked = 47188,
+    AvailabilityNotBooked = 37478,
+    MatchedAndBooked = 35328,
+    FeedbackRequested = 47039
 }
 
 export const enum SessionLocation {
-    InPerson=107916,
+    InPerson = 107916,
     Online = 106892
 }
 
 export const enum Labels {
-    firstLessonComplete=169932
+    firstLessonComplete = 169932
 }
 
 export const updateServiceById = async (id: number, data: UpdateServicePayload) => {
-    try{
+    try {
         await axios(apiUrl(`/services/${id}/`), {
             method: "PUT",
             headers: apiHeaders,
             data: data
         });
-    } catch(e){
+    } catch (e) {
         Log.error(e);
     }
 };
 
 export const getServiceById = async (id: number): Promise<JobObject | null> => {
     try {
-        return (await axios(apiUrl(`/services/${id}/`), {headers: apiHeaders})).data as JobObject;
+        return (await axios(apiUrl(`/services/${id}/`), { headers: apiHeaders })).data as JobObject;
     } catch (e) {
         Log.error(e);
     }
     return null;
 };
 
-export const getManyServices = async (page?: number) : Promise<ManyResponse<DumbJob> | null> => {
-    try{
+export const getManyServices = async (page?: number): Promise<ManyResponse<DumbJob> | null> => {
+    try {
         return (await axios(apiUrl(`/services?page=${Math.max(page ?? 1, 1)}`), { headers: apiHeaders })).data as ManyResponse<DumbJob>;
     } catch (e) {
         return null;
@@ -69,10 +69,10 @@ export const getManyServices = async (page?: number) : Promise<ManyResponse<Dumb
 };
 
 export const getRandomService = async (): Promise<JobObject | null> => {
-    try{
+    try {
         const services = await getManyServices();
-        
-        if(!services || services.count === 0)
+
+        if (!services || services.count === 0)
             return null;
 
         return await getServiceById(randomChoice(services.results).id);
@@ -92,22 +92,22 @@ export const getMinimumJobUpdate = (job: JobObject | DumbJob): UpdateServicePayl
 
 const fixJobName = (job: JobObject): JobObject | null => {
     // if name has only one word in it, return and exit
-    if(job.name.split("from")[1].trim().split(" ").length === 1)
+    if (job.name.split("from")[1].trim().split(" ").length === 1)
         return null;
 
     const name = job.name.split("from")[1]
         .trim()
         .split(" ")
         .filter((_v: string, i: number, arr: string[]) => {
-            return i === 0 || i === arr.length-1;
+            return i === 0 || i === arr.length - 1;
         }).map((v: string, i: number) => {
-            if(i === 0)
+            if (i === 0)
                 return v;
             // last initial
-            return v.charAt(0).toUpperCase()+".";
+            return v.charAt(0).toUpperCase() + ".";
         }).join(" ");
 
-    job.name = job.name.split("from")[0]+"from "+name;
+    job.name = job.name.split("from")[0] + "from " + name;
     return job;
 };
 
@@ -143,24 +143,24 @@ addTCListener("REQUESTED_A_SERVICE", async (event: TCEvent<any, JobObject>) => {
     //    keep current job object unless fixJobName returns a new one
     job = fixJobName(job) ?? job;
     await updateServiceById(job.id, setDftLocation(job));
-    
-    if(job.rcrs.length > 0){
+
+    if (job.rcrs.length > 0) {
         const client = await getClientById(job.rcrs[0].paying_client);
-        if(!client)
+        if (!client)
             return;
 
         await setJobRate(client, job);
 
         const school = getAttrByMachineName("student_school", client.extra_attrs);
-        if(!school)
+        if (!school)
             return;
 
         // set school
         const updatePayload = getMinimumClientUpdate(client);
         updatePayload.status = "prospect";
         updatePayload.pipeline_stage = PipelineStage.NewClient;
-        updatePayload.extra_attrs = { student_school: school.value.split(" ").map(capitalize).join(" ")};
-        
+        updatePayload.extra_attrs = { student_school: school.value.split(" ").map(capitalize).join(" ") };
+
         const schoolName = updatePayload.extra_attrs.student_school.toLowerCase();
 
         // set sophie hansen (blair), pavani (churchill), or mike (other) as client manager
@@ -180,15 +180,15 @@ addTCListener("REMOVED_CONTRACTOR_FROM_SERVICE", async (event: TCEvent<any, JobO
     const TCJob = event.subject;
     const realContractors = TCJob.conjobs.map(v => v.contractor);
 
-    const DBJob = await AwaitingClient.findOne({job_id: TCJob.id});
-    if(!DBJob)
+    const DBJob = await AwaitingClient.findOne({ job_id: TCJob.id });
+    if (!DBJob)
         return;
 
     // keep only if tutor_id is in realContractors array
     DBJob.tutor_ids = DBJob.tutor_ids.filter(v => realContractors.includes(v));
     Log.debug("removing tutor");
 
-    if(DBJob.tutor_ids.length === 0){
+    if (DBJob.tutor_ids.length === 0) {
         await AwaitingClient.findByIdAndDelete(DBJob._id);
         return;
     }
@@ -198,23 +198,23 @@ addTCListener("REMOVED_CONTRACTOR_FROM_SERVICE", async (event: TCEvent<any, JobO
 });
 
 export const addedContractorToService = async (job: JobObject) => {
-    if(job.rcrs.length > 0){
+    if (job.rcrs.length > 0) {
         const client = await getClientById(job.rcrs[0].paying_client);
 
-        for(let i = 0; i < job.conjobs.length; i++) {
+        for (let i = 0; i < job.conjobs.length; i++) {
             const contractor = await getContractorById(job.conjobs[i].contractor);
 
-            if(!contractor)
+            if (!contractor)
                 return Log.debug(`contractor is null \n ${job.conjobs[i]}`);
 
             await setLookingForJob(contractor, false);
-            
+
             transporter.sendMail(tutorMatchedMail(contractor, client, job), (err) => {
-                if(err)
+                if (err)
                     Log.error(err);
             });
 
-            try{
+            try {
                 if (client) {
                     const hasBeenAdded = (await AwaitingClient.findOne({
                         tutor_ids: contractor.id,
@@ -222,13 +222,13 @@ export const addedContractorToService = async (job: JobObject) => {
                         job_id: job.id
                     }));
                     // if current tutor has not been added
-                    if(hasBeenAdded === null) {
+                    if (hasBeenAdded === null) {
                         const clientJobRelation = (await AwaitingClient.findOne({
                             client_id: client.id,
                             job_id: job.id
                         }));
                         // if a client job relation has not already been made, create it
-                        if(clientJobRelation === null) {
+                        if (clientJobRelation === null) {
                             await new AwaitingClient({
                                 client_id: client.id,
                                 client_name: getUserFullName(client.user),
@@ -243,13 +243,15 @@ export const addedContractorToService = async (job: JobObject) => {
                         }
                         // now add to schedule mail that sends to us in 1 day if availability not set
                         const inDB = await ScheduleMail.findOne(
-                            { job_id: job.id,
-                              client_id: client.id,
-                              contractor_id: contractor.id,
-                              email_type: EmailTypes.AwaitingAvail }
+                            {
+                                job_id: job.id,
+                                client_id: client.id,
+                                contractor_id: contractor.id,
+                                email_type: EmailTypes.AwaitingAvail
+                            }
                         );
                         if (!inDB) {
-                            queueEmail(Date.now() + (PROD ? day : day), awaitingAvailMail(contractor, client, job));
+                            queueEmail(PROD ? day : 10000, awaitingAvailMail(contractor, client, job));
                         }
                     }
                 }
@@ -258,7 +260,7 @@ export const addedContractorToService = async (job: JobObject) => {
             }
         }
 
-        if(client && client.status === "prospect" && client.pipeline_stage.id === PipelineStage.NewClient){
+        if (client && client.status === "prospect" && client.pipeline_stage.id === PipelineStage.NewClient) {
             await updateClient({
                 ...getMinimumClientUpdate(client),
                 pipeline_stage: PipelineStage.AvailabilityNotBooked
@@ -280,9 +282,9 @@ addTCListener("ADDED_CONTRACTOR_TO_SERVICE", async (event: TCEvent<any, JobObjec
 
 export const onLessonComplete = (job: JobObject, client_id: number) => {
     getClientById(client_id).then(async client => {
-        if(!client)
+        if (!client)
             return;
-        
+
         // matched and booked stage
         if (client.status === "prospect" && client.pipeline_stage.id === PipelineStage.MatchedAndBooked) {
             for (let i = 0; i < job.labels.length; i++) {
@@ -301,17 +303,17 @@ export const onLessonComplete = (job: JobObject, client_id: number) => {
 
 addTCListener("ADDED_A_LABEL_TO_A_SERVICE", async (event: TCEvent<any, JobObject>) => {
     const job = event.subject;
-    if(job.rcrs.length > 0){
+    if (job.rcrs.length > 0) {
         onLessonComplete(job, job.rcrs[0].paying_client);
     }
 });
 
 addTCListener("MARKED_AN_APPOINTMENT_AS_COMPLETE", async (event: TCEvent<any, LessonObject>) => {
     const lesson = event.subject;
-    if(lesson.rcras.length > 0){
+    if (lesson.rcras.length > 0) {
         const job = await getServiceById(lesson.service.id);
 
-        if(!job)
+        if (!job)
             return;
 
         onLessonComplete(job, job.rcrs[0].paying_client);
@@ -321,18 +323,18 @@ addTCListener("MARKED_AN_APPOINTMENT_AS_COMPLETE", async (event: TCEvent<any, Le
 addTCListener("APPLIED_FOR_SERVICE", async (event: TCEvent<any, any>) => {
     const contractor = await getContractorById(event.actor.id);
 
-    if(!contractor)
+    if (!contractor)
         return;
 
     setLookingForJob(contractor, true);
 });
 
-addTCListener("CHANGED_SERVICE_STATUS",async (event: TCEvent<any, any>) => {
+addTCListener("CHANGED_SERVICE_STATUS", async (event: TCEvent<any, any>) => {
     const job = event.subject;
     const client = await getClientById(job.rcrs[0].paying_client);
     if (!client)
         return;
-    
+
     // add other checks here, maybe time frame near winter break cancel this
     if (job.status === "gone-cold" && client.status === "live") {
         const contractor = await getContractorById(job.conjobs[0].contractor);
@@ -346,7 +348,7 @@ addTCListener("CHANGED_SERVICE_STATUS",async (event: TCEvent<any, any>) => {
         });
         if (notCold) {
             transporter.sendMail(goneColdMail(job, client, contractor), (err) => {
-                if(err)
+                if (err)
                     Log.error(err);
             });
             await NotCold.findByIdAndDelete(notCold.id);

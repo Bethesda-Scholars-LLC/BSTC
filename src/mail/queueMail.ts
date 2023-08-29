@@ -2,8 +2,8 @@ import { Mutex } from "async-mutex";
 import { Aggregate } from "mongoose";
 import ScheduleMail, { IScheduledMail } from "../models/scheduledEmail";
 import { Log, PROD } from "../util";
-import { EmailTypes, MailOpts, transporter } from "./mail";
 import { contractorIncompleteVerify } from "./contractorIncomplete";
+import { EmailTypes, MailOpts, transporter } from "./mail";
 
 export const scheduledMailMutex = new Mutex();
 
@@ -16,7 +16,7 @@ const getExpiredMail = async (): Promise<Aggregate<IScheduledMail[]> | null> => 
                 }
             }
         ]);
-    } catch(e) {
+    } catch (e) {
         Log.error(e);
     }
     return null;
@@ -24,15 +24,15 @@ const getExpiredMail = async (): Promise<Aggregate<IScheduledMail[]> | null> => 
 
 
 export const queueEmail = async (timestamp: number, mailData: MailOpts) => {
-    Log.debug(`Sending in ${(timestamp-Date.now())/1000} seconds`);
+    Log.debug(`Sending in ${(timestamp) / 1000} seconds`);
     const release = await scheduledMailMutex.acquire();
     try {
         new ScheduleMail({
             ...mailData,
-            send_at: timestamp,
+            send_at: Date.now() + timestamp,
         }).save();
         Log.debug("saving");
-    } catch(e) {
+    } catch (e) {
         Log.error(e);
     } finally {
         release();
@@ -41,17 +41,20 @@ export const queueEmail = async (timestamp: number, mailData: MailOpts) => {
 
 setInterval(async () => {
     const release = await scheduledMailMutex.acquire();
-    try{
+    try {
         const expiredEmails = await getExpiredMail();
-        if(expiredEmails) {
+        if (expiredEmails) {
             expiredEmails.forEach(async v => {
                 Log.debug(v);
+                // check if email_type == contractor_incomplete, if not continue
+                // check if any field is empty
+                // if so, send email, otherwise return
                 try {
-                    if(v.email_type === EmailTypes.ContractorIncomplete && !contractorIncompleteVerify(v))
+                    if (v.email_type === EmailTypes.ContractorIncomplete && !contractorIncompleteVerify(v))
                         return await ScheduleMail.findByIdAndDelete(v._id);
 
                     await transporter.sendMail(v, (err, _) => {
-                        if(err)
+                        if (err)
                             Log.error(err);
                     });
 
@@ -61,7 +64,7 @@ setInterval(async () => {
                 }
             });
         }
-    } catch (e){
+    } catch (e) {
         Log.error(e);
     } finally {
         release();
