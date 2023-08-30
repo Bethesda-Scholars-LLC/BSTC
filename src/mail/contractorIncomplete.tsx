@@ -18,7 +18,7 @@ export const contractorIncompleteVerify = async (incompleteEmail: IScheduledMail
     if (!contractor)
         return false;
     const bio = getAttrByMachineName("contractor_bio", contractor.extra_attrs);
-    // if bio doesn't have a value or contractor skills length is zero
+    // if bio doesn't have a value or contractor skills length is 0
     if (!bio?.value || bio?.value === "" || (contractor.skills?.length ?? 0 === 0))
         return true;
 
