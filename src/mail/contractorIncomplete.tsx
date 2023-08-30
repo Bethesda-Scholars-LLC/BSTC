@@ -24,7 +24,7 @@ export const contractorIncompleteVerify = async (incompleteEmail: IScheduledMail
 
     return false;
 };
-
+// test commit
 export const contractorIncompleteMail = (contractor: ContractorObject): MailOpts => {
     return {
         from: `"${process.env.BUSINESS_EMAIL_FROM}" <${process.env.BUSINESS_EMAIL_ADDRESS}>`, // eslint-disable-line,
