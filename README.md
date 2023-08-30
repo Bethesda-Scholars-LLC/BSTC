@@ -44,5 +44,5 @@ The MongoDB databased used in this integration is used for storing client who ar
 `CREATED_AN_APPOINTMENT`        | Moves client to matched and booked pipeline if the client is in matched not booked and the job does not have first lesson complete label. |
 `TENDER_WAS_ACCEPTED`           | Does the same as `ADDED_CONTRACTOR_TO_SERVICE`. |
 `CREATED_REPORT`                | Does the same as `ADDED_A_LABEL_TO_A_SERVICE`. |
-`CHANGED_SERVICE_STATUS`        |  |
-`CREATED_A_CONTRACTOR`          |  |
+`CHANGED_SERVICE_STATUS`        | If the status is cold and the job is in the `not_colds` schema, sends email to client if so. Deletes from job this schema. |
+`CREATED_A_CONTRACTOR`          | Schedules mail to send to tutor in one day reminding them to put in bio. Deletes this email before sending if the bio is filled out. |
