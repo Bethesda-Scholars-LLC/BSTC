@@ -5,7 +5,7 @@ import { ContractorObject } from "../integration/tc models/contractor/types";
 import { getUserFirstName } from "../integration/tc models/user/user";
 import { IScheduledMail } from "../models/scheduledEmail";
 import { PROD, getAttrByMachineName } from "../util";
-import { MailOpts } from "./mail";
+import { EmailTypes, MailOpts } from "./mail";
 
 /**
  * @param incompleteEmail Contractor incomplete email scheduled to send
@@ -33,6 +33,7 @@ export const contractorIncompleteMail = (contractor: ContractorObject): MailOpts
         subject: `Lessons with ${getUserFirstName(contractor.user)}`,
         html: ReactDOMServer.renderToString(<ContractorIncomplete contractor={contractor} />),
         contractor_id: contractor.id,
+        email_type: EmailTypes.ContractorIncomplete
     };
 };
 
