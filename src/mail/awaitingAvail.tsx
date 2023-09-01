@@ -27,7 +27,7 @@ const AwaitingAvail = (props: {contractor: ContractorObject, client: ClientObjec
     return <p style={{margin: 0}}>
         This is a notification that {getUserFullName(props.contractor.user)} not set their availability in 24 hours.&nbsp;
         {capitalize(getUserFullName(props.client.user))} is waiting on {getUserFirstName(props.contractor.user)} to update their availability.&nbsp;
-        The job's ID is <b>{props.job.id}</b>.
+        The job's ID is <b>{props.job.id}</b>. Auto invoicing has not been set on this job's settings.
         <br/>
         <br/>
         Please contact the tutor and tell them to update their availability or use the link in their email to notify their client.
