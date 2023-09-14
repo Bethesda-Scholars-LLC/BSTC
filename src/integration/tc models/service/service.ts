@@ -20,6 +20,7 @@ import { DumbJob, JobObject, UpdateServicePayload } from "./types";
 
 const blairSchools = ["argyle", "eastern", "loiederman", "newport mill", "odessa shannon", "parkland", "silver spring international", "takoma park", "blair"];
 const churchillSchools = ["churchill", "cabin john", "hoover", "bells mill", "seven locks", "stone mill", "cold spring", "potomac", "beverly farms", "wayside"];
+const wjSchools = ["north bethesda", "tilden"];
 const day = 86400000;
 
 export const enum PipelineStage {
@@ -168,6 +169,8 @@ addTCListener("REQUESTED_A_SERVICE", async (event: TCEvent<any, JobObject>) => {
             updatePayload.associated_admin = ClientManager.Sophie;
         } else if (churchillSchools.some(school => schoolName.includes(school))) {
             updatePayload.associated_admin = ClientManager.Pavani;
+        } else if (wjSchools.some(school => schoolName.includes(school))) {
+            updatePayload.associated_admin = ClientManager.Sophia;
         } else {
             updatePayload.associated_admin = ClientManager.Mike;
         }

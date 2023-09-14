@@ -17,7 +17,8 @@ import { getUserFullName } from "../user/user";
 export enum ClientManager {
     Mike=2182255,
     Sophie=2255450,
-    Pavani=2255169
+    Pavani=2255169,
+    Sophia=2401049
 }
 
 export const updateClient = async (data: UpdateClientPayload) => {
