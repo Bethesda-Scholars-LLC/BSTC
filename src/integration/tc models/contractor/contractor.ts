@@ -219,7 +219,7 @@ addTCListener("CREATED_REPORT", async (event: TCEvent<any, any>) => {
     if (!job)
         return;
 
-    onLessonComplete(job, report.client.id);
+    await onLessonComplete(job, report.client.id);
 });
 
 addTCListener("TENDER_WAS_ACCEPTED", async (event: TCEvent<any, any>) => {

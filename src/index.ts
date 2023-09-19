@@ -1,6 +1,7 @@
 import cors from "cors";
 import express, { json } from "express";
 import mongoose from "mongoose";
+import apiRouter from "./api/api";
 import tutorAvailRouter from "./api/tutoravailability";
 import hookRouter from "./integration/hook";
 import "./integration/tc models/contractor/contractor";
@@ -23,6 +24,7 @@ app.use(json({
     },
 }));
 
+app.use("/api", apiRouter);
 app.use("/hook", hookRouter);
 app.use("/tutoravailability", tutorAvailRouter);
 

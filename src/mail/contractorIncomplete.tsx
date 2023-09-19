@@ -3,7 +3,6 @@ import ReactDOMServer from "react-dom/server";
 import { getContractorById } from "../integration/tc models/contractor/contractor";
 import { ContractorObject } from "../integration/tc models/contractor/types";
 import { getUserFirstName } from "../integration/tc models/user/user";
-import { IScheduledMail } from "../models/scheduledEmail";
 import { PROD, getAttrByMachineName } from "../util";
 import { EmailTypes, MailOpts } from "./mail";
 
@@ -11,15 +10,15 @@ import { EmailTypes, MailOpts } from "./mail";
  * @param incompleteEmail Contractor incomplete email scheduled to send
  * @returns {boolean} wether or not to actually send it
  */
-export const contractorIncompleteVerify = async (incompleteEmail: IScheduledMail): Promise<boolean> => {
-    if (!incompleteEmail?.contractor_id)
+export const contractorIncompleteVerify = async (contractorId?: number): Promise<boolean> => {
+    if(!contractorId)
         return false;
-    const contractor = await getContractorById(incompleteEmail.contractor_id);
+    const contractor = await getContractorById(contractorId);
     if (!contractor)
         return false;
     const bio = getAttrByMachineName("contractor_bio", contractor.extra_attrs);
     // if bio doesn't have a value or contractor skills length is 0
-    if (!bio?.value || bio?.value === "" || (contractor.skills?.length ?? 0 === 0))
+    if (!bio?.value || bio?.value === "" || contractor.skills.length === 0)
         return true;
 
     return false;
