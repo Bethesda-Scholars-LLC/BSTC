@@ -44,14 +44,16 @@ setInterval(async () => {
     try {
         const expiredEmails = await getExpiredMail();
         if (expiredEmails) {
-            expiredEmails.forEach(async v => {
-                Log.debug(v);
+            for(let i = 0; i < expiredEmails.length; i++) {
+                const v = expiredEmails[i];
                 // check if email_type == contractor_incomplete, if not continue
                 // check if any field is empty
                 // if so, send email, otherwise return
                 try {
-                    if (v.email_type === EmailTypes.ContractorIncomplete && !contractorIncompleteVerify(v))
-                        return await ScheduleMail.findByIdAndDelete(v._id);
+                    if (v.email_type === EmailTypes.ContractorIncomplete && !contractorIncompleteVerify(v.contractor_id)){
+                        await ScheduleMail.findByIdAndDelete(v._id);
+                        continue;
+                    }
 
                     await transporter.sendMail(v, (err, _) => {
                         if (err)
@@ -62,7 +64,7 @@ setInterval(async () => {
                 } catch (e) {
                     Log.error(e);
                 }
-            });
+            }
         }
     } catch (e) {
         Log.error(e);

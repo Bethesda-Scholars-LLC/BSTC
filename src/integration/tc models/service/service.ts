@@ -283,31 +283,30 @@ addTCListener("ADDED_CONTRACTOR_TO_SERVICE", async (event: TCEvent<any, JobObjec
     addedContractorToService(job);
 });
 
-export const onLessonComplete = (job: JobObject, client_id: number) => {
-    getClientById(client_id).then(async client => {
-        if (!client)
-            return;
+export const onLessonComplete = async (job: JobObject, client_id: number) => {
+    const client = await getClientById(client_id);
+    if (!client)
+        return;
 
-        // matched and booked stage
-        if (client.status === "prospect" && client.pipeline_stage.id === PipelineStage.MatchedAndBooked) {
-            for (let i = 0; i < job.labels.length; i++) {
-                // first lesson is complete
-                if (job.labels[i].id === Labels.firstLessonComplete) {
-                    await queueFirstLessonComplete(job);
-                    const updatePayload = getMinimumClientUpdate(client);
-                    updatePayload.pipeline_stage = PipelineStage.FeedbackRequested;
-                    await updateClient(updatePayload);
-                    return;
-                }
+    // matched and booked stage
+    if (client.status === "prospect" && client.pipeline_stage.id === PipelineStage.MatchedAndBooked) {
+        for (let i = 0; i < job.labels.length; i++) {
+            // first lesson is complete
+            if (job.labels[i].id === Labels.firstLessonComplete) {
+                await queueFirstLessonComplete(job);
+                const updatePayload = getMinimumClientUpdate(client);
+                updatePayload.pipeline_stage = PipelineStage.FeedbackRequested;
+                await updateClient(updatePayload);
+                return;
             }
         }
-    });
+    }
 };
 
 addTCListener("ADDED_A_LABEL_TO_A_SERVICE", async (event: TCEvent<any, JobObject>) => {
     const job = event.subject;
     if (job.rcrs.length > 0) {
-        onLessonComplete(job, job.rcrs[0].paying_client);
+        await onLessonComplete(job, job.rcrs[0].paying_client);
     }
 });
 
@@ -319,7 +318,7 @@ addTCListener("MARKED_AN_APPOINTMENT_AS_COMPLETE", async (event: TCEvent<any, Le
         if (!job)
             return;
 
-        onLessonComplete(job, job.rcrs[0].paying_client);
+        await onLessonComplete(job, job.rcrs[0].paying_client);
     }
 });
 
