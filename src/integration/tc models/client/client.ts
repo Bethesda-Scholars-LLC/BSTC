@@ -71,7 +71,7 @@ export const getClientById = async (id: number): Promise<ClientObject | null> =>
 export const moveToMatchedAndBooked = async (lesson: LessonObject, job: JobObject) => {
     // deleted matched not booked check, only checks for prospect now
     const client = await getClientById(lesson.rcras[0].paying_client);
-    if (!client || client.status !== "prospect")
+    if (!client || client.status !== "prospect" || client.pipeline_stage.id === PipelineStage.FeedbackRequested)
         return;
 
     for (let i = 0; i < job.labels.length; i++) {
