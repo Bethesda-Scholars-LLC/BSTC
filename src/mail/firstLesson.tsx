@@ -25,7 +25,7 @@ export const FirstLesson = (props: { job: JobObject, tutor: ContractorObject, cl
         {(tutorPhoneNumber || tutorEmailAddress) && <>
             <br />
             <br />
-            If you have not got in contact with {tutorFirstName}, {pronouns.possesive} {tutorPhoneNumber ? ` phone number is ${tutorPhoneNumber}` : ` email address is ${tutorEmailAddress}`}.
+            If you have not gotten in contact with {tutorFirstName}, {pronouns.possesive} {tutorPhoneNumber ? ` phone number is ${tutorPhoneNumber}` : ` email address is ${tutorEmailAddress}`}.
             It might make scheduling easier, just remember to book the lesson after a time is coordinated.
         </>}
         <br />
