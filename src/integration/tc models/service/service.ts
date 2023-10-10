@@ -353,12 +353,14 @@ addTCListener("CHANGED_SERVICE_STATUS", async (event: TCEvent<any, any>) => {
                 if (err)
                     Log.error(err);
             });
-            // await NotCold.findByIdAndDelete(notCold.id);     uncomment to delete from DB and send once
+            // await NotCold.findByIdAndDelete(notCold.id);
+            
+            updateServiceById(job.id, {         // change status back to in progress
+                ...getMinimumJobUpdate(job),
+                status: "in-progress",
+            });
         }
-        updateServiceById(job.id, {
-            ...getMinimumJobUpdate(job),
-            status: "in-progress",
-        });
-        // change status back to in progress
+        
+        
     }
 });
