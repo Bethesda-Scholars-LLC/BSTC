@@ -126,13 +126,21 @@ const setDftLocation = (job: JobObject): UpdateServicePayload => {
     return oldJob;
 };
 
-const setJobRate = async (client: ClientObject, job: JobObject) => {
+const setJobRate = async (client: ClientObject, job: JobObject, milesFound: boolean) => {
     const studentGrade = getAttrByMachineName("student_grade", client.extra_attrs);
-    if (studentGrade?.value !== "1st-5th grade")
-        return;
+    let chargeRate = 40.0;
+
+    if (milesFound) {
+        if (studentGrade?.value !== "1st-5th grade") {
+            chargeRate = 65.0;
+        } else {
+            chargeRate = 55.0;
+        }
+    } else if (studentGrade?.value !== "1st-5th grade")
+            return;
 
     const jobUpdate = getMinimumJobUpdate(job);
-    jobUpdate.dft_charge_rate = 40.0;
+    jobUpdate.dft_charge_rate = chargeRate;
     await updateServiceById(job.id, jobUpdate);
 };
 
@@ -150,8 +158,6 @@ addTCListener("REQUESTED_A_SERVICE", async (event: TCEvent<any, JobObject>) => {
         if (!client)
             return;
 
-        await setJobRate(client, job);
-
         const school = getAttrByMachineName("student_school", client.extra_attrs);
         if (!school)
             return;
@@ -163,18 +169,21 @@ addTCListener("REQUESTED_A_SERVICE", async (event: TCEvent<any, JobObject>) => {
         updatePayload.extra_attrs = { student_school: school.value.split(" ").map(capitalize).join(" ") };
 
         const schoolName = updatePayload.extra_attrs.student_school.toLowerCase();
+        const clientAddress = getAttrByMachineName("home_address", client.extra_attrs);
+        const milesFound = clientAddress?.value.toLowerCase.includes("ct") || clientAddress?.value.toLowerCase.includes("connecticut") || clientAddress?.value.toLowerCase.includes("fairfield");
 
         // set sophie hansen (blair), pavani (churchill), or mike (other) as client manager
         if (blairSchools.some(school => schoolName.includes(school))) {
             updatePayload.associated_admin = ClientManager.Sophie;
         } else if (churchillSchools.some(school => schoolName.includes(school))) {
             updatePayload.associated_admin = ClientManager.Pavani;
-        } else if (wjSchools.some(school => schoolName.includes(school))) {
-            updatePayload.associated_admin = ClientManager.Sophia;
+        } else if (milesFound) {
+            updatePayload.associated_admin = ClientManager.Miles;
         } else {
             updatePayload.associated_admin = ClientManager.Mike;
         }
-
+        
+        await setJobRate(client, job, milesFound);
         await updateClient(updatePayload);
     }
 });
