@@ -1,4 +1,5 @@
 import axios from "axios";
+import { GeoResponse, geocode } from "../../../geo";
 import { awaitingAvailMail } from "../../../mail/awaitingAvail";
 import { queueFirstLessonComplete } from "../../../mail/firstLesson";
 import { goneColdMail } from "../../../mail/goneCold";
@@ -126,18 +127,27 @@ const setDftLocation = (job: JobObject): UpdateServicePayload => {
     return oldJob;
 };
 
+/**
+ * @param {ClientObject} client client who's child is getting tutored
+ * @param {JobObject} job job object
+ * @param {boolean} milesFound if client is in connecticut
+ * @returns {undefined}
+ * TODO: make miles found distance from maryland
+ */
 const setJobRate = async (client: ClientObject, job: JobObject, milesFound: boolean) => {
     const studentGrade = getAttrByMachineName("student_grade", client.extra_attrs);
-    let chargeRate = 40.0;
+    if(!studentGrade)
+        return;
+    let chargeRate = 40;
 
-    if (milesFound) {
-        if (studentGrade?.value !== "1st-5th grade") {
-            chargeRate = 65.0;
-        } else {
-            chargeRate = 55.0;
-        }
-    } else if (studentGrade?.value !== "1st-5th grade")
-            return;
+    if(!milesFound && studentGrade.value !== "1st-5th grade")
+        return;
+
+    if(milesFound){
+        chargeRate = 65;
+        if (studentGrade.value === "1st-5th grade")
+            chargeRate = 55;
+    }
 
     const jobUpdate = getMinimumJobUpdate(job);
     jobUpdate.dft_charge_rate = chargeRate;
@@ -170,7 +180,8 @@ addTCListener("REQUESTED_A_SERVICE", async (event: TCEvent<any, JobObject>) => {
 
         const schoolName = updatePayload.extra_attrs.student_school.toLowerCase();
         const clientAddress = getAttrByMachineName("home_address", client.extra_attrs);
-        const milesFound = clientAddress?.value.toLowerCase.includes("ct") || clientAddress?.value.toLowerCase.includes("connecticut") || clientAddress?.value.toLowerCase.includes("fairfield");
+        const addressResponses: GeoResponse[] = await geocode(clientAddress?.value);
+        const milesFound = addressResponses[0]?.display_name?.toLowerCase().includes("connecticut");
 
         // set sophie hansen (blair), pavani (churchill), or mike (other) as client manager
         if (blairSchools.some(school => schoolName.includes(school))) {
