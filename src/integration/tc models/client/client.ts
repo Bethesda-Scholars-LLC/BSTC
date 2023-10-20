@@ -13,6 +13,7 @@ import { getContractorById } from "../contractor/contractor";
 import ScheduleMail from "../../../models/scheduledEmail";
 import NotCold from "../../../models/notCold";
 import { getUserFullName } from "../user/user";
+import { dormantBookedMail } from "../../../mail/dormantBooked";
 
 export enum ClientManager {
     Mike=2182255,
@@ -125,6 +126,16 @@ addTCListener("BOOKED_AN_APPOINTMENT", async (event: TCEvent<any, LessonObject>)
     // when booking with random tutor, its possible that there is no job created yet, look into that
     if (!job)
         return;
+    
+    // check if client is in dormant
+    const client = await getClientById(job.rcrs[0].paying_client);
+    if (client?.status === "dormant") {
+        transporter.sendMail(dormantBookedMail(job, client), (err) => {
+            if(err)
+                Log.error(err);
+        });
+        return;
+    }
 
     // if booked with wrong tutor notify us and return
     if (job.description.toLowerCase().includes("job created while booking a lesson through tutorcruncher") &&
@@ -135,7 +146,6 @@ addTCListener("BOOKED_AN_APPOINTMENT", async (event: TCEvent<any, LessonObject>)
                 return;
             }
         }
-        const client = await getClientById(job.rcrs[0].paying_client);
         const contractor = await getContractorById(job.conjobs[0].contractor);
         transporter.sendMail(wrongTutorMail(job, client, contractor), (err) => {
             if(err)
