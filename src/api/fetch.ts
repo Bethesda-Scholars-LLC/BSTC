@@ -1,8 +1,5 @@
-// axios stuff
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
-// channels for sending between mainLoop and sendRequest
 import { SimpleChannel } from "channel-ts";
-// Log is our logging, apiHeaders includes our api key, apiUrl turns a url into a tutorcruncher api url, and stallFor sleep
 import { Log, apiHeaders, apiUrl, stallFor } from "../util";
 
 type TCApiReq = {
@@ -12,7 +9,7 @@ type TCApiReq = {
 }
 
 //                num of reqs, num of seconds
-const rateData = [50, 30];
+const rateData = [20, 30];
 
 class TCApiFetcher {
     /**
@@ -59,6 +56,7 @@ class TCApiFetcher {
         }
         this.loopRunning = true;
         // infinite for loop
+        let sent = 0;
         for(;;){
             try {
                 // if we have nothing to send, stall for 100ms
@@ -79,24 +77,24 @@ class TCApiFetcher {
                     continue;
                 }
 
+                sent++;
+                Log.debug(`Sending ${sent}...`);
                 // sending a request, so add to sentAt
                 this.sentAt.push(Date.now());
                 const currReq = this.toSend.shift()!; // eslint-disable-line
-                try {
-                    const resp = await axios(
-                        apiUrl(currReq.url), {
-                        ...currReq.config,
-                        headers: {
-                            ...apiHeaders,
-                            ...currReq.config?.headers,
-                        }
-                    });
+                axios(
+                    apiUrl(currReq.url), {
+                    ...currReq.config,
+                    headers: {
+                        ...apiHeaders,
+                        ...currReq.config?.headers,
+                    }
+                }).then(resp => {
                     currReq.chan.send(resp);
-                } catch(e) {
+                }).catch(e => {
                     Log.error(e);
                     currReq.chan.send(null);
-                    break;
-                }
+                });
             } catch(e) {
                 Log.error(e);
             }

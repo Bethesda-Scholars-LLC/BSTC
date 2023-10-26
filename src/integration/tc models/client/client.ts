@@ -1,19 +1,19 @@
-import axios from "axios";
-import { ManyResponse, TCEvent } from "../../../types";
-import { Log, apiHeaders, apiUrl, randomChoice } from "../../../util";
-import { ClientObject, UpdateClientPayload } from "./types";
-import { addTCListener } from "../../hook";
-import { DumbUser } from "../user/types";
-import { Labels, PipelineStage, getServiceById } from "../service/service";
-import { LessonObject } from "../lesson/types";
-import { JobObject } from "../service/types";
+import ApiFetcher from "../../../api/fetch";
+import { dormantBookedMail } from "../../../mail/dormantBooked";
 import { EmailTypes, transporter } from "../../../mail/mail";
 import { wrongTutorMail } from "../../../mail/wrongTutor";
-import { getContractorById } from "../contractor/contractor";
-import ScheduleMail from "../../../models/scheduledEmail";
 import NotCold from "../../../models/notCold";
+import ScheduleMail from "../../../models/scheduledEmail";
+import { ManyResponse, TCEvent } from "../../../types";
+import { Log, randomChoice } from "../../../util";
+import { addTCListener } from "../../hook";
+import { getContractorById } from "../contractor/contractor";
+import { LessonObject } from "../lesson/types";
+import { Labels, PipelineStage, getServiceById } from "../service/service";
+import { JobObject } from "../service/types";
+import { DumbUser } from "../user/types";
 import { getUserFullName } from "../user/user";
-import { dormantBookedMail } from "../../../mail/dormantBooked";
+import { ClientObject, UpdateClientPayload } from "./types";
 
 export enum ClientManager {
     Mike=2182255,
@@ -24,9 +24,8 @@ export enum ClientManager {
 
 export const updateClient = async (data: UpdateClientPayload) => {
     try {
-        await axios(apiUrl("/clients/"), {
+        await ApiFetcher.sendRequest("/clients/", {
             method: "POST",
-            headers: apiHeaders,
             data
         });
     } catch(e) {
@@ -36,7 +35,7 @@ export const updateClient = async (data: UpdateClientPayload) => {
 
 export const getRandomClient = async (): Promise<ClientObject | null> => {
     try {
-        const clients = (await axios(apiUrl("/clients"), {headers: apiHeaders})).data as ManyResponse<DumbUser>;
+        const clients = (await ApiFetcher.sendRequest("/clients"))?.data as ManyResponse<DumbUser>;
 
         if(clients.count === 0)
             return null;
@@ -60,9 +59,7 @@ export const getMinimumClientUpdate = (client: ClientObject): UpdateClientPayloa
 
 export const getClientById = async (id: number): Promise<ClientObject | null> => {
     try {
-        return (await axios(apiUrl(`/clients/${id}`), {
-            headers: apiHeaders
-        })).data as ClientObject;
+        return (await ApiFetcher.sendRequest(`/clients/${id}`))?.data as ClientObject;
     } catch(e) {
         Log.error(e);
         return null;

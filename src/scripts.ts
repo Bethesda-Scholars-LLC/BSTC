@@ -1,18 +1,16 @@
-import axios from "axios";
+import ApiFetcher from "./api/fetch";
 import { getRandomClient } from "./integration/tc models/client/client";
 import { getContractorById, getRandomContractor, setLookingForJob } from "./integration/tc models/contractor/contractor";
 import { ContractorObject } from "./integration/tc models/contractor/types";
 import { getManyServices, getMinimumJobUpdate, getRandomService, getServiceById, updateServiceById } from "./integration/tc models/service/service";
 import clientMatchedMail from "./mail/clientMatched";
 import { transporter } from "./mail/mail";
-import { Log, apiHeaders, apiUrl, getAttrByMachineName, stallFor } from "./util";
+import { Log, getAttrByMachineName, stallFor } from "./util";
 
 
 const getContractors = async (page?: number): Promise<ContractorObject | null> => {
     try {
-        return (await axios(apiUrl(`/contractors?page=${page ?? 1}`), {
-            headers: apiHeaders
-        })).data;
+        return (await ApiFetcher.sendRequest(`/contractors?page=${page ?? 1}`))?.data;
     } catch(e) {
         Log.error(e);
         return null;
