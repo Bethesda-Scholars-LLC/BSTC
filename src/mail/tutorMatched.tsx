@@ -69,6 +69,7 @@ const TutorMatched = (props: {tutor: ContractorObject, client: ClientObject | nu
             You can find more details about the address, frequency, and subject under the tab "My Jobs" on your account.
         </b> If a lesson lasts longer or shorter than one hour, before marking the lesson as complete, click on the blue "Actions" button, then select edit to change the length of the session.
         <br/>
+        <b style={{backgroundColor: "yellow"}}> Please keep your student's information confidential. We have a zero tolerance policy for talking about students in a disrespectful manner or disclosing students' names, academic performance, weakenesses, or personal details.</b>
         <br/>
         If you have any questions, you can reply directly to this email.
         <br/>
