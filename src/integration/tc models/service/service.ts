@@ -1,4 +1,4 @@
-import axios from "axios";
+import ApiFetcher from "../../../api/fetch";
 import { GeoResponse, geocode } from "../../../geo";
 import { awaitingAvailMail } from "../../../mail/awaitingAvail";
 import { queueFirstLessonComplete } from "../../../mail/firstLesson";
@@ -10,7 +10,7 @@ import AwaitingClient from "../../../models/clientAwaiting";
 import NotCold from "../../../models/notCold";
 import ScheduleMail from "../../../models/scheduledEmail";
 import { ManyResponse, TCEvent } from "../../../types";
-import { Log, PROD, apiHeaders, apiUrl, capitalize, getAttrByMachineName, randomChoice } from "../../../util";
+import { Log, PROD, capitalize, getAttrByMachineName, randomChoice } from "../../../util";
 import { addTCListener } from "../../hook";
 import { ClientManager, getClientById, getMinimumClientUpdate, updateClient } from "../client/client";
 import { ClientObject } from "../client/types";
@@ -43,9 +43,8 @@ export const enum Labels {
 
 export const updateServiceById = async (id: number, data: UpdateServicePayload) => {
     try {
-        await axios(apiUrl(`/services/${id}/`), {
+        await ApiFetcher.sendRequest(`/services/${id}/`, {
             method: "PUT",
-            headers: apiHeaders,
             data: data
         });
     } catch (e) {
@@ -55,7 +54,7 @@ export const updateServiceById = async (id: number, data: UpdateServicePayload) 
 
 export const getServiceById = async (id: number): Promise<JobObject | null> => {
     try {
-        return (await axios(apiUrl(`/services/${id}/`), { headers: apiHeaders })).data as JobObject;
+        return (await ApiFetcher.sendRequest(`/services/${id}/`))?.data as JobObject;
     } catch (e) {
         Log.error(e);
     }
@@ -64,7 +63,7 @@ export const getServiceById = async (id: number): Promise<JobObject | null> => {
 
 export const getManyServices = async (page?: number): Promise<ManyResponse<DumbJob> | null> => {
     try {
-        return (await axios(apiUrl(`/services?page=${Math.max(page ?? 1, 1)}`), { headers: apiHeaders })).data as ManyResponse<DumbJob>;
+        return (await ApiFetcher.sendRequest(`/services?page=${Math.max(page ?? 1, 1)}`))?.data as ManyResponse<DumbJob>;
     } catch (e) {
         return null;
     }

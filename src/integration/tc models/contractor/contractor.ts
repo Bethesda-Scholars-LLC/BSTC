@@ -1,5 +1,5 @@
 
-import axios from "axios";
+import ApiFetcher from "../../../api/fetch";
 import { awaitingBookingMail } from "../../../mail/awaitingBooking";
 import clientMatchedMail from "../../../mail/clientMatched";
 import { contractorIncompleteMail } from "../../../mail/contractorIncomplete";
@@ -9,7 +9,7 @@ import { tutorReferralMail } from "../../../mail/tutorReferral";
 import AwaitingClient, { popTutorFromCA } from "../../../models/clientAwaiting";
 import ScheduleMail from "../../../models/scheduledEmail";
 import { ManyResponse, TCEvent } from "../../../types";
-import { Log, PROD, apiHeaders, apiUrl, capitalize, getAttrByMachineName, randomChoice } from "../../../util";
+import { Log, PROD, capitalize, getAttrByMachineName, randomChoice } from "../../../util";
 import { addTCListener } from "../../hook";
 import { ChargeCat, createAdHocCharge } from "../ad hoc/adHoc";
 import { ClientManager, getClientById, getMinimumClientUpdate, moveToMatchedAndBooked, updateClient } from "../client/client";
@@ -20,9 +20,7 @@ import { ContractorObject, UpdateContractorPayload } from "./types";
 
 export const getContractorById = async (id: number): Promise<ContractorObject | null> => {
     try {
-        return (await axios(apiUrl(`/contractors/${id}`), {
-            headers: apiHeaders
-        })).data as ContractorObject;
+        return (await ApiFetcher.sendRequest(`/contractors/${id}`))?.data as ContractorObject;
     } catch (e) {
         Log.error(e);
         return null;
@@ -31,9 +29,8 @@ export const getContractorById = async (id: number): Promise<ContractorObject | 
 
 const updateContractor = async (data: UpdateContractorPayload) => {
     try {
-        return await axios(apiUrl("/contractors/"), {
+        return await ApiFetcher.sendRequest("/contractors/", {
             method: "POST",
-            headers: apiHeaders,
             data
         });
     } catch (e) {
@@ -43,7 +40,7 @@ const updateContractor = async (data: UpdateContractorPayload) => {
 
 export const getRandomContractor = async (): Promise<ContractorObject | null> => {
     try {
-        const services = (await axios(apiUrl("/contractors"), { headers: apiHeaders })).data as ManyResponse<DumbUser>;
+        const services = (await ApiFetcher.sendRequest("/contractors"))?.data as ManyResponse<DumbUser>;
 
         if (services.count === 0)
             return null;

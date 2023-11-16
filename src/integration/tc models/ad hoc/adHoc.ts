@@ -1,5 +1,5 @@
-import axios from "axios";
-import { Log, apiHeaders, apiUrl } from "../../../util";
+import ApiFetcher from "../../../api/fetch";
+import { Log } from "../../../util";
 import { CreateAdHocChargePayload } from "./types";
 
 export const enum ChargeCat {
@@ -10,11 +10,10 @@ export const enum ChargeCat {
 
 export const createAdHocCharge = async (payload: CreateAdHocChargePayload): Promise<void> => {
     try {
-        return (await axios(apiUrl("/adhoccharges/"), {
+        return (await ApiFetcher.sendRequest("/adhoccharges/", {
             method: "POST",
-            headers: apiHeaders,
             data: payload
-        })).data;
+        }))?.data;
     } catch (e) {
         Log.error(e);
         return;
