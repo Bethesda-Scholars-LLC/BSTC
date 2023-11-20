@@ -361,7 +361,8 @@ addTCListener("CHANGED_SERVICE_STATUS", async (event: TCEvent<any, any>) => {
         const contractor = await getContractorById(job.conjobs[0].contractor);
         if (!contractor)
             return;
-
+        
+        /* UNCOMMENT AFTER THANKSGIVING AND CHRISTMAS
         const notCold = await NotCold.findOne({
             job_id: job.id,
             client_id: client.id,
@@ -373,6 +374,7 @@ addTCListener("CHANGED_SERVICE_STATUS", async (event: TCEvent<any, any>) => {
                     Log.error(err);
             });
             // await NotCold.findByIdAndDelete(notCold.id);
+        */
             
             updateServiceById(job.id, {         // change status back to in progress
                 ...getMinimumJobUpdate(job),
