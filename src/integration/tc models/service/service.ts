@@ -361,25 +361,26 @@ addTCListener("CHANGED_SERVICE_STATUS", async (event: TCEvent<any, any>) => {
         const contractor = await getContractorById(job.conjobs[0].contractor);
         if (!contractor)
             return;
-
+        
         const notCold = await NotCold.findOne({
             job_id: job.id,
             client_id: client.id,
             tutor_id: contractor.id
         });
         if (notCold) {
+
+            /* UNCOMMENT AFTER THANKSGIVING AND CHRISTMAS
             transporter.sendMail(goneColdMail(job, client, contractor), (err) => {
                 if (err)
                     Log.error(err);
             });
             // await NotCold.findByIdAndDelete(notCold.id);
+            */
             
             updateServiceById(job.id, {         // change status back to in progress
                 ...getMinimumJobUpdate(job),
                 status: "in-progress",
             });
         }
-        
-        
     }
 });
