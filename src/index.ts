@@ -2,15 +2,13 @@ import cors from "cors";
 import express, { json } from "express";
 import mongoose from "mongoose";
 import apiRouter from "./api/api";
-import ApiFetcher from "./api/fetch";
 import tutorAvailRouter from "./api/tutoravailability";
 import hookRouter from "./integration/hook";
 import "./integration/tc models/contractor/contractor";
 import "./integration/tc models/service/service";
-import { DumbUser } from "./integration/tc models/user/types";
 import "./mail/mail";
 import "./scripts";
-import { ManyResponse, Req } from "./types";
+import { Req } from "./types";
 import { DB_URI, Log, PROD } from "./util";
 
 mongoose.connect(DB_URI).then(() => { // eslint-disable-line
@@ -40,6 +38,6 @@ app.use("/api", apiRouter);
 app.use("/hook", hookRouter);
 app.use("/tutoravailability", tutorAvailRouter);
 
-app.listen(process.env.PORT, () => {
+app.listen(process.env.PORT ?? 80, () => {
     Log.debug("Ready to go");
 });
