@@ -369,13 +369,13 @@ addTCListener("CHANGED_SERVICE_STATUS", async (event: TCEvent<any, any>) => {
         });
         if (notCold) {
 
-            /* UNCOMMENT AFTER THANKSGIVING AND CHRISTMAS
+            // COMMENT BEFORE THANKSGIVING AND CHRISTMAS
             transporter.sendMail(goneColdMail(job, client, contractor), (err) => {
                 if (err)
                     Log.error(err);
             });
             // await NotCold.findByIdAndDelete(notCold.id);
-            */
+            
             
             updateServiceById(job.id, {         // change status back to in progress
                 ...getMinimumJobUpdate(job),
