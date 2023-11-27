@@ -13,6 +13,7 @@ BUSINESS_EMAIL_ADDRESS=my@business.com
 BUSINESS_EMAIL_FROM=My Business
 TEST_EMAIL_ADDRESS=test@test.com
 SIGNATURE_DESCRIPTION=Co-Founder and CEO at My Business Inc.
+PORT=80
 
 DB_NAME=my_db
 DB_TEST_NAME=test

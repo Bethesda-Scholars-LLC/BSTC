@@ -17,6 +17,7 @@ mongoose.connect(DB_URI).then(() => { // eslint-disable-line
     Log.debug(`Connected to ${(PROD ? process.env.DB_NAME : process.env.DB_TEST_NAME)}`);
 }).catch(Log.error);
 
+/* RATE LIMIT TESTING
 (async () => {
     const contractors: ManyResponse<DumbUser> = (await ApiFetcher.sendRequest("/contractors"))?.data;
     if(!contractors)
@@ -25,7 +26,7 @@ mongoose.connect(DB_URI).then(() => { // eslint-disable-line
         const currId = contractors.results[i % contractors.count].id;
         ApiFetcher.sendRequest(`/contractors/${currId}`);
     }
-})();
+})(); */
 
 const app = express();
 app.use(cors());
@@ -39,6 +40,6 @@ app.use("/api", apiRouter);
 app.use("/hook", hookRouter);
 app.use("/tutoravailability", tutorAvailRouter);
 
-app.listen(80, () => {
+app.listen(process.env.PORT, () => {
     Log.debug("Ready to go");
 });
