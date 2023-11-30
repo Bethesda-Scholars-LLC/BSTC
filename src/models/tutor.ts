@@ -1,4 +1,4 @@
-import { Schema, Types, model } from "mongoose";
+import { Schema, model } from "mongoose";
 
 export class TutorSubject {
     constructor (public subject: string, public skillLevel: number) { }
@@ -6,7 +6,8 @@ export class TutorSubject {
 
 export interface TutorSkill {
     subject: string,
-    skillLevel: number
+    skillLevel: number,
+    levelName: string
 }
 
 export enum TutorGender {
@@ -15,62 +16,39 @@ export enum TutorGender {
     Other=2
 }
 
-export enum TutorStatus {
-    Pending=0,
-    Approved=1,
-    Rejected=2,
-    Dormant=3
-}
-
 export interface ITutor {
-    _id: Types.ObjectId
+    cruncher_id: number,
     lat: number,
     lon: number,
     grade: number,
     bias: number,
     stars: number,
-    dateApproved: Date,
+    dateApproved?: Date,
 
     // per week on average
-    lessonFrequency: number,
+    lessonFrequency?: number,
 
-    gender: TutorGender,
+    gender: number,
 
     skills: TutorSkill[],
     gpa: number,
 
-    tutor_id: number,
-    status: number,
+    status: string,
 }
 
 const tutorSchema = new Schema<ITutor>({
-    _id: {
-        type: Schema.Types.ObjectId,
-        required: true,
-        auto: true,
-    },
-    lat: {
-        type: Number
-    },
-    lon: {
-        type: Number
-    },
-    grade: {
-        type: Number
-    },
-    bias: {
-        type: Number
-    },
-    stars: {
-        type: Number
-    },
+    lat: Number,
+    lon: Number,
+    grade: Number,
+    bias: Number,
+    stars: Number,
     dateApproved: Number,
     lessonFrequency: Number,
     gender: Number,
-    skills: Types.Array,
+    skills: Schema.Types.Array,
     gpa: Number,
-    tutor_id: Number,
-    status: Number,
+    cruncher_id: Number,
+    status: String,
 
 });
 

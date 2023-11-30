@@ -119,7 +119,7 @@ export const getAttrByMachineName = (name: string, extra_attrs: {machine_name: s
 export const capitalize = (str: string): string => {
     if(str.length < 2)
         return str.toUpperCase();
-    return str.charAt(0).toUpperCase()+str.substring(1);
+    return str.charAt(0).toUpperCase()+str.substring(1).toLowerCase();
 };
 
 export const calcStripeFee = (lessonPrice: number): string => {

@@ -1,6 +1,7 @@
 import cors from "cors";
 import express, { json } from "express";
 import mongoose from "mongoose";
+import "./algo/algo";
 import apiRouter from "./api/api";
 import tutorAvailRouter from "./api/tutoravailability";
 import hookRouter from "./integration/hook";
