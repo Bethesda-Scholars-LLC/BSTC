@@ -59,7 +59,7 @@ const gradePossibilities: {[key: string]: number} = {
     "college senior": 16
 };
 
-const skillsHeiherarchy = [
+const skillsHierarchy = [
     "other",
     "gpa",
     "primary",
@@ -100,8 +100,8 @@ const tutorFromContractor = (con: ContractorObject): ITutor => {
         skills: con.skills.map(val => {
                 return {
                     subject: val.subject,
-                    skillLevel: skillsHeiherarchy.indexOf(val.qual_level.toLowerCase()),
-                    levelName: val.qual_level
+                    skillLevel: skillsHierarchy.indexOf(val.qual_level.toLowerCase()),
+                    levelName: val.qual_level.toLowerCase()
                 };
             }),
         gpa: getAttrByMachineName("unweighted_gpa_1", con.extra_attrs)!.value,

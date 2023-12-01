@@ -25,9 +25,6 @@ export interface ITutor {
     stars: number,
     dateApproved?: Date,
 
-    // per week on average
-    lessonFrequency?: number,
-
     gender: number,
 
     skills: TutorSkill[],
@@ -43,7 +40,6 @@ const tutorSchema = new Schema<ITutor>({
     bias: Number,
     stars: Number,
     dateApproved: Number,
-    lessonFrequency: Number,
     gender: Number,
     skills: Schema.Types.Array,
     gpa: Number,

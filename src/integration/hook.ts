@@ -11,6 +11,10 @@ const listeners: {
 
 export const addTCListener = (eventName: string, listener: TCEventListener) => {
     if(eventName in listeners) {
+        if(listeners[eventName].includes(listener)) {
+            Log.debug(`EXACT SAME LISTENER BINDING TWICE IN ${eventName}`);
+            return;
+        }
         listeners[eventName].push(listener);
         return;
     }
