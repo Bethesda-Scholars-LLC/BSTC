@@ -56,7 +56,6 @@ class TCApiFetcher {
         }
         this.loopRunning = true;
         // infinite for loop
-        let sent = 0;
         for(;;){
             try {
                 // if we have nothing to send, stall for 100ms
@@ -77,8 +76,6 @@ class TCApiFetcher {
                     continue;
                 }
 
-                sent++;
-                Log.debug(`Sending ${sent}...`);
                 // sending a request, so add to sentAt
                 this.sentAt.push(Date.now());
                 const currReq = this.toSend.shift()!; // eslint-disable-line

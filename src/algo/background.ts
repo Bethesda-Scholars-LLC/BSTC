@@ -13,6 +13,7 @@ const updatedContractorFunc = (ev: TCEvent<any, ContractorObject>) => {
     if(!("skills" in contractor)) {
         return;
     }
+    Log.debug(contractor.skills);
     SyncContractor(contractor);
 };
 
@@ -27,25 +28,32 @@ const SyncContractor = async (contractor: ContractorObject) => {
     const lock = contractorLocks[contractor.id];
     await lock.acquire();
     try {
-        const tutor = await TutorModel.findOne({tutor_id: contractor.id}).exec();
+        const tutor = await TutorModel.findOne({cruncher_id: contractor.id}).exec();
 
         if(!tutor) {
-            tutorFromContractor(contractor);
+            const fromContractor = tutorFromContractor(contractor);
+            TutorModel.create(fromContractor);
             return;
         }
 
+        const newTutor = tutorFromContractor(contractor);
         if(contractor.status.toLowerCase() !== tutor.status && contractor.status.toLowerCase() === "approved")
             tutor.dateApproved = new Date();
-        
-        tutor.status = contractor.status.toLowerCase();
-        tutor.lon = contractor.user.longitude;
-        tutor.lat = contractor.user.latitude;
+
+        tutor.lat = newTutor.lat;
+        tutor.lon = newTutor.lon;
+        tutor.grade = newTutor.grade;
+        tutor.stars = newTutor.stars;
+        tutor.gender = newTutor.gender;
+        tutor.skills = newTutor.skills;
+        tutor.gpa = newTutor.gpa;
+        tutor.status = newTutor.status;
+
         await tutor.save();
     } catch (e) {
-        Log.debug(e);
-        lock.release();
-        return;
+        Log.error(e);
     }
+    lock.release();
 };
 
 const gradePossibilities: {[key: string]: number} = {
@@ -89,15 +97,30 @@ const tutorFromContractor = (con: ContractorObject): ITutor => {
         genderNum = 2;
     }
     
+    // .map(val => {return {...val, qual_level: [val.qual_level]};})
     return {
         cruncher_id: con.id,
         lat: con.user.latitude,
         lon: con.user.longitude,
         grade: gradeNum,
         bias: 0,
-        stars: getAttrByMachineName("rating", con.extra_attrs)!.value,
+        stars: getAttrByMachineName("rating", con.extra_attrs)!.value.split("/")[0],
         gender: genderNum,
-        skills: con.skills.map(val => {
+        skills: con.skills
+            .reduce((prev: {id: number, subject: string, qual_level: string}[], cur) => {
+                let merged = false;
+                for(let i = 0; i < prev.length; i++) {
+                    if(prev[i].subject === cur.subject) {
+                        merged = true;
+                        const newLevel = skillsHierarchy.indexOf(cur.qual_level.toLowerCase());
+                        if(newLevel > skillsHierarchy.indexOf(prev[i].qual_level.toLowerCase()))
+                            prev[i].qual_level = cur.qual_level;
+                    }
+                }
+                if(merged)
+                    return prev;
+                return [...prev, cur];
+            }, []).map(val => {
                 return {
                     subject: val.subject,
                     skillLevel: skillsHierarchy.indexOf(val.qual_level.toLowerCase()),
