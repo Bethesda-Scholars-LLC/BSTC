@@ -1,6 +1,8 @@
 import { Mutex } from "async-mutex";
+import { Duration } from "ts-duration";
 import { addTCListener } from "../integration/hook";
 import { ContractorObject } from "../integration/tc models/contractor/types";
+import LessonModel from "../models/lesson";
 import TutorModel, { ITutor } from "../models/tutor";
 import { TCEvent } from "../types";
 import { Log, PROD, getAttrByMachineName } from "../util";
@@ -53,14 +55,14 @@ const skillsHierarchy = [
 
 addTCListener("DELETED_A_CONTRACTOR", async (ev: TCEvent<any, ContractorObject>) => {
     const contractor = ev.subject;
-    const lock = await createContractorLock(contractor.id);
+    const lock = await getContractorLock(contractor.id);
     await lock.acquire();
     try {
         const tutor = await TutorModel.findOne({cruncher_id: contractor.id}).exec();
 
         // deleted but it doesn't matter
         if(!tutor) {
-            await lock.release();
+            lock.release();
             return;
         }
         tutor.deleted_on = new Date();
@@ -69,19 +71,19 @@ addTCListener("DELETED_A_CONTRACTOR", async (ev: TCEvent<any, ContractorObject>)
     } catch (e) {
         Log.error(e);
     } finally {
-        await lock.release();
+        lock.release();
     }
 });
 
 addTCListener("RECOVERED_A_CONTRACTOR", async (ev: TCEvent<any, ContractorObject>) => {
     const contractor = ev.subject;
-    const lock = await createContractorLock(contractor.id);
+    const lock = await getContractorLock(contractor.id);
     await lock.acquire();
     try {
         const tutor = await TutorModel.findOne({cruncher_id: contractor.id}).exec();
         if(!tutor) {
             await TutorModel.create(tutorFromContractor(contractor));
-            await lock.release();
+            lock.release();
             return;
         }
 
@@ -90,7 +92,7 @@ addTCListener("RECOVERED_A_CONTRACTOR", async (ev: TCEvent<any, ContractorObject
     } catch (e) {
         Log.error(e);
     } finally {
-        await lock.release();
+        lock.release();
     }
 });
 
@@ -102,7 +104,7 @@ function updatedContractorFunc(ev: TCEvent<any, ContractorObject>) {
     SyncContractor(contractor);
 }
 
-async function createContractorLock(contractor_id: number): Promise<Mutex> {
+async function getContractorLock(contractor_id: number): Promise<Mutex> {
     if(!contractorLocks[contractor_id]) {
         await newLockLock.acquire();
         if(!contractorLocks[contractor_id])
@@ -114,7 +116,7 @@ async function createContractorLock(contractor_id: number): Promise<Mutex> {
 }
 
 async function SyncContractor(contractor: ContractorObject) {
-    const lock = await createContractorLock(contractor.id);
+    const lock = await getContractorLock(contractor.id);
     await lock.acquire();
     try {
         const tutor = await TutorModel.findOne({cruncher_id: contractor.id}).exec();
@@ -128,7 +130,7 @@ async function SyncContractor(contractor: ContractorObject) {
 
         const newTutor = tutorFromContractor(contractor);
         if(contractor.status.toLowerCase() !== tutor.status && contractor.status.toLowerCase() === "approved")
-            tutor.dateApproved = new Date();
+            tutor.date_approved = new Date();
 
         [
             "first_name",
@@ -136,6 +138,8 @@ async function SyncContractor(contractor: ContractorObject) {
             "lat",
             "lon",
             "grade",
+            "total_paid_hours",
+            "work_ready",
             "stars",
             "gender",
             "skills",
@@ -177,7 +181,7 @@ function tutorFromContractor(con: ContractorObject): ITutor {
         grade: gradeNum,
 
         recent_hours: 0,
-        hours_valid_until: new Date(new Date().getUTCMilliseconds() + (30 * 24 * 60 * 60 * 1000)),
+        hours_valid_until: new Date(new Date().getTime() + (30 * 24 * 60 * 60 * 1000)),
 
         total_paid_hours: con.work_done_details.total_paid_hours,
 
@@ -218,10 +222,47 @@ function tutorFromContractor(con: ContractorObject): ITutor {
     /* eslint-enable */
 }
 
+export async function syncTutorHours(contractorId: number) {
+    const lock = await getContractorLock(contractorId);
+    try {
+        // get tutor lessons sorted in ascending order by date completed
+        const tutorLessons = await LessonModel.find({tutor_id: contractorId}, undefined, {sort: {completed_on: 1}}).exec();
+        // purge all lessons at beginning of array that are before 30 day cutoff
+        for(;;) {
+            if(tutorLessons.length === 0 || (tutorLessons[0].completed_on.getTime()) > (new Date().getTime() - Duration.hour(30 * 24).milliseconds) )
+                break;
+            tutorLessons.shift();
+        }
+
+        // get oldest lesson completed on time and then add 30 days
+        const validUntil = new Date((tutorLessons[0]?.completed_on ?? new Date()).getTime() + Duration.hour(30 * 24).milliseconds);
+        let totalHours = 0;
+        for(let i = 0; i < tutorLessons.length; i++) {
+            totalHours += tutorLessons[i].lesson_time;
+        }
+        // lock contractor lock
+        await lock.acquire();
+        const tutor = await TutorModel.findOne({cruncher_id: contractorId}).exec();
+        if(!tutor) {
+            lock.release();
+            return;
+        }
+
+        tutor.hours_valid_until = validUntil;
+        tutor.recent_hours = totalHours;
+
+        await tutor.save();
+    } catch (e) {
+        Log.error(e);
+    } finally {
+        lock.release();
+    }
+}
+
 function checkBoolExtraAttr(extra_attrs: any, attr: string): boolean | undefined {
     const walue = getAttrByMachineName(attr, extra_attrs);
     if(!walue) {
         return undefined;
     }
-    return walue?.value === "True";
+    return walue.value === "True";
 }

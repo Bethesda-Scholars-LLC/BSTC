@@ -100,7 +100,7 @@ export const popTutorFromCAs = async (contractor: ContractorObject) => {
 
     const dbAwaitings = await AwaitingClient.find({
         tutor_ids: contractor.id
-    });
+    }).exec();
 
     for (let i = 0; i < dbAwaitings.length; i++) {
         const awaitingClient = popTutorFromCA(dbAwaitings[i], contractor.id);

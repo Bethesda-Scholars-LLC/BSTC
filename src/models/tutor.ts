@@ -22,7 +22,7 @@ export interface ITutor {
     grade: number,
     bias: number,
     stars: number,
-    dateApproved?: Date,
+    date_approved?: Date,
 
     recent_hours: number,
     hours_valid_until: Date,
@@ -45,18 +45,39 @@ const WorkReadySchema = new Schema<IWorkReady>({
 });
 
 const tutorSchema = new Schema<ITutor>({
-    first_name: String,
-    last_name: String,
-    cruncher_id: Number,
+    first_name: {
+        type: String,
+        required: true,
+    },
+    last_name: {
+        type: String,
+        required: true,
+    },
+    cruncher_id: {
+        type: Number,
+        required: true,
+    },
     deleted_on: Date,
     lat: Number,
     lon: Number,
-    grade: Number,
-    bias: Number,
-    stars: Number,
-    dateApproved: Number,
+    grade: {
+        type: Number,
+        required: true,
+    },
+    bias: {
+        type: Number,
+        required: true,
+    },
+    stars: {
+        type: Number,
+        required: true,
+    },
+    date_approved: Date,
 
-    recent_hours: Number,
+    recent_hours: {
+        type: Number,
+        required: true,
+    },
     hours_valid_until: Date,
 
     total_paid_hours: String,

@@ -3,7 +3,7 @@ import { Schema, model } from "mongoose";
 
 export interface ILesson {
     cruncher_id: number,
-    tutor_ids: number[],
+    tutor_id: number,
     completed_on: Date,
     lesson_time: number,
 }
@@ -11,7 +11,7 @@ export interface ILesson {
 
 const lessonSchema = new Schema<ILesson>({
     cruncher_id: Number,
-    tutor_ids: Schema.Types.Array,
+    tutor_id: Number,
     completed_on: Date,
     lesson_time: Number
 });

@@ -51,6 +51,7 @@
     "nodemailer": "^6.9.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "stripe": "^12.8.0"
+    "stripe": "^12.8.0",
+    "ts-duration": "^1.1.0"
   }
 }

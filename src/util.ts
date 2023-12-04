@@ -68,6 +68,32 @@ export const apiHeaders = {
 
 const baseUrl = "https://secure.tutorcruncher.com/api/";
 
+export const isObject = (obj: any): boolean => typeof obj === "object" && !Array.isArray(obj) && obj !== null;
+
+export const getValue = (target: any, path: string[]): any => {
+    if (!target)
+        return undefined;
+    for (let i = 0; i < path.length - 1; i++) {
+        target = target[path[i]];
+
+        if (!isObject(target))
+            return undefined;
+    }
+    return target[path[path.length - 1]];
+};
+
+export const changeValue = (target: any, path: string[], value: any) => {
+    for (let i = 0; i < path.length - 1; i++) {
+        if (!isObject(target))
+            break;
+        if (!Object.keys(target).includes(path[i]))
+            target[path[i]] = {};
+
+        target = target[path[i]];
+    }
+    target[path[path.length - 1]] = value;
+};
+
 /**
  * @param path Route Path
  * @returns {string} full api request url
