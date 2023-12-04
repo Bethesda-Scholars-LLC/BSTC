@@ -16,16 +16,6 @@ mongoose.connect(DB_URI).then(() => { // eslint-disable-line
     Log.debug(`Connected to ${(PROD ? process.env.DB_NAME : process.env.DB_TEST_NAME)}`);
 }).catch(Log.error);
 
-/* RATE LIMIT TESTING
-(async () => {
-    const contractors: ManyResponse<DumbUser> = (await ApiFetcher.sendRequest("/contractors"))?.data;
-    if(!contractors)
-        return;
-    for(let i = 0; i < 101; i++) {
-        const currId = contractors.results[i % contractors.count].id;
-        ApiFetcher.sendRequest(`/contractors/${currId}`);
-    }
-})(); */
 
 const app = express();
 app.use(cors());

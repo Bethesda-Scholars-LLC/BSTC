@@ -1,6 +1,2 @@
-import { ContractorObject } from "../integration/tc models/contractor/types";
-import "./background";
+import "./contractorSync";
 
-const SyncContractor = (contractor: ContractorObject) => {
-    //
-};
