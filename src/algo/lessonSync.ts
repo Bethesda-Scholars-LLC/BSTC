@@ -1,3 +1,4 @@
+import { Duration } from "ts-duration";
 import { addTCListener } from "../integration/hook";
 import { LessonObject } from "../integration/tc models/lesson/types";
 import LessonModel, { ILesson } from "../models/lesson";
@@ -23,7 +24,7 @@ function getLesson(lesson: LessonObject): ILesson[] {
             tutor_id: val.contractor,
             completed_on: completedOn,
             cruncher_id: lesson.id,
-            lesson_time: (new Date(lesson.start).getTime() - new Date(lesson.finish).getTime()) / (1000 * 60 * 60)
+            lesson_time: Duration.millisecond(new Date(lesson.finish).getTime() - new Date(lesson.start).getTime()).hours
         };
     });
 }

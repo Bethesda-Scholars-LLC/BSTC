@@ -16,6 +16,6 @@ const lessonSchema = new Schema<ILesson>({
     lesson_time: Number
 });
 
-const LessonModel = model("tutors", lessonSchema);
+const LessonModel = model("lessons", lessonSchema);
 
 export default LessonModel;
