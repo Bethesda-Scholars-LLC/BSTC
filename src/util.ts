@@ -37,6 +37,7 @@ const requiredEnvs = [
 
 const envKeys = Object.keys(process.env);
 export const PROD = ["production", "prod"].includes(process.env.NODE_ENV?.toLowerCase() ?? ""); // eslint-disable-line
+export const TEST = ["testing", "test"].includes(process.env.NODE_ENV?.toLowerCase() ?? ""); // eslint-disable-line
 
 export const DIR_ROOT = path.join(__dirname, ".."); // eslint-disable-line
 
@@ -61,7 +62,7 @@ export const DB_URI = process.env.DB_URI! + getDbUri(); // eslint-disable-line
 
 function getDbUri(): string {
     /* eslint-disable */
-    if(!process.env.NODE_ENV || PROD)
+    if(PROD)
         return process.env.DB_NAME!;
     if(process.env.NODE_ENV === "testing")
         return process.env.DB_TEST_NAME!;

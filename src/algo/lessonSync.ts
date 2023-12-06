@@ -4,7 +4,7 @@ import { LessonObject } from "../integration/tc models/lesson/types";
 import LessonModel, { ILesson } from "../models/lesson";
 import { TCEvent } from "../types";
 
-addTCListener("MARKED_APPOINTMENT_AS_COMPLETE", async (ev: TCEvent<any, LessonObject>) => {
+addTCListener("MARKED_AN_APPOINTMENT_AS_COMPLETE", async (ev: TCEvent<any, LessonObject>) => {
     const lesson = ev.subject;
     const dbLessons = await LessonModel.find({cruncher_id: lesson.id}).exec();
     const localLessons = getLesson(lesson);

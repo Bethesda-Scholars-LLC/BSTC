@@ -171,6 +171,7 @@ function tutorFromContractor(con: ContractorObject): ITutor {
     }
     
     // .map(val => {return {...val, qual_level: [val.qual_level]};})
+    Log.debug(con);
     return {
         first_name: con.user.first_name,
         last_name: con.user.last_name,

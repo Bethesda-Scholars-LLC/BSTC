@@ -1,7 +1,6 @@
 import cors from "cors";
 import express, { json } from "express";
 import mongoose from "mongoose";
-import { Duration } from "ts-duration";
 import "./algo/algo";
 import apiRouter from "./api/api";
 import tutorAvailRouter from "./api/tutoravailability";
@@ -11,22 +10,14 @@ import "./integration/tc models/service/service";
 import "./mail/mail";
 import "./scripts";
 import { Req } from "./types";
-import { DB_URI, Log, PROD, stallFor } from "./util";
+import { DB_URI, Log, PROD, TEST } from "./util";
 
-let connected = false;
+const main = () => {
 
-mongoose.connect(DB_URI).then(() => { // eslint-disable-line
-    Log.debug(`Connected to ${(PROD ? process.env.DB_NAME : process.env.DB_TEST_NAME)}`);
-}).catch(Log.error).finally(() => {connected = true;});
+    mongoose.connect(DB_URI).then(() => { // eslint-disable-line
+        Log.debug(`Connected to ${(PROD ? process.env.DB_NAME : process.env.DB_DEV_NAME)}`);
+    }).catch(Log.error);
 
-export const mongoConnected = async () => {
-    while(!connected) {
-        await stallFor(Duration.millisecond(10));
-    }
-};
-
-
-if(process.env.NODE_ENV !== "testing") {
     const app = express();
     app.use(cors());
     app.use(json({
@@ -42,4 +33,7 @@ if(process.env.NODE_ENV !== "testing") {
     app.listen(process.env.PORT ?? 80, () => {
         Log.debug("Ready to go");
     });
-}
+};
+
+if(!TEST)
+    main();

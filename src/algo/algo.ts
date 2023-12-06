@@ -1,2 +1,3 @@
 import "./contractorSync";
+import "./lessonSync";
 
