@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
+import { Duration } from "ts-duration";
 import { ExtraAttr } from "./types";
 dotenv.config();
 
@@ -31,7 +32,6 @@ const requiredEnvs = [
     "SIGNATURE_DESCRIPTION",
 
     "DB_NAME",
-    "DB_TEST_NAME",
     "DB_URI",
 ];
 
@@ -57,7 +57,17 @@ if(requiredEnvs.reduce((prev, val) => {
 
 export const BUSINESS_EMAIL_FROM = `"Bethesda Scholars" <${process.env.BUSINESS_EMAIL_ADDRESS}>`; // eslint-disable-line
 
-export const DB_URI = process.env.DB_URI! + (PROD ? process.env.DB_NAME! : process.env.DB_TEST_NAME); // eslint-disable-line
+export const DB_URI = process.env.DB_URI! + getDbUri(); // eslint-disable-line
+
+function getDbUri(): string {
+    /* eslint-disable */
+    if(!process.env.NODE_ENV || PROD)
+        return process.env.DB_NAME!;
+    if(process.env.NODE_ENV === "testing")
+        return process.env.DB_TEST_NAME!;
+    return process.env.DB_DEV_NAME!;
+    /* eslint-enable */
+}
 
 /**
  * @description Api headers to send to TutorCruncher API
@@ -131,8 +141,8 @@ export const writeFile = (flName: string, data: string | Buffer): Promise<null> 
     });
 };
 
-export const stallFor = async (ms: number) => new Promise((resolve, _reject) => {
-    setTimeout(resolve, ms);
+export const stallFor = async (dur: Duration) => new Promise((resolve, _reject) => {
+    setTimeout(resolve, dur.milliseconds);
 });
 
 export const getAttrByMachineName = (name: string, extra_attrs: {machine_name: string}[]): ExtraAttr | undefined =>

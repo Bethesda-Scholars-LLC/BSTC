@@ -110,7 +110,7 @@ async function getContractorLock(contractor_id: number): Promise<Mutex> {
         if(!contractorLocks[contractor_id])
             contractorLocks[contractor_id] = new Mutex();
         
-        await newLockLock.release();
+        newLockLock.release();
     }
     return contractorLocks[contractor_id];
 }
@@ -181,7 +181,7 @@ function tutorFromContractor(con: ContractorObject): ITutor {
         grade: gradeNum,
 
         recent_hours: 0,
-        hours_valid_until: new Date(new Date().getTime() + (30 * 24 * 60 * 60 * 1000)),
+        hours_valid_until: new Date(new Date().getTime() + Duration.hour(30 * 24).milliseconds),
 
         total_paid_hours: con.work_done_details.total_paid_hours,
 

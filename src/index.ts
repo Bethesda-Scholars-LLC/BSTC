@@ -1,6 +1,7 @@
 import cors from "cors";
 import express, { json } from "express";
 import mongoose from "mongoose";
+import { Duration } from "ts-duration";
 import "./algo/algo";
 import apiRouter from "./api/api";
 import tutorAvailRouter from "./api/tutoravailability";
@@ -10,25 +11,35 @@ import "./integration/tc models/service/service";
 import "./mail/mail";
 import "./scripts";
 import { Req } from "./types";
-import { DB_URI, Log, PROD } from "./util";
+import { DB_URI, Log, PROD, stallFor } from "./util";
+
+let connected = false;
 
 mongoose.connect(DB_URI).then(() => { // eslint-disable-line
     Log.debug(`Connected to ${(PROD ? process.env.DB_NAME : process.env.DB_TEST_NAME)}`);
-}).catch(Log.error);
+}).catch(Log.error).finally(() => {connected = true;});
+
+export const mongoConnected = async () => {
+    while(!connected) {
+        await stallFor(Duration.millisecond(10));
+    }
+};
 
 
-const app = express();
-app.use(cors());
-app.use(json({
-    verify: (req: Req, _, buf) => {
-        req.rawBody = buf.toString();
-    },
-}));
+if(process.env.NODE_ENV !== "testing") {
+    const app = express();
+    app.use(cors());
+    app.use(json({
+        verify: (req: Req, _, buf) => {
+            req.rawBody = buf.toString();
+        },
+    }));
 
-app.use("/api", apiRouter);
-app.use("/hook", hookRouter);
-app.use("/tutoravailability", tutorAvailRouter);
+    app.use("/api", apiRouter);
+    app.use("/hook", hookRouter);
+    app.use("/tutoravailability", tutorAvailRouter);
 
-app.listen(process.env.PORT ?? 80, () => {
-    Log.debug("Ready to go");
-});
+    app.listen(process.env.PORT ?? 80, () => {
+        Log.debug("Ready to go");
+    });
+}

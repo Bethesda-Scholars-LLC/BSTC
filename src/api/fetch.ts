@@ -1,5 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { SimpleChannel } from "channel-ts";
+import { Duration } from "ts-duration";
 import { Log, apiHeaders, apiUrl, stallFor } from "../util";
 
 type TCApiReq = {
@@ -60,7 +61,7 @@ class TCApiFetcher {
             try {
                 // if we have nothing to send, stall for 100ms
                 if(this.toSend.length === 0) {
-                    await stallFor(100);
+                    await stallFor(Duration.millisecond(100));
                     continue;
                 }
 
@@ -72,7 +73,7 @@ class TCApiFetcher {
                 // we've sent too many requests recently
                 if(this.sentAt.length >= rateData[0]) {
                     Log.debug("RATE LIMITED");
-                    await stallFor(100);
+                    await stallFor(Duration.millisecond(100));
                     continue;
                 }
 
