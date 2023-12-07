@@ -1,11 +1,11 @@
 import React from "react";
 import ReactDOMServer from "react-dom/server";
+import { ClientObject } from "../integration/tc models/client/types";
 import { ContractorObject } from "../integration/tc models/contractor/types";
+import { JobObject } from "../integration/tc models/service/types";
 import { getUserFirstName, getUserFullName } from "../integration/tc models/user/user";
 import { BUSINESS_EMAIL_FROM, PROD, capitalize } from "../util";
 import { EmailTypes, MailOpts } from "./mail";
-import { ClientObject } from "../integration/tc models/client/types";
-import { JobObject } from "../integration/tc models/service/types";
 
 export const awaitingAvailMail = (contractor: ContractorObject, client: ClientObject, job: JobObject): MailOpts => {
     return {
@@ -27,7 +27,7 @@ const AwaitingAvail = (props: {contractor: ContractorObject, client: ClientObjec
     return <p style={{margin: 0}}>
         This is a notification that {getUserFullName(props.contractor.user)} not set their availability in 24 hours.&nbsp;
         {capitalize(getUserFullName(props.client.user))} is waiting on {getUserFirstName(props.contractor.user)} to update their availability.&nbsp;
-        The job's ID is <b>{props.job.id}</b>. Auto invoicing has not been set on this job's settings.
+        The job's ID is <a href={`https://secure.tutorcruncher.com/cal/service/${props.job.id}/`}>{props.job.id}</a>. Auto invoicing has not been set on this job's settings.
         <br/>
         <br/>
         Please contact the tutor and tell them to update their availability or use the link in their email to notify their client.

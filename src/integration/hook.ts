@@ -40,7 +40,9 @@ hookRouter.all("*", (req: Req, res: Res) => {
             if(!cbs)
                 continue;
             cbs.forEach(cb => {
-                (async () => {cb(events[i]);})();
+                (async () => {
+                    cb(events[i]);
+                })().catch(err => {Log.error(err);});
             });
         }
     }

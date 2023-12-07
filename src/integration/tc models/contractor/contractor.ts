@@ -1,4 +1,5 @@
 
+import { Duration } from "ts-duration";
 import ApiFetcher from "../../../api/fetch";
 import { awaitingBookingMail } from "../../../mail/awaitingBooking";
 import clientMatchedMail from "../../../mail/clientMatched";
@@ -130,7 +131,7 @@ export const popTutorFromCAs = async (contractor: ContractorObject) => {
                 }
             );
             if (!inDBAwaitingBooking) {
-                queueEmail(PROD ? day * 3 : 10000, awaitingBookingMail(contractor, client, job));
+                queueEmail(PROD ? Duration.hour(3 * 24) : Duration.second(10), awaitingBookingMail(contractor, client, job));
             }
 
             const inDBAwaitingAvail = await ScheduleMail.findOne(
@@ -171,7 +172,7 @@ addTCListener("EDITED_A_CONTRACTOR", async (event: TCEvent<any, ContractorObject
     await updateContractorDetails(event.subject);
 });
 
-const day = 86400000;
+const day = Duration.hour(24);
 addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<any, ContractorObject>) => {
     const contractor = event.subject;
 
@@ -183,7 +184,7 @@ addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<any, Contractor
         };
         await updateContractor(toUpdate);
 
-        queueEmail(PROD ? day * 5 : 10000, tutorReferralMail(contractor));
+        queueEmail(PROD ? Duration.hour(24 * 5) : Duration.second(10), tutorReferralMail(contractor));
 
         const referrerId = parseInt(getAttrByMachineName("referral", contractor.extra_attrs)?.value);
         if (!referrerId || isNaN(referrerId) || Object.values(ClientManager).includes(referrerId))
@@ -232,5 +233,5 @@ addTCListener("CONTRACTOR_SIGN_UP", async (event: TCEvent<any, ContractorObject>
     const contractor = event.subject;
 
     // schedule email here
-    queueEmail(PROD ? day : 10000, contractorIncompleteMail(contractor));
+    queueEmail(PROD ? day : Duration.second(10), contractorIncompleteMail(contractor));
 });

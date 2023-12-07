@@ -163,6 +163,10 @@ export const calcStripeFee = (lessonPrice: number): string => {
     return (((lessonPrice + 0.3)/0.961) - lessonPrice).toFixed(2);
 };
 
+export const days = (d: number): Duration => {
+    return Duration.hour(d * 24);
+};
+
 export const randomChoice = <T>(arr: T[]): T => {
     return arr[Math.floor(Math.random()*arr.length)];
 };

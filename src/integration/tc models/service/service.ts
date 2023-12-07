@@ -1,3 +1,4 @@
+import { Duration } from "ts-duration";
 import ApiFetcher from "../../../api/fetch";
 import { GeoResponse, geocode } from "../../../geo";
 import { awaitingAvailMail } from "../../../mail/awaitingAvail";
@@ -22,7 +23,7 @@ import { DumbJob, JobObject, UpdateServicePayload } from "./types";
 const blairSchools = ["argyle", "eastern", "loiederman", "newport mill", "odessa shannon", "parkland", "silver spring international", "takoma park", "blair"];
 const churchillSchools = ["churchill", "cabin john", "hoover", "bells mill", "seven locks", "stone mill", "cold spring", "potomac", "beverly farms", "wayside"];
 const wjSchools = ["north bethesda", "tilden"];
-const day = 86400000;
+const day = Duration.hour(24);
 
 export const enum PipelineStage {
     NewClient = 35326,
@@ -273,7 +274,7 @@ export const addedContractorToService = async (job: JobObject) => {
                             }
                         );
                         if (!inDB) {
-                            queueEmail(PROD ? day : 10000, awaitingAvailMail(contractor, client, job));
+                            queueEmail(PROD ? day : Duration.second(10), awaitingAvailMail(contractor, client, job));
                         }
                     }
                 }
