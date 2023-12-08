@@ -312,7 +312,7 @@ const syncDBGpas = async () => {
     }
 };
 
-syncDBGpas();
+// syncDBGpas();
 
 const _syncAllDBContractors = async () => {
     for(let i = 1;; i++) {
