@@ -335,7 +335,7 @@ addTCListener("MARKED_AN_APPOINTMENT_AS_COMPLETE", async (event: TCEvent<any, Le
     if (lesson.rcras.length > 0) {
         const job = await getServiceById(lesson.service.id);
 
-        if (!job)
+        if (!job || job.rcrs.length === 0)
             return;
 
         await onLessonComplete(job, job.rcrs[0].paying_client);

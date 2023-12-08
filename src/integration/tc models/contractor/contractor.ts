@@ -19,6 +19,14 @@ import { DumbUser } from "../user/types";
 import { getUserFullName } from "../user/user";
 import { ContractorObject, UpdateContractorPayload } from "./types";
 
+export const getManyContractors = async (page?: number): Promise<ManyResponse<DumbUser> | null> => {
+    try {
+        return (await ApiFetcher.sendRequest(`/contractors?page=${Math.max(page ?? 1, 1)}`))?.data as ManyResponse<DumbUser>;
+    } catch (e) {
+        return null;
+    }
+};
+
 export const getContractorById = async (id: number): Promise<ContractorObject | null> => {
     try {
         return (await ApiFetcher.sendRequest(`/contractors/${id}`))?.data as ContractorObject;

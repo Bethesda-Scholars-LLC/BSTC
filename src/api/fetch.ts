@@ -70,6 +70,7 @@ class TCApiFetcher {
         }
         this.loopRunning = true;
         // infinite for loop
+        let firstRate = true;
         for(;!this.dead;){
             try {
                 // if we have nothing to send, stall for 100ms
@@ -85,10 +86,14 @@ class TCApiFetcher {
 
                 // we've sent too many requests recently
                 if(this.sentAt.length >= rateData[0]) {
-                    Log.debug("RATE LIMITED");
+                    if(firstRate){
+                        Log.debug("RATE LIMITED");
+                        firstRate = false;
+                    }
                     await stallFor(Duration.millisecond(100));
                     continue;
                 }
+                firstRate = true;
 
                 // sending a request, so add to sentAt
                 this.sentAt.push(Date.now());

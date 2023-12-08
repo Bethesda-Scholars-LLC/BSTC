@@ -5,6 +5,7 @@ export interface ILesson {
     cruncher_id: number,
     tutor_id: number,
     completed_on: Date,
+    // hours
     lesson_time: number,
 }
 
