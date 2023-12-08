@@ -167,7 +167,7 @@ function tutorFromContractor(con: ContractorObject): ITutor | null {
         const grade = getAttrByMachineName("grade_1",  con.extra_attrs);
         const gradeNum = gradePossibilities[grade?.value.toLowerCase().trim()];
         const gender = getAttrByMachineName("contractor_gender", con.extra_attrs)?.value.toLowerCase().trim();
-        const parsedGpa = parseInt(getAttrByMachineName("unweighted_gpa_1", con.extra_attrs)?.value.trim());
+        const parsedGpa = parseFloat(getAttrByMachineName("unweighted_gpa_1", con.extra_attrs)?.value.trim());
         let genderNum;
         if(!gender){
             genderNum = undefined;
@@ -246,7 +246,7 @@ export async function addTutorHours(lesson: ILesson) {
         }
 
         if(!tutor.hours_valid_until) {
-            tutor.hours_valid_until = new Date(Date.now() + Duration.hour(24 * 30).milliseconds);
+            tutor.hours_valid_until = new Date(lesson.completed_on.getTime() + Duration.hour(24 * 30).milliseconds);
             tutor.recent_hours += lesson.lesson_time;
         } else if (new Date().getTime() > tutor.hours_valid_until.getTime()) {
             const [validUntil, hours] = await syncTutorHours(tutor);
@@ -291,6 +291,28 @@ function checkBoolExtraAttr(extra_attrs: any, attr: string): boolean | undefined
     }
     return walue.value.trim().toLowerCase() === "true";
 }
+
+const syncDBGpas = async () => {
+    //
+    const tutors = await TutorModel.find({status: "approved"}).exec();
+    Log.debug(tutors.length);
+    for(let i = 0; i < tutors.length; i++) {
+        const tutor = tutors[i];
+        const contractor = await getContractorById(tutor.cruncher_id);
+        Log.debug(`Syncing ${tutor.first_name} ${tutor.last_name}`);
+        if(!contractor) {
+            Log.debug(`Couldn't get ${tutor.first_name} ${tutor.last_name}`);
+            continue;
+        }
+        const newTutor = tutorFromContractor(contractor);
+        if(!newTutor)
+            continue;
+        tutor.gpa = newTutor?.gpa;
+        tutor.save();
+    }
+};
+
+syncDBGpas();
 
 const _syncAllDBContractors = async () => {
     for(let i = 1;; i++) {

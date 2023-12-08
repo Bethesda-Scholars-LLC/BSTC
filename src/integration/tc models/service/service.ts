@@ -22,7 +22,7 @@ import { DumbJob, JobObject, UpdateServicePayload } from "./types";
 
 const blairSchools = ["argyle", "eastern", "loiederman", "newport mill", "odessa shannon", "parkland", "silver spring international", "takoma park", "blair"];
 const churchillSchools = ["churchill", "cabin john", "hoover", "bells mill", "seven locks", "stone mill", "cold spring", "potomac", "beverly farms", "wayside"];
-const wjSchools = ["north bethesda", "tilden"];
+const _wjSchools = ["north bethesda", "tilden"];
 const day = Duration.hour(24);
 
 export const enum PipelineStage {
