@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOMServer from "react-dom/server";
+import { Duration } from "ts-duration";
 import { getClientById } from "../integration/tc models/client/client";
 import { ClientObject } from "../integration/tc models/client/types";
 import { getContractorById } from "../integration/tc models/contractor/contractor";
@@ -65,7 +66,7 @@ export const getTutorPronouns = (tutor: ContractorObject): {
     };
 };
 
-const day = 86400000;
+const day = Duration.hour(24);
 export const queueFirstLessonComplete = async (job: JobObject) => {
     if (!job.conjobs || job.conjobs.length === 0)
         return;
@@ -81,7 +82,7 @@ export const queueFirstLessonComplete = async (job: JobObject) => {
     const tutorFirstName = job.conjobs[0].name.split(" ")[0];
     const userEmail = client.user.email;
 
-    queueEmail(PROD ? day : 10000, {
+    queueEmail(PROD ? day : Duration.second(10), {
         from: `"${process.env.PERSONAL_EMAIL_FROM}" <${process.env.PERSONAL_EMAIL_ADDRESS}>`, // eslint-disable-line
         to: PROD ? userEmail : (process.env.TEST_EMAIL_ADDRESS ?? userEmail),
         cc: process.env.BUSINESS_EMAIL_ADDRESS,

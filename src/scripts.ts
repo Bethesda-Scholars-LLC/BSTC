@@ -1,3 +1,4 @@
+import { Duration } from "ts-duration";
 import ApiFetcher from "./api/fetch";
 import { getRandomClient } from "./integration/tc models/client/client";
 import { getContractorById, getRandomContractor, setLookingForJob } from "./integration/tc models/contractor/contractor";
@@ -38,7 +39,7 @@ const _editAllContractors = async () => {
                 Log.debug(contractor.user.first_name+" "+contractor.user.last_name);
                 await setLookingForJob(contractor, true);
             }
-            await stallFor(1000);
+            await stallFor(Duration.second(1));
         }
     } catch (error) {
         Log.error("Error: ", error);
@@ -65,14 +66,14 @@ const _changeDefaultServiceRate = async () => {
         if(!services)
             return;
 
-        await stallFor(1000);
+        await stallFor(Duration.second(1));
         for(let j = 0; j < services.results.length; j++){
             const service = await getServiceById(services.results[j].id);
 
             if(!service)
                 return;
 
-            await stallFor(1000);
+            await stallFor(Duration.second(1));
 
             Log.debug(`Id: ${service.id}`);
             Log.debug(`Name: ${service.name}`);
@@ -83,7 +84,7 @@ const _changeDefaultServiceRate = async () => {
                 dft_charge_rate: service.description?.toLowerCase().match("1st-5th grade") ? 40 : 45.0,
                 dft_contractor_rate: 25.0
             });
-            await stallFor(1000);
+            await stallFor(Duration.second(1));
         }
 
         if(!services.next)

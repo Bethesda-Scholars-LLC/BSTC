@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
+import { Duration } from "ts-duration";
 import { ExtraAttr } from "./types";
 dotenv.config();
 
@@ -31,12 +32,12 @@ const requiredEnvs = [
     "SIGNATURE_DESCRIPTION",
 
     "DB_NAME",
-    "DB_TEST_NAME",
     "DB_URI",
 ];
 
 const envKeys = Object.keys(process.env);
 export const PROD = ["production", "prod"].includes(process.env.NODE_ENV?.toLowerCase() ?? ""); // eslint-disable-line
+export const TEST = ["testing", "test"].includes(process.env.NODE_ENV?.toLowerCase() ?? ""); // eslint-disable-line
 
 export const DIR_ROOT = path.join(__dirname, ".."); // eslint-disable-line
 
@@ -57,7 +58,17 @@ if(requiredEnvs.reduce((prev, val) => {
 
 export const BUSINESS_EMAIL_FROM = `"Bethesda Scholars" <${process.env.BUSINESS_EMAIL_ADDRESS}>`; // eslint-disable-line
 
-export const DB_URI = process.env.DB_URI! + (PROD ? process.env.DB_NAME! : process.env.DB_TEST_NAME); // eslint-disable-line
+export const DB_URI = process.env.DB_URI! + getDbUri(); // eslint-disable-line
+
+function getDbUri(): string {
+    /* eslint-disable */
+    if(PROD)
+        return process.env.DB_NAME!;
+    if(process.env.NODE_ENV === "testing")
+        return process.env.DB_TEST_NAME!;
+    return process.env.DB_DEV_NAME!;
+    /* eslint-enable */
+}
 
 /**
  * @description Api headers to send to TutorCruncher API
@@ -67,6 +78,32 @@ export const apiHeaders = {
 };
 
 const baseUrl = "https://secure.tutorcruncher.com/api/";
+
+export const isObject = (obj: any): boolean => typeof obj === "object" && !Array.isArray(obj) && obj !== null;
+
+export const getValue = (target: any, path: string[]): any => {
+    if (!target)
+        return undefined;
+    for (let i = 0; i < path.length - 1; i++) {
+        target = target[path[i]];
+
+        if (!isObject(target))
+            return undefined;
+    }
+    return target[path[path.length - 1]];
+};
+
+export const changeValue = (target: any, path: string[], value: any) => {
+    for (let i = 0; i < path.length - 1; i++) {
+        if (!isObject(target))
+            break;
+        if (!Object.keys(target).includes(path[i]))
+            target[path[i]] = {};
+
+        target = target[path[i]];
+    }
+    target[path[path.length - 1]] = value;
+};
 
 /**
  * @param path Route Path
@@ -105,8 +142,8 @@ export const writeFile = (flName: string, data: string | Buffer): Promise<null> 
     });
 };
 
-export const stallFor = async (ms: number) => new Promise((resolve, _reject) => {
-    setTimeout(resolve, ms);
+export const stallFor = async (dur: Duration) => new Promise((resolve, _reject) => {
+    setTimeout(resolve, dur.milliseconds);
 });
 
 export const getAttrByMachineName = (name: string, extra_attrs: {machine_name: string}[]): ExtraAttr | undefined =>
@@ -119,11 +156,15 @@ export const getAttrByMachineName = (name: string, extra_attrs: {machine_name: s
 export const capitalize = (str: string): string => {
     if(str.length < 2)
         return str.toUpperCase();
-    return str.charAt(0).toUpperCase()+str.substring(1);
+    return str.charAt(0).toUpperCase()+str.substring(1).toLowerCase();
 };
 
 export const calcStripeFee = (lessonPrice: number): string => {
     return (((lessonPrice + 0.3)/0.961) - lessonPrice).toFixed(2);
+};
+
+export const days = (d: number): Duration => {
+    return Duration.hour(d * 24);
 };
 
 export const randomChoice = <T>(arr: T[]): T => {

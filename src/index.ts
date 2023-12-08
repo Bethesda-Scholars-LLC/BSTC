@@ -1,44 +1,40 @@
 import cors from "cors";
 import express, { json } from "express";
 import mongoose from "mongoose";
+import "./algo/algo";
 import apiRouter from "./api/api";
-import ApiFetcher from "./api/fetch";
 import tutorAvailRouter from "./api/tutoravailability";
 import hookRouter from "./integration/hook";
 import "./integration/tc models/contractor/contractor";
 import "./integration/tc models/service/service";
-import { DumbUser } from "./integration/tc models/user/types";
 import "./mail/mail";
 import "./scripts";
-import { ManyResponse, Req } from "./types";
-import { DB_URI, Log, PROD } from "./util";
+import { Req } from "./types";
+import { DB_URI, Log, PROD, TEST } from "./util";
 
-mongoose.connect(DB_URI).then(() => { // eslint-disable-line
-    Log.debug(`Connected to ${(PROD ? process.env.DB_NAME : process.env.DB_TEST_NAME)}`);
-}).catch(Log.error);
+const main = () => {
 
-(async () => {
-    const contractors: ManyResponse<DumbUser> = (await ApiFetcher.sendRequest("/contractors"))?.data;
-    if(!contractors)
-        return;
-    for(let i = 0; i < 101; i++) {
-        const currId = contractors.results[i % contractors.count].id;
-        ApiFetcher.sendRequest(`/contractors/${currId}`);
-    }
-})();
+    mongoose.connect(DB_URI).then(() => {
+        Log.debug(`Connected to ${(PROD ? process.env.DB_NAME : process.env.DB_DEV_NAME)}`);
+    }).catch(Log.error);
 
-const app = express();
-app.use(cors());
-app.use(json({
-    verify: (req: Req, _, buf) => {
-        req.rawBody = buf.toString();
-    },
-}));
+    const app = express();
+    app.use(cors());
+    app.use(json({
+        verify: (req: Req, _, buf) => {
+            req.rawBody = buf.toString();
+        },
+    }));
 
-app.use("/api", apiRouter);
-app.use("/hook", hookRouter);
-app.use("/tutoravailability", tutorAvailRouter);
+    app.use("/api", apiRouter);
+    app.use("/hook", hookRouter);
+    app.use("/tutoravailability", tutorAvailRouter);
 
-app.listen(80, () => {
-    Log.debug("Ready to go");
-});
+    app.listen(process.env.PORT ?? 80, () => {
+        Log.debug("Ready to go");
+    });
+};
+
+if(!TEST)
+    main();
+

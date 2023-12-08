@@ -2,7 +2,7 @@ import express from "express";
 import path from "path";
 import { getContractorById, popTutorFromCAs } from "../integration/tc models/contractor/contractor";
 import { Req, Res } from "../types";
-import { DIR_ROOT, Log } from "../util";
+import { DIR_ROOT } from "../util";
 const tutorAvailRouter = express.Router();
 
 

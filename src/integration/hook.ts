@@ -1,16 +1,24 @@
+import { createHmac } from "crypto";
 import express from "express";
 import { Req, Res, TCEvent, TCEventListener } from "../types";
 import { Log } from "../util";
-import { createHmac } from "crypto";
 import "./tc models/ad hoc/adHoc";
 const hookRouter = express.Router();
 
 const listeners: {
-    [key: string]: TCEventListener
+    [key: string]: TCEventListener[]
 } = {};
 
 export const addTCListener = (eventName: string, listener: TCEventListener) => {
-    listeners[eventName] = listener;
+    if(eventName in listeners) {
+        if(listeners[eventName].includes(listener)) {
+            Log.debug(`EXACT SAME LISTENER BINDING TWICE IN ${eventName}`);
+            return;
+        }
+        listeners[eventName].push(listener);
+        return;
+    }
+    listeners[eventName] = [listener];
 };
 
 hookRouter.all("*", (req: Req, res: Res) => {
@@ -28,10 +36,14 @@ hookRouter.all("*", (req: Req, res: Res) => {
         const events: TCEvent[] = req.body.events;
         for(let i = 0; i < events.length; i++){
             Log.debug(events[i].action);
-            const cb = listeners[events[i].action];
-            if(!cb)
+            const cbs = listeners[events[i].action];
+            if(!cbs)
                 continue;
-            cb(events[i]);
+            cbs.forEach(cb => {
+                (async () => {
+                    cb(events[i]);
+                })().catch(err => {Log.error(err);});
+            });
         }
     }
     res.status(200).send();

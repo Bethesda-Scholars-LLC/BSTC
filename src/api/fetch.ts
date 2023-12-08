@@ -1,9 +1,10 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { SimpleChannel } from "channel-ts";
-import { Log, apiHeaders, apiUrl, stallFor } from "../util";
+import { Duration } from "ts-duration";
+import { Log, PROD, apiHeaders, apiUrl, stallFor } from "../util";
 
 type TCApiReq = {
-    chan: SimpleChannel<AxiosResponse<any, any> | null>,
+    chan: SimpleChannel<AxiosResponse<any, any> | [any]>,
     url: string,
     config?: AxiosRequestConfig,
 }
@@ -24,11 +25,16 @@ class TCApiFetcher {
      * @description boolean to indicate wether or not we're currently listening for requests
      */
     private loopRunning: boolean;
+    /**
+     * @description set to true to kill mainloop
+     */
+    private dead: boolean;
 
     constructor() {
         this.sentAt = [];
         this.toSend = [];
         this.loopRunning = false;
+        this.dead = false;
     }
 
     /**
@@ -37,14 +43,22 @@ class TCApiFetcher {
      * @returns Response from api
      * @describe Queue request to be sent when ratelimit is up
      */
-    async sendRequest(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<any, any> | null> {
-        const rChan = new SimpleChannel<AxiosResponse<any, any> | null>();
+    async sendRequest(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<any, any>> {
+        const rChan = new SimpleChannel<AxiosResponse<any, any> | [any]>();
         this.toSend.push({
             chan: rChan,
             url,
             config
         });
-        return rChan.receive();
+        const response = await rChan.receive();
+        if(Array.isArray(response))
+            throw response[0];
+        
+        return response;
+    }
+
+    kill() {
+        this.dead = true;
     }
 
     /**
@@ -56,12 +70,12 @@ class TCApiFetcher {
         }
         this.loopRunning = true;
         // infinite for loop
-        let sent = 0;
-        for(;;){
+        let firstRate = true;
+        for(;!this.dead;){
             try {
                 // if we have nothing to send, stall for 100ms
                 if(this.toSend.length === 0) {
-                    await stallFor(100);
+                    await stallFor(Duration.millisecond(100));
                     continue;
                 }
 
@@ -72,13 +86,15 @@ class TCApiFetcher {
 
                 // we've sent too many requests recently
                 if(this.sentAt.length >= rateData[0]) {
-                    Log.debug("RATE LIMITED");
-                    await stallFor(100);
+                    if(firstRate){
+                        Log.debug("RATE LIMITED");
+                        firstRate = false;
+                    }
+                    await stallFor(Duration.millisecond(100));
                     continue;
                 }
+                firstRate = true;
 
-                sent++;
-                Log.debug(`Sending ${sent}...`);
                 // sending a request, so add to sentAt
                 this.sentAt.push(Date.now());
                 const currReq = this.toSend.shift()!; // eslint-disable-line
@@ -92,8 +108,7 @@ class TCApiFetcher {
                 }).then(resp => {
                     currReq.chan.send(resp);
                 }).catch(e => {
-                    Log.error(e);
-                    currReq.chan.send(null);
+                    currReq.chan.send([e]);
                 });
             } catch(e) {
                 Log.error(e);
@@ -108,9 +123,14 @@ apiFetcher.mainLoop();
 
 namespace ApiFetcher {
     // just expose sendRequest function on apiFetcher
-    export async function sendRequest(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<any, any> | null> {
+    export async function sendRequest(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<any, any>> {
         return apiFetcher.sendRequest(url, config);
     }
+    export async function kill() {
+        if(!PROD)
+            apiFetcher.kill();
+    }
+
 }
 
 export default ApiFetcher;
