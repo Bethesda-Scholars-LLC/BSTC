@@ -6,7 +6,7 @@ import { ContractorObject } from "../integration/tc models/contractor/types";
 import LessonModel, { ILesson } from "../models/lesson";
 import TutorModel, { ITutor } from "../models/tutor";
 import { TCEvent } from "../types";
-import { Log, PROD, getAttrByMachineName } from "../util";
+import { Log, getAttrByMachineName } from "../util";
 
 const contractorLocks: {[key: number]: Mutex} = {};
 const newLockLock = new Mutex();
@@ -48,10 +48,7 @@ const skillsHierarchy = [
     "ADDED_A_LABEL_TO_A_USER",
     "CONTRACTOR_SIGN_UP",
 ].forEach(evName => {
-    // just in case this gets merged to master
-    if(!PROD) {
-        addTCListener(evName, updatedContractorFunc);
-    }
+    addTCListener(evName, updatedContractorFunc);
 });
 
 addTCListener("DELETED_A_CONTRACTOR", async (ev: TCEvent<any, ContractorObject>) => {
