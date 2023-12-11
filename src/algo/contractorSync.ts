@@ -165,9 +165,9 @@ function tutorFromContractor(con: ContractorObject): ITutor | null {
     try {
         /* eslint-disable @typescript-eslint/no-non-null-assertion */
         const grade = getAttrByMachineName("grade_1",  con.extra_attrs);
-        const gradeNum = gradePossibilities[grade?.value.toLowerCase().trim()];
-        const gender = getAttrByMachineName("contractor_gender", con.extra_attrs)?.value.toLowerCase().trim();
-        const parsedGpa = parseFloat(getAttrByMachineName("unweighted_gpa_1", con.extra_attrs)?.value.trim());
+        const gradeNum = gradePossibilities[grade?.value.toLowerCase()];
+        const gender = getAttrByMachineName("contractor_gender", con.extra_attrs)?.value.toLowerCase();
+        const parsedGpa = parseFloat(getAttrByMachineName("unweighted_gpa_1", con.extra_attrs)?.value);
         let genderNum;
         if(!gender){
             genderNum = undefined;
@@ -289,10 +289,10 @@ function checkBoolExtraAttr(extra_attrs: any, attr: string): boolean | undefined
     if(!walue) {
         return undefined;
     }
-    return walue.value.trim().toLowerCase() === "true";
+    return walue.value.toLowerCase() === "true";
 }
 
-const syncDBGpas = async () => {
+const _syncDBGpas = async () => {
     //
     const tutors = await TutorModel.find({status: "approved"}).exec();
     Log.debug(tutors.length);

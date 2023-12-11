@@ -5,7 +5,7 @@ export const geocode = async (address: string): Promise<GeoResponse[]> => {
   try {
     return (await axios(`https://geocode.maps.co/search?q=${encodeURIComponent(address)}`)).data;
   }catch (e) {
-    Log.error(e);
+    Log.error((e as any).data);
     return [];
   }
 };

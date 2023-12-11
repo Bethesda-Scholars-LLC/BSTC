@@ -49,7 +49,7 @@ export const getTutorPronouns = (tutor: ContractorObject): {
     pronouns: [string, string],
     possesive: string
 } => {
-    const tutorGender = getAttrByMachineName("contractor_gender", tutor.extra_attrs)?.value.toLowerCase().trim() ?? "";
+    const tutorGender = getAttrByMachineName("contractor_gender", tutor.extra_attrs)?.value.toLowerCase() ?? "";
     if (tutorGender === "male")
         return {
             pronouns: ["he", "him"],

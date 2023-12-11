@@ -146,8 +146,12 @@ export const stallFor = async (dur: Duration) => new Promise((resolve, _reject) 
     setTimeout(resolve, dur.milliseconds);
 });
 
-export const getAttrByMachineName = (name: string, extra_attrs: {machine_name: string}[]): ExtraAttr | undefined =>
-    extra_attrs.filter(v => v.machine_name === name)[0] as ExtraAttr ?? undefined;
+export const getAttrByMachineName = (name: string, extra_attrs: {machine_name: string}[]): ExtraAttr | undefined => {
+    const val: ExtraAttr | undefined = extra_attrs.filter(v => v.machine_name === name)[0] as ExtraAttr ?? undefined;
+    if(typeof val?.value === "string")
+        val.value = val.value.trim();
+    return val;
+};
 
 /**
  * @param str string to capitalize

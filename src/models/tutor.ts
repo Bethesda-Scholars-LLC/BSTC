@@ -17,25 +17,42 @@ export interface ITutor {
     last_name: string,
     cruncher_id: number,
     deleted_on?: Date,
-    lat: number,
-    lon: number,
+    // exponentially drops off, 25 mins should be 0
+    lat?: number,
+    lon?: number,
+
+    // hard filter 2 year gap
     grade?: number,
+
+    // undefined so far
     bias: number,
+
+    // 4 can tutor AP level or high level like calc
+    // 3 high school subjects (bio, chem, alg 2, precalc)
+    // 2 low level subjects
+    // 1 good with kids
     stars?: number,
+    // TODO: delete
     date_approved?: Date,
 
+    // negative sigmoid
     recent_hours: number,
     hours_valid_until?: Date,
 
     phone_number?: string,
+    // 0 is positively weighed
     total_paid_hours?: string,
     work_ready: IWorkReady,
 
+    // weigh same gender closer
     gender?: number,
 
+    // weigh tutors with skill 10% better
     skills: TutorSkill[],
+    // piecewise but you don't lose for having bad gpa
     gpa?: number,
 
+    // hard filter for approved
     status: string,
 }
 
