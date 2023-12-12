@@ -191,7 +191,7 @@ function tutorFromContractor(con: ContractorObject): ITutor | null {
 
             recent_hours: 0,
 
-            total_paid_hours: con.work_done_details?.total_paid_hours,
+            total_paid_hours: convertPaidHours(con.work_done_details?.total_paid_hours),
 
             work_ready: {
                 w9_filled_out: checkBoolExtraAttr(con.extra_attrs, "w9_filled_out")??false,
@@ -292,6 +292,22 @@ function checkBoolExtraAttr(extra_attrs: any, attr: string): boolean | undefined
     return walue.value.toLowerCase() === "true";
 }
 
+const paidHoursRE = new RegExp(/^([0-9]+ )?[0-9]{2}:[0-9]{2}:[0-9]{2}$/);
+function convertPaidHours(paidHours: string): number {
+    if(!paidHours.match(paidHoursRE))
+        return 0;
+    let hours = 0;
+    if(paidHours.includes(" ")) {
+        const splPaidHours = paidHours.split(" ");
+        hours += parseInt(splPaidHours[0])*24;
+        paidHours = splPaidHours[1];
+    }
+    const splHours = paidHours.split(":");
+    hours += parseInt(splHours[0]);
+    hours += parseInt(splHours[1])/60;
+    return hours;
+}
+
 const _syncDBGpas = async () => {
     //
     const tutors = await TutorModel.find({status: "approved"}).exec();
@@ -337,31 +353,19 @@ const _syncAllDBContractors = async () => {
     }
 };
 
-const convertContractorPaidHours = async () => {
+const _convertContractorPaidHours = async () => {
     //
     try {
         const contractors = await TutorModel.find({total_paid_hours: {$ne: null}}).exec();
         for(let i = 0; i < contractors.length; i++) {
             const contractor = contractors[i];
-            Log.debug(`${contractor.first_name} ${contractor.last_name} "${contractor.total_paid_hours}" ${convertPaidHours(contractor.total_paid_hours as any)}`);
+            if(typeof contractor.total_paid_hours === "string")
+                contractor.total_paid_hours = convertPaidHours(contractor.total_paid_hours);
+            // contractor.save();
         }
     } catch (e) {
         Log.error(e);
     }
-};
-const convertPaidHours = (paidHours: string): number => {
-    if(paidHours === "0" || !paidHours.match(new RegExp(/^([0-9]+ )?[0-9]{2}:[0-9]{2}:[0-9]{2}$/)))
-        return 0;
-    let hours = 0;
-    if(paidHours.includes(" ")) {
-        const splPaidHours = paidHours.split(" ");
-        hours += parseInt(splPaidHours[0])*24;
-        paidHours = splPaidHours[1];
-    }
-    const splHours = paidHours.split(":");
-    hours += parseInt(splHours[0]);
-    hours += parseInt(splHours[1])/60;
-    return hours;
 };
 
 // convertContractorPaidHours();
