@@ -41,7 +41,7 @@ export interface ITutor {
 
     phone_number?: string,
     // 0 is positively weighed
-    total_paid_hours?: string,
+    total_paid_hours?: string | number,
     work_ready: IWorkReady,
 
     // weigh same gender closer
@@ -90,7 +90,7 @@ const tutorSchema = new Schema<ITutor>({
     hours_valid_until: Date,
 
     phone_number: String,
-    total_paid_hours: String,
+    total_paid_hours: Schema.Types.Mixed,
     work_ready: WorkReadySchema,
 
     gender: Number,
@@ -98,7 +98,10 @@ const tutorSchema = new Schema<ITutor>({
     skills: Schema.Types.Array,
     gpa: Number,
 
-    status: String,
+    status: {
+        type: String,
+        index: true
+    },
 });
 
 const TutorModel = model("tutors", tutorSchema);

@@ -26,6 +26,7 @@ const scheduledEmailSchema = new Schema<IScheduledMail>({
     },
     send_at: {
         type: Date,
+        index: true,
         required: true
     },
     from: {

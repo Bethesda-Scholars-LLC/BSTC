@@ -337,6 +337,33 @@ const _syncAllDBContractors = async () => {
     }
 };
 
+const convertContractorPaidHours = async () => {
+    //
+    try {
+        const contractors = await TutorModel.find({total_paid_hours: {$ne: null}}).exec();
+        for(let i = 0; i < contractors.length; i++) {
+            const contractor = contractors[i];
+            Log.debug(`${contractor.first_name} ${contractor.last_name} "${contractor.total_paid_hours}" ${convertPaidHours(contractor.total_paid_hours as any)}`);
+        }
+    } catch (e) {
+        Log.error(e);
+    }
+};
+const convertPaidHours = (paidHours: string): number => {
+    if(paidHours === "0" || !paidHours.match(new RegExp(/^([0-9]+ )?[0-9]{2}:[0-9]{2}:[0-9]{2}$/)))
+        return 0;
+    let hours = 0;
+    if(paidHours.includes(" ")) {
+        const splPaidHours = paidHours.split(" ");
+        hours += parseInt(splPaidHours[0])*24;
+        paidHours = splPaidHours[1];
+    }
+    const splHours = paidHours.split(":");
+    hours += parseInt(splHours[0]);
+    hours += parseInt(splHours[1])/60;
+    return hours;
+};
 
+// convertContractorPaidHours();
 // uncomment to sync entire tutorCruncher db
 // syncAllDBContractors();
