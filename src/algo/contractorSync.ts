@@ -54,7 +54,7 @@ const skillsHierarchy = [
     addTCListener(evName, updatedContractorFunc);
 });
 
-addTCListener("DELETED_A_CONTRACTOR", async (ev: TCEvent<any, ContractorObject>) => {
+addTCListener("DELETED_A_CONTRACTOR", async (ev: TCEvent<ContractorObject>) => {
     const contractor = ev.subject;
     const lock = await getContractorLock(contractor.id);
     await lock.acquire();
@@ -76,7 +76,7 @@ addTCListener("DELETED_A_CONTRACTOR", async (ev: TCEvent<any, ContractorObject>)
     }
 });
 
-addTCListener("RECOVERED_A_CONTRACTOR", async (ev: TCEvent<any, ContractorObject>) => {
+addTCListener("RECOVERED_A_CONTRACTOR", async (ev: TCEvent<ContractorObject>) => {
     const contractor = ev.subject;
     const lock = await getContractorLock(contractor.id);
     await lock.acquire();
@@ -100,7 +100,7 @@ addTCListener("RECOVERED_A_CONTRACTOR", async (ev: TCEvent<any, ContractorObject
     }
 });
 
-function updatedContractorFunc(ev: TCEvent<any, ContractorObject>) {
+function updatedContractorFunc(ev: TCEvent<ContractorObject>) {
     const contractor = ev.subject;
     if(!("skills" in contractor)) {
         return;

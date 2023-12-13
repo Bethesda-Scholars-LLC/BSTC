@@ -170,18 +170,18 @@ export const popTutorFromCAs = async (contractor: ContractorObject) => {
     //
 };
 
-addTCListener("EDITED_AVAILABILITY", async (event: TCEvent<any, ContractorObject>) => {
+addTCListener("EDITED_AVAILABILITY", async (event: TCEvent<ContractorObject>) => {
     const contractor = event.subject;
 
     await popTutorFromCAs(contractor);
 });
 
-addTCListener("EDITED_A_CONTRACTOR", async (event: TCEvent<any, ContractorObject>) => {
+addTCListener("EDITED_A_CONTRACTOR", async (event: TCEvent<ContractorObject>) => {
     await updateContractorDetails(event.subject);
 });
 
 const day = Duration.hour(24);
-addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<any, ContractorObject>) => {
+addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<ContractorObject>) => {
     const contractor = event.subject;
 
     if (contractor.status === "approved") {
@@ -208,7 +208,7 @@ addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<any, Contractor
     }
 });
 
-addTCListener("CREATED_AN_APPOINTMENT", async (event: TCEvent<any, any>) => {
+addTCListener("CREATED_AN_APPOINTMENT", async (event: TCEvent<any>) => {
     const lesson = event.subject;
     const job = await getServiceById(lesson.service.id);
     if (!job)
@@ -219,7 +219,7 @@ addTCListener("CREATED_AN_APPOINTMENT", async (event: TCEvent<any, any>) => {
     }
 });
 
-addTCListener("CREATED_REPORT", async (event: TCEvent<any, any>) => {
+addTCListener("CREATED_REPORT", async (event: TCEvent<any>) => {
     const report: any = event.subject;
     const job = await getServiceById(report.appointment.service.id);
     if (!job)
@@ -228,7 +228,7 @@ addTCListener("CREATED_REPORT", async (event: TCEvent<any, any>) => {
     await onLessonComplete(job, report.client.id);
 });
 
-addTCListener("TENDER_WAS_ACCEPTED", async (event: TCEvent<any, any>) => {
+addTCListener("TENDER_WAS_ACCEPTED", async (event: TCEvent<any>) => {
     const application: any = event.subject;     // add application to types?
     const job = await getServiceById(application.service.id);
     if (!job)
@@ -237,7 +237,7 @@ addTCListener("TENDER_WAS_ACCEPTED", async (event: TCEvent<any, any>) => {
     addedContractorToService(job);
 });
 
-addTCListener("CONTRACTOR_SIGN_UP", async (event: TCEvent<any, ContractorObject>) => {
+addTCListener("CONTRACTOR_SIGN_UP", async (event: TCEvent<ContractorObject>) => {
     const contractor = event.subject;
 
     // schedule email here

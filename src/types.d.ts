@@ -15,19 +15,24 @@ export type Res = Response;
 /**
  * @type TutorCruncher event
  */
-export type TCEvent<ActorType=any, SubjectType = any> = {
+export type TCEvent<SubjectType = any> = {
     action: string,
     verb: string,
     timestamp: string,
     branch: number,
-    actor: ActorType,
+    actor: {
+        name: string,
+        id: number,
+        user_id: number,
+        url: string
+    },
     subject: SubjectType,
 };
 
 /**
  * @type Function that takes TCEvent, and does whatever with it
  */
-export type TCEventListener<AT=any, ST=any> = (event: TCEvent<AT, ST>) => any;
+export type TCEventListener<ST=any> = (event: TCEvent<ST>) => any;
 
 export type ExtraAttr = {
     id: number
