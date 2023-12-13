@@ -63,9 +63,10 @@ const testRandomJob = async () => {
     if(!job)
         return;
 
-    const tutorsGraded: (ITutor & {score: number})[] = [];
+    const tutorsGraded: (ITutor & {breakdown: any, score: number})[] = [];
     const tutors = await TutorModel.find({status: "approved"}).exec();
-    const address = extractFieldFromJob(job, "home address");
+    const address = extractFieldFromJob(job, "home address") ?? extractFieldFromJob(job, "home address (if in person lessons)");
+    const onlineJob = job.dft_location?.id === SessionLocation.Online;
     let coords: {x: number, y: number} | undefined;
     if(address) {
         const results = await geocode(address.includes("nw") ? address.trim() + " Washington DC" : address.trim());
@@ -76,46 +77,59 @@ const testRandomJob = async () => {
             });
         }
     }
-    const onlineJob = job.dft_location?.id === SessionLocation.Online;
-
-
 
     for(let i = 0; i < tutors.length; i++) {
         const tutor = tutors[i];
         const tGrade = await gradeTutor(tutor, job, coords);
         if(!tGrade)
             continue;
-        tutorsGraded.splice(binarySearch(tutorsGraded, (t) => t.score-tGrade)+1, 0, {
+        const [score, breakdown] = tGrade;
+        tutorsGraded.splice(binarySearch(tutorsGraded, (t) => t.score-score)+1, 0, {
             ...tutor,
-            score: tGrade
+            score,
+            breakdown
         });
     }
-    Log.debug("Lesson location: " + (onlineJob ? "Online" : "In Person"));
     for(let i = 14; i >= 0; i--) {
         const t = (tutorsGraded[i] as any)._doc;
-        Log.debug(`#${i+1} ${t.first_name} ${t.last_name}: ${(tutorsGraded[0] as any).score}`);
+        Log.debug("-----------------");
+        Log.debug(`#${i+1} ${t.first_name} ${t.last_name}: ${(tutorsGraded[i] as any).score}`);
+        Log.debug(`${Object.entries(tutorsGraded[i].breakdown).reduce((prev, cur, i, arr) => {
+            return prev+`${cur[0]}: ${cur[1]}${i !== arr.length-1 ? "\n" : ""}`;
+        }, "")}`);
     }
+    if(!address && !onlineJob) {
+        Log.debug(job.description);
+    }
+    Log.debug("Lesson location: " + (onlineJob ? "Online" : "In Person"));
+    Log.debug(address);
     
 };
 
-const gradeTutor = async (tutor: ITutor, job: JobObject, jobCoords: {x: number, y: number} | undefined): Promise<number | null> => {
+const gradeTutor = async (tutor: ITutor, job: JobObject, jobCoords: {x: number, y: number} | undefined): Promise<[number, any] | null> => {
     const onlineJob = job.dft_location?.id === SessionLocation.Online;
     const grade = gradePossibilities[extractFieldFromJob(job, "student grade")!]; // eslint-disable-line
     let score = 1;
+    const breakdown: any = {
+        totalPaidScore: recentHoursFunc(tutor.total_paid_hours??0),
+        recentHoursScore: recentHoursFunc(tutor.recent_hours??0),
+        gpaScore: gpaFunc(tutor.gpa??1),
+    };
 
+    if(!onlineJob && !jobCoords)
+        Log.debug("in person but no coords");
     if(!onlineJob && jobCoords) {
         if(!tutor.lat || !tutor.lon){
             Log.debug("no lat or lon");
             return null;
         }
-        score *= distFunc(calcDist(convertLatLon(tutor as any), jobCoords));
+        breakdown.distScore = distFunc(calcDist(convertLatLon(tutor as any), jobCoords));
     }
-    if(tutor.grade)
-        score *= gradeDiffFunc(tutor.grade-grade);
-    score *= recentHoursFunc(tutor.total_paid_hours ?? 0);
-    score *= recentHoursFunc(tutor.recent_hours ?? 0);
-    score *= gpaFunc(tutor.gpa ?? 1);
-    return score;
+    if(tutor.grade) {
+        breakdown.gradeScore = gradeDiffFunc(tutor.grade-grade);
+    }
+    Object.entries(breakdown).forEach(val => score*= val[1] as number);
+    return [score, Object.fromEntries(Object.entries(breakdown).map(val => [val[0], (val[1] as number).toFixed(3)]))];
 };
 
 // testRandomJob();
