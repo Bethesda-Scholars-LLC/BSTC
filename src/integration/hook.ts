@@ -29,7 +29,7 @@ hookRouter.all("*", (req: Req, res: Res) => {
 
         if(verifyHook !== req.headers["webhook-signature"]){
             Log.debug(`invalid request ${JSON.stringify(req.body, undefined, 2)}`);
-            return res.status(400).send();
+            return res.json({error: "invalid request"}).status(400).send();
         }
 
         Log.debug(req.body);
