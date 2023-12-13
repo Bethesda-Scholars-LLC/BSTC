@@ -175,3 +175,30 @@ export const randomChoice = <T>(arr: T[]): T => {
     return arr[Math.floor(Math.random()*arr.length)];
 };
 
+export const binarySearch = <T>(arr: T[], comp: (p: T)=>number): number => {
+    if(arr.length === 0)
+        return -1;
+    let start = 0, end = arr.length - 1;
+ 
+    // Iterate while start not meets end
+    while (start <= end) {
+ 
+        // Find the mid index
+        const mid = Math.floor((start + end) / 2);
+        const dir = comp(arr[mid]);
+ 
+        // If element is present at
+        // mid, return True
+        if (dir === 0) return mid;
+ 
+        // Else look in left or
+        // right half accordingly
+        else if (dir < 0)
+            end = mid - 1;
+        else
+            start = mid + 1;
+    }
+ 
+    return end;
+
+};
