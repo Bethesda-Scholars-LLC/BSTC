@@ -39,9 +39,6 @@ const gradeDiffFunc = (diff: number): number => {
 };
 
 /*
-    // hard filter 2 year gap
-    grade?: number,
-
     // undefined so far
     bias: number,
 
