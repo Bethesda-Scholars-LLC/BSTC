@@ -58,7 +58,8 @@ class TCApiFetcher {
     }
 
     kill() {
-        this.dead = true;
+        if(!PROD)
+            this.dead = true;
     }
 
     /**

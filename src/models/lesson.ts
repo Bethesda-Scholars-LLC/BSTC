@@ -12,7 +12,10 @@ export interface ILesson {
 
 const lessonSchema = new Schema<ILesson>({
     cruncher_id: Number,
-    tutor_id: Number,
+    tutor_id: {
+        type: Number,
+        index: true,
+    },
     completed_on: Date,
     lesson_time: Number
 });

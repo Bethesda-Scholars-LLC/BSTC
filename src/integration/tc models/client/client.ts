@@ -116,7 +116,7 @@ export const moveToMatchedAndBooked = async (lesson: LessonObject, job: JobObjec
     }
 };
 
-addTCListener("BOOKED_AN_APPOINTMENT", async (event: TCEvent<any, LessonObject>) => {
+addTCListener("BOOKED_AN_APPOINTMENT", async (event: TCEvent<LessonObject>) => {
     const lesson = event.subject;
     const job = await getServiceById(lesson.service.id);
     
