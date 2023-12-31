@@ -72,6 +72,9 @@ export const runAlgo = async (job: JobObject, subject: string, stars: number): P
         passed.push(filterRes);
     }
     passed = passed.filter((_val, i) => i < 10);
+    if(!jobInfo.isOnline) {
+        passed.sort((t1, t2) => (t1.estimatedDistance ?? Infinity) -(t2.estimatedDistance ?? Infinity));
+    }
 
     return passed;
 };
