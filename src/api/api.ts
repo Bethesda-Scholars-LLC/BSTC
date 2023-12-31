@@ -1,4 +1,5 @@
 import express from "express";
+import { runAlgo } from "../algo/algo";
 import { JobObject } from "../integration/tc models/service/types";
 import { contractorIncompleteVerify } from "../mail/contractorIncomplete";
 import { Req, Res } from "../types";
@@ -41,7 +42,9 @@ apiRouter.post("/find/tutor", async (req: Req, res: Res) => {
         return res.status(500).json(errorMsg("something went wrong sending your request"));
     }
 
-    res.json({name: service.name});
+    const tutors = await runAlgo(service, req.body.subject, req.body.stars);
+
+    res.json({service_name: service.name, tutors});
 });
 
 export default apiRouter;

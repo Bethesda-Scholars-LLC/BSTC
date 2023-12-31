@@ -75,7 +75,10 @@ const tutorSchema = new Schema<ITutor>({
     deleted_on: Date,
     lat: Number,
     lon: Number,
-    grade: Number,
+    grade: {
+        type: Number,
+        index: true,
+    },
     bias: {
         type: Number,
         required: true,
