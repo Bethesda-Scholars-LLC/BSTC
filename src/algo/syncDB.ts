@@ -30,7 +30,7 @@ const _syncAllDBContractors = async () => {
             tutor.applications_accepted = 0;
             tutor.applications_accepted_valid_until = new Date(Date.now() + Duration.hour(24 * 14).milliseconds);
 
-            tutor.school_full_name = getAttrByMachineName("school_1", contractor.extra_attrs)!.value;
+            tutor.school_full_name = getAttrByMachineName("school_1", contractor.extra_attrs)?.value;
             tutor.date_created = new Date(contractor.user.date_created);
 
             await tutor.save();

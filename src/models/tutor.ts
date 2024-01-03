@@ -24,7 +24,7 @@ export interface ITutor {
     applications_accepted: number,
     applications_accepted_valid_until: Date,
 
-    school_full_name: string,
+    school_full_name?: string,
     date_created: Date,
 
     // exponentially drops off, 25 mins should be 0

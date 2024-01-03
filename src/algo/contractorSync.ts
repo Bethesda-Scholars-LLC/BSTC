@@ -196,7 +196,7 @@ function tutorFromContractor(con: ContractorObject): ITutor | null {
             applications_accepted: 0,
             applications_accepted_valid_until: new Date(Date.now() + Duration.hour(24 * 14).milliseconds),
 
-            school_full_name: getAttrByMachineName("school_1", con.extra_attrs)!.value,
+            school_full_name: getAttrByMachineName("school_1", con.extra_attrs)?.value,
             date_created: new Date(con.user.date_created),
 
             lat: con.user.latitude,
