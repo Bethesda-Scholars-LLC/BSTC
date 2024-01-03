@@ -93,7 +93,7 @@ export const moveToMatchedAndBooked = async (lesson: LessonObject, job: JobObjec
             client_id: client.id,
             contractor_id: contractor.id,
             email_type: EmailTypes.AwaitingBooking }
-    );
+    ).exec();
     
     if (awaitingBookingEmail) {
         await ScheduleMail.findByIdAndDelete(awaitingBookingEmail._id);
@@ -104,7 +104,7 @@ export const moveToMatchedAndBooked = async (lesson: LessonObject, job: JobObjec
         job_id: job.id,
         client_id: client.id,
         tutor_id: contractor.id
-    });
+    }).exec();
     if (!notCold) {
         await new NotCold({
             client_id: client.id,
@@ -116,7 +116,7 @@ export const moveToMatchedAndBooked = async (lesson: LessonObject, job: JobObjec
     }
 };
 
-addTCListener("BOOKED_AN_APPOINTMENT", async (event: TCEvent<any, LessonObject>) => {
+addTCListener("BOOKED_AN_APPOINTMENT", async (event: TCEvent<LessonObject>) => {
     const lesson = event.subject;
     const job = await getServiceById(lesson.service.id);
     

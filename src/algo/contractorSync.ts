@@ -1,7 +1,6 @@
 import { Mutex } from "async-mutex";
 import { Duration } from "ts-duration";
 import { addTCListener } from "../integration/hook";
-import { getContractorById, getManyContractors } from "../integration/tc models/contractor/contractor";
 import { ContractorObject } from "../integration/tc models/contractor/types";
 import LessonModel, { ILesson } from "../models/lesson";
 import TutorModel, { ITutor } from "../models/tutor";
@@ -11,7 +10,11 @@ import { Log, getAttrByMachineName } from "../util";
 const contractorLocks: {[key: number]: Mutex} = {};
 const newLockLock = new Mutex();
 
-const gradePossibilities: {[key: string]: number} = {
+export const gradePossibilities: {[key: string]: number} = {
+    "1st-5th grade": 5,
+    "6th grade": 6,
+    "7th grade": 7,
+    "8th grade": 8,
     "9th grade": 9,
     "10th grade": 10,
     "11th grade": 11,
@@ -51,7 +54,7 @@ const skillsHierarchy = [
     addTCListener(evName, updatedContractorFunc);
 });
 
-addTCListener("DELETED_A_CONTRACTOR", async (ev: TCEvent<any, ContractorObject>) => {
+addTCListener("DELETED_A_CONTRACTOR", async (ev: TCEvent<ContractorObject>) => {
     const contractor = ev.subject;
     const lock = await getContractorLock(contractor.id);
     await lock.acquire();
@@ -73,7 +76,7 @@ addTCListener("DELETED_A_CONTRACTOR", async (ev: TCEvent<any, ContractorObject>)
     }
 });
 
-addTCListener("RECOVERED_A_CONTRACTOR", async (ev: TCEvent<any, ContractorObject>) => {
+addTCListener("RECOVERED_A_CONTRACTOR", async (ev: TCEvent<ContractorObject>) => {
     const contractor = ev.subject;
     const lock = await getContractorLock(contractor.id);
     await lock.acquire();
@@ -97,7 +100,7 @@ addTCListener("RECOVERED_A_CONTRACTOR", async (ev: TCEvent<any, ContractorObject
     }
 });
 
-function updatedContractorFunc(ev: TCEvent<any, ContractorObject>) {
+function updatedContractorFunc(ev: TCEvent<ContractorObject>) {
     const contractor = ev.subject;
     if(!("skills" in contractor)) {
         return;
@@ -116,7 +119,7 @@ async function getContractorLock(contractor_id: number): Promise<Mutex> {
     return contractorLocks[contractor_id];
 }
 
-async function SyncContractor(contractor: ContractorObject) {
+export async function SyncContractor(contractor: ContractorObject) {
     const lock = await getContractorLock(contractor.id);
     await lock.acquire();
     try {
@@ -136,9 +139,11 @@ async function SyncContractor(contractor: ContractorObject) {
         if(contractor.status.toLowerCase() !== tutor.status && contractor.status.toLowerCase() === "approved")
             tutor.date_approved = new Date();
 
+        // attributes we want to check when tutor updates account
         [
             "first_name",
             "last_name",
+            "school_full_name",
             "lat",
             "lon",
             "grade",
@@ -178,13 +183,22 @@ function tutorFromContractor(con: ContractorObject): ITutor | null {
         } else {
             genderNum = 2;
         }
-        
         // .map(val => {return {...val, qual_level: [val.qual_level]};})
         return {
             first_name: con.user.first_name,
             last_name: con.user.last_name,
             cruncher_id: con.id,
             deleted_on: undefined,
+
+            recent_notifications: 0,
+            recent_notifications_valid_until: new Date(Date.now() + Duration.hour(24 * 14).milliseconds),
+
+            applications_accepted: 0,
+            applications_accepted_valid_until: new Date(Date.now() + Duration.hour(24 * 14).milliseconds),
+
+            school_full_name: getAttrByMachineName("school_1", con.extra_attrs)!.value,
+            date_created: new Date(con.user.date_created),
+
             lat: con.user.latitude,
             lon: con.user.longitude,
             grade: gradeNum,
@@ -199,7 +213,7 @@ function tutorFromContractor(con: ContractorObject): ITutor | null {
                 contract_filled_out: checkBoolExtraAttr(con.extra_attrs, "contract_filled_out")??false,
             },
 
-            bias: 0,
+            bias: 1,
             stars: getAttrByMachineName("rating", con.extra_attrs)?.value.split("/")[0],
             gender: genderNum,
             phone_number: (con.user.mobile??con.user.phone)??undefined,
@@ -308,66 +322,3 @@ function convertPaidHours(paidHours: string): number {
     return hours;
 }
 
-const _syncDBGpas = async () => {
-    //
-    const tutors = await TutorModel.find({status: "approved"}).exec();
-    Log.debug(tutors.length);
-    for(let i = 0; i < tutors.length; i++) {
-        const tutor = tutors[i];
-        const contractor = await getContractorById(tutor.cruncher_id);
-        Log.debug(`Syncing ${tutor.first_name} ${tutor.last_name}`);
-        if(!contractor) {
-            Log.debug(`Couldn't get ${tutor.first_name} ${tutor.last_name}`);
-            continue;
-        }
-        const newTutor = tutorFromContractor(contractor);
-        if(!newTutor)
-            continue;
-        tutor.gpa = newTutor?.gpa;
-        tutor.save();
-    }
-};
-
-// syncDBGpas();
-
-const _syncAllDBContractors = async () => {
-    for(let i = 1;; i++) {
-        const contractors = await getManyContractors(i);
-        if(!contractors) {
-            Log.error("contractors returned null");
-            break;
-        }
-        for(let j = 0; j < contractors.results.length; j++) {
-            Log.error(`Syncing ${contractors.results[j].first_name} ${contractors.results[j].last_name}...`);
-            const contractor = await getContractorById(contractors.results[j].id);
-            if(!contractor){
-                Log.error(`${contractors.results[j].first_name} ${contractors.results[j].last_name} failed to load`);
-                continue;
-            }
-
-            await SyncContractor(contractor);
-        }
-
-        if(!contractors.next)
-            break;
-    }
-};
-
-const _convertContractorPaidHours = async () => {
-    //
-    try {
-        const contractors = await TutorModel.find({total_paid_hours: {$ne: null}}).exec();
-        for(let i = 0; i < contractors.length; i++) {
-            const contractor = contractors[i];
-            if(typeof contractor.total_paid_hours === "string")
-                contractor.total_paid_hours = convertPaidHours(contractor.total_paid_hours);
-            // contractor.save();
-        }
-    } catch (e) {
-        Log.error(e);
-    }
-};
-
-// convertContractorPaidHours();
-// uncomment to sync entire tutorCruncher db
-// syncAllDBContractors();

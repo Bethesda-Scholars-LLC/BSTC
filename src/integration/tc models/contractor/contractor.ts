@@ -13,6 +13,7 @@ import { ManyResponse, TCEvent } from "../../../types";
 import { Log, PROD, capitalize, getAttrByMachineName, randomChoice } from "../../../util";
 import { addTCListener } from "../../hook";
 import { ChargeCat, createAdHocCharge } from "../ad hoc/adHoc";
+import { ApplicationObject } from "../application/types";
 import { ClientManager, getClientById, getMinimumClientUpdate, moveToMatchedAndBooked, updateClient } from "../client/client";
 import { PipelineStage, addedContractorToService, getServiceById, onLessonComplete } from "../service/service";
 import { DumbUser } from "../user/types";
@@ -137,7 +138,7 @@ export const popTutorFromCAs = async (contractor: ContractorObject) => {
                     contractor_id: contractor.id,
                     email_type: EmailTypes.AwaitingBooking
                 }
-            );
+            ).exec();
             if (!inDBAwaitingBooking) {
                 queueEmail(PROD ? Duration.hour(3 * 24) : Duration.second(10), awaitingBookingMail(contractor, client, job));
             }
@@ -149,7 +150,7 @@ export const popTutorFromCAs = async (contractor: ContractorObject) => {
                     contractor_id: contractor.id,
                     email_type: EmailTypes.AwaitingAvail
                 }
-            );
+            ).exec();
             if (inDBAwaitingAvail) {
                 await ScheduleMail.findByIdAndDelete(inDBAwaitingAvail._id);
             }
@@ -170,18 +171,18 @@ export const popTutorFromCAs = async (contractor: ContractorObject) => {
     //
 };
 
-addTCListener("EDITED_AVAILABILITY", async (event: TCEvent<any, ContractorObject>) => {
+addTCListener("EDITED_AVAILABILITY", async (event: TCEvent<ContractorObject>) => {
     const contractor = event.subject;
 
     await popTutorFromCAs(contractor);
 });
 
-addTCListener("EDITED_A_CONTRACTOR", async (event: TCEvent<any, ContractorObject>) => {
+addTCListener("EDITED_A_CONTRACTOR", async (event: TCEvent<ContractorObject>) => {
     await updateContractorDetails(event.subject);
 });
 
 const day = Duration.hour(24);
-addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<any, ContractorObject>) => {
+addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<ContractorObject>) => {
     const contractor = event.subject;
 
     if (contractor.status === "approved") {
@@ -208,7 +209,7 @@ addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<any, Contractor
     }
 });
 
-addTCListener("CREATED_AN_APPOINTMENT", async (event: TCEvent<any, any>) => {
+addTCListener("CREATED_AN_APPOINTMENT", async (event: TCEvent<any>) => {
     const lesson = event.subject;
     const job = await getServiceById(lesson.service.id);
     if (!job)
@@ -219,7 +220,7 @@ addTCListener("CREATED_AN_APPOINTMENT", async (event: TCEvent<any, any>) => {
     }
 });
 
-addTCListener("CREATED_REPORT", async (event: TCEvent<any, any>) => {
+addTCListener("CREATED_REPORT", async (event: TCEvent<any>) => {
     const report: any = event.subject;
     const job = await getServiceById(report.appointment.service.id);
     if (!job)
@@ -228,8 +229,8 @@ addTCListener("CREATED_REPORT", async (event: TCEvent<any, any>) => {
     await onLessonComplete(job, report.client.id);
 });
 
-addTCListener("TENDER_WAS_ACCEPTED", async (event: TCEvent<any, any>) => {
-    const application: any = event.subject;     // add application to types?
+addTCListener("TENDER_WAS_ACCEPTED", async (event: TCEvent<ApplicationObject>) => {
+    const application = event.subject;     // add application to types?
     const job = await getServiceById(application.service.id);
     if (!job)
         return;
@@ -237,7 +238,7 @@ addTCListener("TENDER_WAS_ACCEPTED", async (event: TCEvent<any, any>) => {
     addedContractorToService(job);
 });
 
-addTCListener("CONTRACTOR_SIGN_UP", async (event: TCEvent<any, ContractorObject>) => {
+addTCListener("CONTRACTOR_SIGN_UP", async (event: TCEvent<ContractorObject>) => {
     const contractor = event.subject;
 
     // schedule email here

@@ -157,7 +157,7 @@ const setJobRate = async (client: ClientObject, job: JobObject, milesFound: bool
 /**
  * @description update job name to only include first name and last initial
  */
-addTCListener("REQUESTED_A_SERVICE", async (event: TCEvent<any, JobObject>) => {
+addTCListener("REQUESTED_A_SERVICE", async (event: TCEvent<JobObject>) => {
     let job = event.subject;
     //    keep current job object unless fixJobName returns a new one
     job = fixJobName(job) ?? job;
@@ -199,11 +199,11 @@ addTCListener("REQUESTED_A_SERVICE", async (event: TCEvent<any, JobObject>) => {
     }
 });
 
-addTCListener("REMOVED_CONTRACTOR_FROM_SERVICE", async (event: TCEvent<any, JobObject>) => {
+addTCListener("REMOVED_CONTRACTOR_FROM_SERVICE", async (event: TCEvent<JobObject>) => {
     const TCJob = event.subject;
     const realContractors = TCJob.conjobs.map(v => v.contractor);
 
-    const DBJob = await AwaitingClient.findOne({ job_id: TCJob.id });
+    const DBJob = await AwaitingClient.findOne({ job_id: TCJob.id }).exec();
     if (!DBJob)
         return;
 
@@ -243,13 +243,13 @@ export const addedContractorToService = async (job: JobObject) => {
                         tutor_ids: contractor.id,
                         client_id: client.id,
                         job_id: job.id
-                    }));
+                    }).exec());
                     // if current tutor has not been added
                     if (hasBeenAdded === null) {
                         const clientJobRelation = (await AwaitingClient.findOne({
                             client_id: client.id,
                             job_id: job.id
-                        }));
+                        }).exec());
                         // if a client job relation has not already been made, create it
                         if (clientJobRelation === null) {
                             await new AwaitingClient({
@@ -272,7 +272,7 @@ export const addedContractorToService = async (job: JobObject) => {
                                 contractor_id: contractor.id,
                                 email_type: EmailTypes.AwaitingAvail
                             }
-                        );
+                        ).exec();
                         if (!inDB) {
                             queueEmail(PROD ? day : Duration.second(10), awaitingAvailMail(contractor, client, job));
                         }
@@ -298,7 +298,7 @@ export const addedContractorToService = async (job: JobObject) => {
 /**
  * @description update status to in progress when contract added
  */
-addTCListener("ADDED_CONTRACTOR_TO_SERVICE", async (event: TCEvent<any, JobObject>) => {
+addTCListener("ADDED_CONTRACTOR_TO_SERVICE", async (event: TCEvent<JobObject>) => {
     const job = event.subject;
     addedContractorToService(job);
 });
@@ -323,14 +323,14 @@ export const onLessonComplete = async (job: JobObject, client_id: number) => {
     }
 };
 
-addTCListener("ADDED_A_LABEL_TO_A_SERVICE", async (event: TCEvent<any, JobObject>) => {
+addTCListener("ADDED_A_LABEL_TO_A_SERVICE", async (event: TCEvent<JobObject>) => {
     const job = event.subject;
     if (job.rcrs.length > 0) {
         await onLessonComplete(job, job.rcrs[0].paying_client);
     }
 });
 
-addTCListener("MARKED_AN_APPOINTMENT_AS_COMPLETE", async (event: TCEvent<any, LessonObject>) => {
+addTCListener("MARKED_AN_APPOINTMENT_AS_COMPLETE", async (event: TCEvent<LessonObject>) => {
     const lesson = event.subject;
     if (lesson.rcras.length > 0) {
         const job = await getServiceById(lesson.service.id);
@@ -342,7 +342,7 @@ addTCListener("MARKED_AN_APPOINTMENT_AS_COMPLETE", async (event: TCEvent<any, Le
     }
 });
 
-addTCListener("APPLIED_FOR_SERVICE", async (event: TCEvent<any, any>) => {
+addTCListener("APPLIED_FOR_SERVICE", async (event: TCEvent<any>) => {
     const contractor = await getContractorById(event.actor.id);
 
     if (!contractor)
@@ -351,7 +351,7 @@ addTCListener("APPLIED_FOR_SERVICE", async (event: TCEvent<any, any>) => {
     setLookingForJob(contractor, true);
 });
 
-addTCListener("CHANGED_SERVICE_STATUS", async (event: TCEvent<any, any>) => {
+addTCListener("CHANGED_SERVICE_STATUS", async (event: TCEvent<any>) => {
     const job = event.subject;
     const client = await getClientById(job.rcrs[0].paying_client);
     if (!client)
@@ -367,7 +367,7 @@ addTCListener("CHANGED_SERVICE_STATUS", async (event: TCEvent<any, any>) => {
             job_id: job.id,
             client_id: client.id,
             tutor_id: contractor.id
-        });
+        }).exec();
         if (notCold) {
 
             // COMMENT AFTER THANKSGIVING AND CHRISTMAS

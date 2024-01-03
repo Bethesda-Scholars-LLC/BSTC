@@ -1,89 +1,104 @@
-import { geocode } from "../geo";
-import { getRandomService } from "../integration/tc models/service/service";
+import * as turf from "@turf/turf";
+import { PipelineStage } from "mongoose";
+import { GeoResponse, geocode } from "../geo";
 import { JobObject } from "../integration/tc models/service/types";
-import { Log } from "../util";
+import TutorModel, { ITutor } from "../models/tutor";
+import "./applicationSync";
 import "./contractorSync";
+import { gradePossibilities } from "./contractorSync";
 import "./lessonSync";
+import "./syncDB";
+
+export interface AlgoFilters {
+    stars: number,
+    subject: string
+}
+
+export interface JobInfo {
+    locationInfo?: GeoResponse,
+    studentGrade: number,
+    classesNeededTutoringIn: string,
+    isOnline: boolean,
+}
+
+export type AlgoTutor = ITutor & {
+    estimated_distance?: number
+}
+
+// measured in miles
+const CUTOFF_DIST = 10;
 
 const extractFieldFromJob = (job: JobObject, field: string): string | undefined => {
-    const splBio = job.description.toLowerCase().split("\n");
+    const splBio = job.description.toLowerCase().split("\n").map(val => val.trim());
     const ind = splBio.indexOf(`**${field.toLowerCase()}:**`);
 
-    return ind !== -1 ? splBio[ind+1] : undefined;
+    return ind !== -1 ? splBio[ind+1].trim() : undefined;
 };
 
-const convertLatLon = (val: {lat: number, lon: number}): {x: number, y: number} => {
-    return {x: val.lat*69, y: val.lon*54.6};
+const getJobInfo = async (job: JobObject): Promise<JobInfo> => {
+    const location = extractFieldFromJob(job, "lesson location")?.toLocaleLowerCase();
+    const address = extractFieldFromJob(job, "home address") ?? extractFieldFromJob(job, "Home address (if in person lessons)")!;
+    const zipCode = extractFieldFromJob(job, "zip code");
+    const isOnline = location === "either" ? true : location !== "in-person lessons at my house";
+
+    return {
+        locationInfo: isOnline ? undefined : (await geocode(address + " " + zipCode))[0],
+        studentGrade: gradePossibilities[extractFieldFromJob(job, "student grade")!.toLowerCase()]!,
+        classesNeededTutoringIn: extractFieldFromJob(job, "classes needed tutoring in")!,
+        isOnline,
+    };
 };
 
-const calcDist = (p1: {x: number, y: number}, p2: {x: number, y: number}): number => {
-    return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
-};
-
-const recentHoursCalc = (hours: number): number => -0.5/(1 + Math.pow(Math.E, -0.5*(hours-10))) + 1.5;
-
-/*
-    // exponentially drops off, 25 mins should be 0
-    lat?: number,
-    lon?: number,
-
-    // hard filter 2 year gap
-    grade?: number,
-
-    // undefined so far
-    bias: number,
-
-    // 4 can tutor AP level or high level like calc
-    // 3 high school subjects (bio, chem, alg 2, precalc)
-    // 2 low level subjects
-    // 1 good with kids
-    stars?: number,
-
-    // negative sigmoid
-    recent_hours: number,
-
-    // 0 is positively weighed
-    total_paid_hours?: string,
-
-    // weigh same gender closer
-    gender?: number,
-
-    // weigh tutors with skill 10% better
-    skills: TutorSkill[],
-    // piecewise but you don't lose for having bad gpa
-    gpa?: number,
-*/
-
-const _testRandomJob = async () => {
-    const job = await getRandomService();
-    if(!job)
-        return;
-    Log.debug(extractFieldFromJob(job, "classes needed tutoring in"));
-    const address = extractFieldFromJob(job, "home address");
-    let coords: {x: number, y: number} | undefined;
-    if(address) {
-        Log.debug(address);
-        const results = await geocode(address.includes("nw") ? address.trim() + " Washington DC" : address.trim());
-        if(results.length > 0) {
-            Log.debug(results[0]);
-            coords = convertLatLon({
-                lat: parseFloat(results[0].lat),
-                lon: parseFloat(results[0].lon)
-            });
-        }
+export const runAlgo = async (job: JobObject, subject: string, stars: number): Promise<AlgoTutor[]> => {
+    const jobInfo = await getJobInfo(job);
+    const failed: {
+        [key: number]: ITutor[]
+    } = {};
+    let passed: AlgoTutor[] = [];
+    const pipeline: PipelineStage[] = [
+        {$match: {status: "approved", grade: {$gte: jobInfo.studentGrade+2}, stars: {$eq: stars}}},
+    ];
+    if(!jobInfo.isOnline) {
+        pipeline.push({$match: {grade: {$lt: 13}}});
     }
-    /*
-    const onlineJob = job.dft_location.id === SessionLocation.Online;
-    const tutors: (ITutor & {score?: number})[] = await TutorModel.find({status: "approved"}).exec();
-    for(let i = 0; i < tutors.length; i++) {
-        const tutor = tutors[i];
-        if(!onlineJob && coords) {
-            if(!tutor.lat || !tutor.lon)
-                continue;
-            calcDist(convertLatLon(tutor as any), coords);
-        }
 
-    }*/
+
+    const tutors = await TutorModel.aggregate(pipeline).exec();
+    for(let i = 0; i < tutors.length; i++) {
+        const filterRes = filterTutor(jobInfo, tutors[i], {subject, stars});
+        if(typeof filterRes === "number") {
+            if(!failed[filterRes])
+                failed[filterRes] = [tutors[i]];
+            else
+                failed[filterRes].push(tutors[i]);
+            continue;
+        }
+        passed.push(filterRes);
+    }
+    passed = passed.filter((_val, i) => i < CUTOFF_DIST);
+    if(!jobInfo.isOnline) {
+        passed.sort((t1, t2) => (t1.estimated_distance ?? Infinity) -(t2.estimated_distance ?? Infinity));
+    }
+
+    return passed;
 };
 
-// testRandomJob();
+const filterTutor = (jobInfo: JobInfo, tutor: ITutor, filters: AlgoFilters): number | AlgoTutor => {
+    let dist = undefined;
+    let i = 1;
+    if(!tutor.skills.map(val => val.subject).includes(filters.subject))
+        return i;
+    i++;
+    if(jobInfo.locationInfo) {
+        if(!tutor.lat || !tutor.lon)
+            return i;
+        const tutorLocation = turf.point([tutor.lon, tutor.lat]);
+        const jobLocation = turf.point([parseFloat(jobInfo.locationInfo.lon), parseFloat(jobInfo.locationInfo.lat)]);
+        dist = turf.distance(tutorLocation, jobLocation, "miles");
+        if(dist > 10) {
+            return i;
+        }
+        
+    }
+    return {...tutor, estimated_distance: dist};
+};
