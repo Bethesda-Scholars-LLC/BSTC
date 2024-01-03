@@ -139,9 +139,11 @@ export async function SyncContractor(contractor: ContractorObject) {
         if(contractor.status.toLowerCase() !== tutor.status && contractor.status.toLowerCase() === "approved")
             tutor.date_approved = new Date();
 
+        // attributes we want to check when tutor updates account
         [
             "first_name",
             "last_name",
+            "school_full_name",
             "lat",
             "lon",
             "grade",
@@ -181,13 +183,22 @@ function tutorFromContractor(con: ContractorObject): ITutor | null {
         } else {
             genderNum = 2;
         }
-        
         // .map(val => {return {...val, qual_level: [val.qual_level]};})
         return {
             first_name: con.user.first_name,
             last_name: con.user.last_name,
             cruncher_id: con.id,
             deleted_on: undefined,
+
+            recent_notifications: 0,
+            recent_notifications_valid_until: new Date(Date.now() + Duration.hour(24 * 14).milliseconds),
+
+            applications_accepted: 0,
+            applications_accepted_valid_until: new Date(Date.now() + Duration.hour(24 * 14).milliseconds),
+
+            school_full_name: getAttrByMachineName("school_1", con.extra_attrs)!.value,
+            date_created: new Date(con.user.date_created),
+
             lat: con.user.latitude,
             lon: con.user.longitude,
             grade: gradeNum,

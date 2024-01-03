@@ -17,6 +17,16 @@ export interface ITutor {
     last_name: string,
     cruncher_id: number,
     deleted_on?: Date,
+
+    recent_notifications: number,
+    recent_notifications_valid_until: Date,
+
+    applications_accepted: number,
+    applications_accepted_valid_until: Date,
+
+    school_full_name: string,
+    date_created: Date,
+
     // exponentially drops off, 25 mins should be 0
     lat?: number,
     lon?: number,
@@ -32,7 +42,6 @@ export interface ITutor {
     // 2 low level subjects
     // 1 good with kids
     stars?: number,
-    // TODO: delete
     date_approved?: Date,
 
     // negative sigmoid
@@ -73,6 +82,15 @@ const tutorSchema = new Schema<ITutor>({
         required: true,
     },
     deleted_on: Date,
+
+    recent_notifications: Number,
+    recent_notifications_valid_until: Date,
+
+    applications_accepted: Number,
+    applications_accepted_valid_until: Date,
+
+    school_full_name: String,
+    date_created: Date,
     lat: Number,
     lon: Number,
     grade: {

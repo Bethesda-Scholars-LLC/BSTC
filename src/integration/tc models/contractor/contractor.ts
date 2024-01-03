@@ -13,6 +13,7 @@ import { ManyResponse, TCEvent } from "../../../types";
 import { Log, PROD, capitalize, getAttrByMachineName, randomChoice } from "../../../util";
 import { addTCListener } from "../../hook";
 import { ChargeCat, createAdHocCharge } from "../ad hoc/adHoc";
+import { ApplicationObject } from "../application/types";
 import { ClientManager, getClientById, getMinimumClientUpdate, moveToMatchedAndBooked, updateClient } from "../client/client";
 import { PipelineStage, addedContractorToService, getServiceById, onLessonComplete } from "../service/service";
 import { DumbUser } from "../user/types";
@@ -137,7 +138,7 @@ export const popTutorFromCAs = async (contractor: ContractorObject) => {
                     contractor_id: contractor.id,
                     email_type: EmailTypes.AwaitingBooking
                 }
-            );
+            ).exec();
             if (!inDBAwaitingBooking) {
                 queueEmail(PROD ? Duration.hour(3 * 24) : Duration.second(10), awaitingBookingMail(contractor, client, job));
             }
@@ -149,7 +150,7 @@ export const popTutorFromCAs = async (contractor: ContractorObject) => {
                     contractor_id: contractor.id,
                     email_type: EmailTypes.AwaitingAvail
                 }
-            );
+            ).exec();
             if (inDBAwaitingAvail) {
                 await ScheduleMail.findByIdAndDelete(inDBAwaitingAvail._id);
             }
@@ -228,8 +229,8 @@ addTCListener("CREATED_REPORT", async (event: TCEvent<any>) => {
     await onLessonComplete(job, report.client.id);
 });
 
-addTCListener("TENDER_WAS_ACCEPTED", async (event: TCEvent<any>) => {
-    const application: any = event.subject;     // add application to types?
+addTCListener("TENDER_WAS_ACCEPTED", async (event: TCEvent<ApplicationObject>) => {
+    const application = event.subject;     // add application to types?
     const job = await getServiceById(application.service.id);
     if (!job)
         return;

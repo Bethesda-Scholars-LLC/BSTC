@@ -44,7 +44,7 @@ apiRouter.post("/find/tutor", async (req: Req, res: Res) => {
 
     const tutors = await runAlgo(service, req.body.subject, req.body.stars);
 
-    res.json({service_name: service.name, tutors});
+    res.json({service_name: service.name, tutors, ...req.body});
 });
 
 export default apiRouter;

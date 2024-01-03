@@ -3,6 +3,7 @@ import { PipelineStage } from "mongoose";
 import { GeoResponse, geocode } from "../geo";
 import { JobObject } from "../integration/tc models/service/types";
 import TutorModel, { ITutor } from "../models/tutor";
+import "./applicationSync";
 import "./contractorSync";
 import { gradePossibilities } from "./contractorSync";
 import "./lessonSync";
@@ -21,8 +22,11 @@ export interface JobInfo {
 }
 
 export type AlgoTutor = ITutor & {
-    estimatedDistance?: number
+    estimated_distance?: number
 }
+
+// measured in miles
+const CUTOFF_DIST = 10;
 
 const extractFieldFromJob = (job: JobObject, field: string): string | undefined => {
     const splBio = job.description.toLowerCase().split("\n").map(val => val.trim());
@@ -71,9 +75,9 @@ export const runAlgo = async (job: JobObject, subject: string, stars: number): P
         }
         passed.push(filterRes);
     }
-    passed = passed.filter((_val, i) => i < 10);
+    passed = passed.filter((_val, i) => i < CUTOFF_DIST);
     if(!jobInfo.isOnline) {
-        passed.sort((t1, t2) => (t1.estimatedDistance ?? Infinity) -(t2.estimatedDistance ?? Infinity));
+        passed.sort((t1, t2) => (t1.estimated_distance ?? Infinity) -(t2.estimated_distance ?? Infinity));
     }
 
     return passed;
@@ -96,5 +100,5 @@ const filterTutor = (jobInfo: JobInfo, tutor: ITutor, filters: AlgoFilters): num
         }
         
     }
-    return {...tutor, estimatedDistance: dist};
+    return {...tutor, estimated_distance: dist};
 };

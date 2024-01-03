@@ -203,7 +203,7 @@ addTCListener("REMOVED_CONTRACTOR_FROM_SERVICE", async (event: TCEvent<JobObject
     const TCJob = event.subject;
     const realContractors = TCJob.conjobs.map(v => v.contractor);
 
-    const DBJob = await AwaitingClient.findOne({ job_id: TCJob.id });
+    const DBJob = await AwaitingClient.findOne({ job_id: TCJob.id }).exec();
     if (!DBJob)
         return;
 
@@ -243,13 +243,13 @@ export const addedContractorToService = async (job: JobObject) => {
                         tutor_ids: contractor.id,
                         client_id: client.id,
                         job_id: job.id
-                    }));
+                    }).exec());
                     // if current tutor has not been added
                     if (hasBeenAdded === null) {
                         const clientJobRelation = (await AwaitingClient.findOne({
                             client_id: client.id,
                             job_id: job.id
-                        }));
+                        }).exec());
                         // if a client job relation has not already been made, create it
                         if (clientJobRelation === null) {
                             await new AwaitingClient({
@@ -272,7 +272,7 @@ export const addedContractorToService = async (job: JobObject) => {
                                 contractor_id: contractor.id,
                                 email_type: EmailTypes.AwaitingAvail
                             }
-                        );
+                        ).exec();
                         if (!inDB) {
                             queueEmail(PROD ? day : Duration.second(10), awaitingAvailMail(contractor, client, job));
                         }
@@ -367,7 +367,7 @@ addTCListener("CHANGED_SERVICE_STATUS", async (event: TCEvent<any>) => {
             job_id: job.id,
             client_id: client.id,
             tutor_id: contractor.id
-        });
+        }).exec();
         if (notCold) {
 
             // COMMENT AFTER THANKSGIVING AND CHRISTMAS

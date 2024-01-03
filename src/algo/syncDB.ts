@@ -1,5 +1,7 @@
+import { Duration } from "ts-duration";
 import { getContractorById, getManyContractors } from "../integration/tc models/contractor/contractor";
-import { Log } from "../util";
+import TutorModel from "../models/tutor";
+import { Log, getAttrByMachineName } from "../util";
 import { SyncContractor } from "./contractorSync";
 
 const _syncAllDBContractors = async () => {
@@ -16,14 +18,37 @@ const _syncAllDBContractors = async () => {
                 Log.error(`${contractors.results[j].first_name} ${contractors.results[j].last_name} failed to load`);
                 continue;
             }
+            const tutor = await TutorModel.findOne({cruncher_id: contractor.id}).exec();
+            if(!tutor) {
+                await SyncContractor(contractor);
+                continue;
+            }
 
-            await SyncContractor(contractor);
+            tutor.recent_notifications = 0;
+            tutor.recent_notifications_valid_until = new Date(Date.now() + Duration.hour(24 * 14).milliseconds);
+
+            tutor.applications_accepted = 0;
+            tutor.applications_accepted_valid_until = new Date(Date.now() + Duration.hour(24 * 14).milliseconds);
+
+            tutor.school_full_name = getAttrByMachineName("school_1", contractor.extra_attrs)!.value;
+            tutor.date_created = new Date(contractor.user.date_created);
+
+            await tutor.save();
         }
 
         if(!contractors.next)
             break;
     }
 };
+
+/**
+ *
+ *   applications_accepted: 0,
+ *   applications_accepted_valid_until: new Date(Date.now() + Duration.hour(24 * 14).milliseconds),
+ *
+ *   school_full_name: getAttrByMachineName("school_1", con.extra_attrs)!.value,
+ *   date_created: new Date(con.user.date_created),
+**/
 
 // uncomment to sync entire tutorCruncher db
 // syncAllDBContractors();

@@ -1,8 +1,8 @@
+import { MailOptions } from "nodemailer/lib/sendmail-transport";
 import React, { CSSProperties } from "react";
 import ReactDOMServer from "react-dom/server";
-import { MailOptions } from "nodemailer/lib/sendmail-transport";
-import { ContractorObject } from "../integration/tc models/contractor/types";
 import { ClientObject } from "../integration/tc models/client/types";
+import { ContractorObject } from "../integration/tc models/contractor/types";
 import { JobObject } from "../integration/tc models/service/types";
 import { cleanPhoneNumber, getUserFirstName, getUserFullName } from "../integration/tc models/user/user";
 import { BUSINESS_EMAIL_FROM, PROD } from "../util";
@@ -40,7 +40,7 @@ const TutorMatched = (props: {tutor: ContractorObject, client: ClientObject | nu
                     <li>Once logged in, click on the blue "Actions" button below your initials and select "Set availability."</li>
                 </ol>
             </li>
-            <li>Carefully <b>review these <a href="https://drive.google.com/file/d/1DV2rxcVndEYT-mar4XbTuM-ROIiLux2L/view?usp=sharing">tutoring guidelines</a></b> before your first lesson.</li>
+            <li>Carefully <b>review these <a href="https://drive.google.com/file/d/1rhc03JLNxR-P2_lc17KqeKY8QnuftVp8/view">tutoring guidelines</a></b> before your first lesson.</li>
             <li>
                 When your client books a lesson with you, you will be notified and must confirm the lesson.
                 Once the lesson is confirmed, <b>contact your client using the information below</b> (text usually works best), and ask for any work to look over in advance if you would like.

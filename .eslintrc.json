@@ -40,7 +40,7 @@
             "error",
             {
                 "selector": ["variable", "function"],
-                "format": ["PascalCase", "camelCase"],
+                "format": ["PascalCase", "camelCase", "UPPER_CASE"],
                 "leadingUnderscore": "allow",
                 "trailingUnderscore": "allow"
             },
