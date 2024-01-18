@@ -27,14 +27,19 @@ if(!PROD) {
     });
 }
 
+const findTutorTypes = {
+    "job_id": "number",
+    "subject": "string",
+    "stars": "number",
+    "only_college": "boolean"
+};
 apiRouter.post("/find/tutor", async (req: Req, res: Res) => {
-    if(typeof req.body.job_id !== "number") {
-        return res.status(400).json(errorMsg("invalid type of \"job_id\""));
-    } if(typeof req.body.subject !== "string") {
-        return res.status(400).json(errorMsg("invalid type of \"subject\""));
-    } if(typeof req.body.stars !== "number") {
-        return res.status(400).json(errorMsg("invalid type of \"stars\""));
+    const tutorTypes = Object.entries(findTutorTypes);
+    for(let i = 0; i < tutorTypes.length; i++) {
+        if(typeof (req.body as any)[tutorTypes[i][0]] !== tutorTypes[i][1])
+            return res.status(400).json(errorMsg(`invalid type of "${tutorTypes[i][0]}"`));
     }
+
     let service: JobObject;
     try {
         service = (await ApiFetcher.sendRequest(`/services/${req.body.job_id}/`)).data;
@@ -42,7 +47,7 @@ apiRouter.post("/find/tutor", async (req: Req, res: Res) => {
         return res.status(500).json(errorMsg("something went wrong sending your request"));
     }
 
-    const tutors = await runAlgo(service, req.body.subject, req.body.stars);
+    const tutors = await runAlgo(service, req.body.subject, req.body.stars, req.body.only_college);
 
     res.json({service_name: service.name, tutors, ...req.body});
 });

@@ -11,7 +11,8 @@ import "./syncDB";
 
 export interface AlgoFilters {
     stars: number,
-    subject: string
+    subject: string,
+    collegeOnly: boolean
 }
 
 export interface JobInfo {
@@ -49,7 +50,7 @@ const getJobInfo = async (job: JobObject): Promise<JobInfo> => {
     };
 };
 
-export const runAlgo = async (job: JobObject, subject: string, stars: number): Promise<AlgoTutor[]> => {
+export const runAlgo = async (job: JobObject, subject: string, stars: number, collegeOnly: boolean): Promise<AlgoTutor[]> => {
     const jobInfo = await getJobInfo(job);
     const failed: {
         [key: number]: ITutor[]
@@ -65,7 +66,7 @@ export const runAlgo = async (job: JobObject, subject: string, stars: number): P
 
     const tutors = await TutorModel.aggregate(pipeline).exec();
     for(let i = 0; i < tutors.length; i++) {
-        const filterRes = filterTutor(jobInfo, tutors[i], {subject, stars});
+        const filterRes = filterTutor(jobInfo, tutors[i], {subject, stars, collegeOnly});
         if(typeof filterRes === "number") {
             if(!failed[filterRes])
                 failed[filterRes] = [tutors[i]];
@@ -98,7 +99,13 @@ const filterTutor = (jobInfo: JobInfo, tutor: ITutor, filters: AlgoFilters): num
         if(dist > 10) {
             return i;
         }
-        
     }
+    i++;
+    if(!jobInfo.isOnline && (tutor?.grade ?? 13) > 12)
+        return i;
+    i++;
+    if(filters.collegeOnly && (tutor?.grade ?? 12) < 13)
+        return i;
+
     return {...tutor, estimated_distance: dist};
 };

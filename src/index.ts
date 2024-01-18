@@ -26,6 +26,8 @@ const main = () => {
         },
     }));
 
+    app.use("/pub", express.static("public"));
+    app.use("/app/*", express.static("public/dist"));
     app.use("/api", apiRouter);
     app.use("/hook", hookRouter);
     app.use("/tutoravailability", tutorAvailRouter);
