@@ -23,6 +23,7 @@ export namespace Log {
  */
 const requiredEnvs = [
     "API_KEY",
+    "GEOCODE_API_KEY",
     "EMAIL_PASSWORD",
     "PERSONAL_EMAIL_ADDRESS",
     "PERSONAL_EMAIL_FROM",
