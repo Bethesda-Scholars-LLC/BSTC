@@ -1,19 +1,15 @@
 import * as turf from "@turf/turf";
 import { PipelineStage } from "mongoose";
+import { AlgoFilters, ApiErrorMsg, errorMsg } from "../api/api";
 import { GeoResponse, geocode } from "../geo";
 import { JobObject } from "../integration/tc models/service/types";
 import TutorModel, { ITutor } from "../models/tutor";
+import { Log } from "../util";
 import "./applicationSync";
 import "./contractorSync";
 import { gradePossibilities } from "./contractorSync";
 import "./lessonSync";
 import "./syncDB";
-
-export interface AlgoFilters {
-    stars: number,
-    subject: string,
-    collegeOnly: boolean
-}
 
 export interface JobInfo {
     locationInfo?: GeoResponse,
@@ -50,15 +46,22 @@ const getJobInfo = async (job: JobObject): Promise<JobInfo> => {
     };
 };
 
-export const runAlgo = async (job: JobObject, subject: string, stars: number, collegeOnly: boolean): Promise<AlgoTutor[]> => {
+export const runAlgo = async (job: JobObject, filters: AlgoFilters): Promise<AlgoTutor[] | ApiErrorMsg> => {
+    Log.debug(filters);
     const jobInfo = await getJobInfo(job);
+    if(filters.ignore_in_person) {
+        jobInfo.isOnline = true;
+    }
     const failed: {
         [key: number]: ITutor[]
     } = {};
     let passed: AlgoTutor[] = [];
     const pipeline: PipelineStage[] = [
-        {$match: {status: "approved", grade: {$gte: jobInfo.studentGrade+2}, stars: {$eq: stars}}},
+        {$match: {status: "approved", grade: {$gte: jobInfo.studentGrade+2}, stars: {$eq: filters.stars}}},
     ];
+    if(!jobInfo.isOnline && filters.only_college) {
+        return errorMsg("only_college enabled on in person job listing", "Cannot filter for college only on in person job");
+    }
     if(!jobInfo.isOnline) {
         pipeline.push({$match: {grade: {$lt: 13}}});
     }
@@ -66,7 +69,7 @@ export const runAlgo = async (job: JobObject, subject: string, stars: number, co
 
     const tutors = await TutorModel.aggregate(pipeline).exec();
     for(let i = 0; i < tutors.length; i++) {
-        const filterRes = filterTutor(jobInfo, tutors[i], {subject, stars, collegeOnly});
+        const filterRes = filterTutor(jobInfo, tutors[i], filters);
         if(typeof filterRes === "number") {
             if(!failed[filterRes])
                 failed[filterRes] = [tutors[i]];
@@ -87,10 +90,10 @@ export const runAlgo = async (job: JobObject, subject: string, stars: number, co
 const filterTutor = (jobInfo: JobInfo, tutor: ITutor, filters: AlgoFilters): number | AlgoTutor => {
     let dist = undefined;
     let i = 1;
-    if(!tutor.skills.map(val => val.subject).includes(filters.subject))
+    if(!filters.subjects.reduce((prev, curr) => prev && tutor.skills.map(val => val.subject).includes(curr), true))
         return i;
     i++;
-    if(jobInfo.locationInfo) {
+    if(jobInfo.locationInfo && !jobInfo.isOnline) {
         if(!tutor.lat || !tutor.lon)
             return i;
         const tutorLocation = turf.point([tutor.lon, tutor.lat]);
@@ -104,7 +107,7 @@ const filterTutor = (jobInfo: JobInfo, tutor: ITutor, filters: AlgoFilters): num
     if(!jobInfo.isOnline && (tutor?.grade ?? 13) > 12)
         return i;
     i++;
-    if(filters.collegeOnly && (tutor?.grade ?? 12) < 13)
+    if(filters.only_college && (tutor?.grade ?? 12) < 13)
         return i;
 
     return {...tutor, estimated_distance: dist};
