@@ -1,5 +1,5 @@
 import express from "express";
-import { runAlgo } from "../algo/algo";
+import { getJobInfo, runAlgo } from "../algo/algo";
 import { JobObject } from "../integration/tc models/service/types";
 import { contractorIncompleteVerify } from "../mail/contractorIncomplete";
 import { Req, Res } from "../types";
@@ -35,6 +35,7 @@ export interface AlgoFilters {
     only_college: boolean,
     ignore_in_person: boolean
 }
+
 const findTutorTypes = {
     "job_id": "number",
     "subjects": "[string]",
@@ -75,15 +76,17 @@ apiRouter.post("/find/tutor", async (req: Req, res: Res) => {
     } catch (e) {
         return res.status(500).json(errorMsg("tutor cruncher request failed", "Could not search for Job ID Provided"));
     }
+    const jobInfo = await getJobInfo(service);
 
-    const tutors = await runAlgo(service, req.body);
+    const inPerson = !jobInfo.isOnline;
+    const tutors = await runAlgo(jobInfo, req.body);
 
     
     if(!Array.isArray(tutors)) {
         return res.json(tutors);
     }
 
-    res.json({service_name: service.name, tutors, ...req.body});
+    res.json({service_name: service.name, is_in_person: inPerson, student_name: service.rcrs[0].recipient_name, tutors, ...req.body});
 });
 
 export default apiRouter;

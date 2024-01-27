@@ -4,7 +4,6 @@ import { AlgoFilters, ApiErrorMsg, errorMsg } from "../api/api";
 import { GeoResponse, geocode } from "../geo";
 import { JobObject } from "../integration/tc models/service/types";
 import TutorModel, { ITutor } from "../models/tutor";
-import { Log } from "../util";
 import "./applicationSync";
 import "./contractorSync";
 import { gradePossibilities } from "./contractorSync";
@@ -22,8 +21,13 @@ export type AlgoTutor = ITutor & {
     estimated_distance?: number
 }
 
+export type AlgoResult = {
+    biased_tutors: ITutor[],
+    merit_tutors: ITutor[]
+};
+
 // measured in miles
-const CUTOFF_DIST = 10;
+// const CUTOFF_DIST = 10;
 
 const extractFieldFromJob = (job: JobObject, field: string): string | undefined => {
     const splBio = job.description.toLowerCase().split("\n").map(val => val.trim());
@@ -32,7 +36,7 @@ const extractFieldFromJob = (job: JobObject, field: string): string | undefined 
     return ind !== -1 ? splBio[ind+1].trim() : undefined;
 };
 
-const getJobInfo = async (job: JobObject): Promise<JobInfo> => {
+export const getJobInfo = async (job: JobObject): Promise<JobInfo> => {
     const location = extractFieldFromJob(job, "lesson location")?.toLocaleLowerCase();
     const address = extractFieldFromJob(job, "home address") ?? extractFieldFromJob(job, "Home address (if in person lessons)")!;
     const zipCode = extractFieldFromJob(job, "zip code");
@@ -46,16 +50,14 @@ const getJobInfo = async (job: JobObject): Promise<JobInfo> => {
     };
 };
 
-export const runAlgo = async (job: JobObject, filters: AlgoFilters): Promise<AlgoTutor[] | ApiErrorMsg> => {
-    Log.debug(filters);
-    const jobInfo = await getJobInfo(job);
+export const runAlgo = async (jobInfo: JobInfo, filters: AlgoFilters): Promise<AlgoTutor[] | ApiErrorMsg> => {
     if(filters.ignore_in_person) {
         jobInfo.isOnline = true;
     }
     const failed: {
         [key: number]: ITutor[]
     } = {};
-    let passed: AlgoTutor[] = [];
+    const passed: AlgoTutor[] = [];
     const pipeline: PipelineStage[] = [
         {$match: {status: "approved", grade: {$gte: jobInfo.studentGrade+2}}},
     ];
@@ -82,7 +84,6 @@ export const runAlgo = async (job: JobObject, filters: AlgoFilters): Promise<Alg
         }
         passed.push(filterRes);
     }
-    passed = passed.filter((_val, i) => i < CUTOFF_DIST);
     if(!jobInfo.isOnline) {
         passed.sort((t1, t2) => (t1.estimated_distance ?? Infinity) -(t2.estimated_distance ?? Infinity));
     }
