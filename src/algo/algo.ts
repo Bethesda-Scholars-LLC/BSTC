@@ -57,8 +57,11 @@ export const runAlgo = async (job: JobObject, filters: AlgoFilters): Promise<Alg
     } = {};
     let passed: AlgoTutor[] = [];
     const pipeline: PipelineStage[] = [
-        {$match: {status: "approved", grade: {$gte: jobInfo.studentGrade+2}, stars: {$eq: filters.stars}}},
+        {$match: {status: "approved", grade: {$gte: jobInfo.studentGrade+2}}},
     ];
+    if(filters.stars !== undefined && filters.stars !== null) {
+        (pipeline[0] as any)["$match"].stars = {$eq: filters.stars};
+    }
     if(!jobInfo.isOnline && filters.only_college) {
         return errorMsg("only_college enabled on in person job listing", "Cannot filter for college only on in person job");
     }

@@ -30,7 +30,7 @@ if(!PROD) {
 }
 
 export interface AlgoFilters {
-    stars: number,
+    stars: number | null,
     subjects: string[],
     only_college: boolean,
     ignore_in_person: boolean
@@ -38,7 +38,7 @@ export interface AlgoFilters {
 const findTutorTypes = {
     "job_id": "number",
     "subjects": "[string]",
-    "stars": "number",
+    "stars?": "number",
     "only_college": "boolean",
     "ignore_in_person": "boolean"
 };
@@ -77,6 +77,7 @@ apiRouter.post("/find/tutor", async (req: Req, res: Res) => {
     }
 
     const tutors = await runAlgo(service, req.body);
+
     
     if(!Array.isArray(tutors)) {
         return res.json(tutors);
