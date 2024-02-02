@@ -184,6 +184,7 @@ addTCListener("REQUESTED_A_SERVICE", async (event: TCEvent<JobObject>) => {
         const milesFound = addressResponses[0]?.display_name?.toLowerCase().includes("connecticut");
 
         // set sophie hansen (blair), pavani (churchill), or mike (other) as client manager
+        /*
         if (blairSchools.some(school => schoolName.includes(school))) {
             updatePayload.associated_admin = ClientManager.Sophie;
         } else if (churchillSchools.some(school => schoolName.includes(school))) {
@@ -192,7 +193,7 @@ addTCListener("REQUESTED_A_SERVICE", async (event: TCEvent<JobObject>) => {
             updatePayload.associated_admin = ClientManager.Miles;
         } else {
             updatePayload.associated_admin = ClientManager.Mike;
-        }
+        }*/
         
         await setJobRate(client, job, milesFound);
         await updateClient(updatePayload);
