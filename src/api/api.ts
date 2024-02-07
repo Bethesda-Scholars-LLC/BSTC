@@ -82,11 +82,11 @@ apiRouter.post("/find/tutor", async (req: Req, res: Res) => {
     const tutors = await runAlgo(jobInfo, req.body);
 
     
-    if(!Array.isArray(tutors)) {
+    if(!("tutors" in tutors)) {
         return res.json(tutors);
     }
 
-    res.json({service_name: service.name, is_in_person: inPerson, student_name: service.rcrs[0].recipient_name, tutors, ...req.body});
+    res.json({service_name: service.name, is_in_person: inPerson, student_name: service.rcrs[0].recipient_name, ...tutors, ...req.body});
 });
 
 export default apiRouter;
