@@ -11,7 +11,7 @@ import "./lessonSync";
 import "./syncDB";
 
 export interface JobInfo {
-    locationInfo?: GeoResponse,
+    locationInfo?: GeoResponse | null,
     studentGrade: number,
     classesNeededTutoringIn: string,
     isOnline: boolean,
@@ -43,14 +43,14 @@ export const getJobInfo = async (job: JobObject): Promise<JobInfo> => {
     const isOnline = location === "either" ? true : location !== "in-person lessons at my house";
 
     return {
-        locationInfo: isOnline ? undefined : (await geocode(address + " " + zipCode))[0],
+        locationInfo: isOnline ? undefined : ((await geocode(address + " " + zipCode))[0]??null),
         studentGrade: gradePossibilities[extractFieldFromJob(job, "student grade")!.toLowerCase()]!,
         classesNeededTutoringIn: extractFieldFromJob(job, "classes needed tutoring in")!,
         isOnline,
     };
 };
 
-export const runAlgo = async (jobInfo: JobInfo, filters: AlgoFilters): Promise<AlgoTutor[] | ApiErrorMsg> => {
+export const runAlgo = async (jobInfo: JobInfo, filters: AlgoFilters): Promise<{tutors: AlgoTutor[], warning?: string} | ApiErrorMsg> => {
     if(filters.ignore_in_person) {
         jobInfo.isOnline = true;
     }
@@ -88,7 +88,10 @@ export const runAlgo = async (jobInfo: JobInfo, filters: AlgoFilters): Promise<A
         passed.sort((t1, t2) => (t1.estimated_distance ?? Infinity) -(t2.estimated_distance ?? Infinity));
     }
 
-    return passed;
+    return {
+        tutors: passed,
+        warning: jobInfo.locationInfo === null ? "Unable to get lesson location, check bio for zip code field" : undefined,
+    };
 };
 
 const filterTutor = (jobInfo: JobInfo, tutor: ITutor, filters: AlgoFilters): number | AlgoTutor => {
