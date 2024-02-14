@@ -137,12 +137,15 @@ addTCListener("BOOKED_AN_APPOINTMENT", async (event: TCEvent<LessonObject>) => {
     // if booked with wrong tutor notify us and return
     if (job.description.toLowerCase().includes("job created while booking a lesson through tutorcruncher") &&
         job.status === "pending") {
+        
+        /* always send this email if a lesson has been booked with wrong tutor and new job is created
         for (let i = 0; i < job.labels.length; i++) {
             if (job.labels[i] === Labels.firstLessonComplete) {
                 Log.debug("first lesson complete");
                 return;
             }
-        }
+        }*/
+
         const contractor = await getContractorById(job.conjobs[0].contractor);
         transporter.sendMail(wrongTutorMail(job, client, contractor), (err) => {
             if(err)
