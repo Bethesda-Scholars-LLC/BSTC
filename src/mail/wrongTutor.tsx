@@ -27,5 +27,8 @@ const WrongTutor = (props: {job: JobObject, client: ClientObject | null, contrac
         <br/>
         This job was created while booking a lesson through TutorCruncher, often indicating that the client booked a lesson with the wrong tutor.&nbsp;
         The client's pipeline stage has not been changed.
+        <br/>
+        <br/>
+        <b>MAKE SURE TO SET AUTO-INVOICING SETTING ON THE NEW JOB.</b>
     </p>;
 };
