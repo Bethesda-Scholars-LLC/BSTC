@@ -136,8 +136,11 @@ export async function SyncContractor(contractor: ContractorObject) {
             return;
         }
 
-        if(contractor.status.toLowerCase() !== tutor.status && contractor.status.toLowerCase() === "approved")
+        // on approved
+        if(contractor.status.toLowerCase() !== tutor.status && contractor.status.toLowerCase() === "approved") {
+            tutor.bias = 1;
             tutor.date_approved = new Date();
+        }
 
         // attributes we want to check when tutor updates account
         [

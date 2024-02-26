@@ -29,19 +29,23 @@ if(!PROD) {
     });
 }
 
+const lessonLocations = ["in-person", "virtual", "both", "from-lesson"];
+
 export interface AlgoFilters {
     stars: number | null,
     subjects: string[],
+    lesson_location: "in-person" | "virtual" | "both" | "from-lesson",
+    only_high_school: boolean,
     only_college: boolean,
-    ignore_in_person: boolean
 }
 
 const findTutorTypes = {
     "job_id": "number",
     "subjects": "[string]",
     "stars?": "number",
+    "lesson_location": "string",
+    "only_high_school": "boolean",
     "only_college": "boolean",
-    "ignore_in_person": "boolean"
 };
 
 const verifyField = (optional: boolean, field: any, expectedType: string): boolean => {
@@ -59,6 +63,12 @@ const verifyField = (optional: boolean, field: any, expectedType: string): boole
     return fieldType === expectedType;
 };
 
+apiRouter.get("/", async (_req: Req, res: Res) => {
+    res.json({});
+});
+
+const genRanHex = (size: number) => [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join("");
+
 apiRouter.post("/find/tutor", async (req: Req, res: Res) => {
     const tutorTypes = Object.entries(findTutorTypes);
     for(let i = 0; i < tutorTypes.length; i++) {
@@ -69,6 +79,11 @@ apiRouter.post("/find/tutor", async (req: Req, res: Res) => {
         if(!verifyField(optional, req.body[fieldName], expectedFieldType))
             return res.status(400).json(errorMsg(`invalid type of "${fieldName}" expected ${expectedFieldType}`));
     }
+    if(req.body.only_high_school && req.body.only_college)
+        return res.status(400).json(errorMsg("only_high_school and only_college cannot both be true"));
+    
+    if(!lessonLocations.includes(req.body.lesson_location))
+        return res.status(400).json(errorMsg(`invalid lesson_location "${req.body.lesson_location}"`));
 
     let service: JobObject;
     try {
@@ -83,10 +98,17 @@ apiRouter.post("/find/tutor", async (req: Req, res: Res) => {
 
     
     if(!("tutors" in tutors)) {
-        return res.json(tutors);
+        return res.json({...tutors, id: genRanHex(8) });
     }
 
-    res.json({service_name: service.name, is_in_person: inPerson, student_name: service.rcrs[0].recipient_name, ...tutors, ...req.body});
+    res.json({
+        id: genRanHex(16),
+        service_name: service.name,
+        is_in_person: inPerson,
+        student_name: service.rcrs[0].recipient_name,
+        ...tutors,
+        ...req.body
+    });
 });
 
 export default apiRouter;

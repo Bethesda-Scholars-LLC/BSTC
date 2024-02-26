@@ -10,18 +10,19 @@ import tutorMatchedMail from "../../../mail/tutorMatched";
 import AwaitingClient from "../../../models/clientAwaiting";
 import NotCold from "../../../models/notCold";
 import ScheduleMail from "../../../models/scheduledEmail";
+import TutorModel from "../../../models/tutor";
 import { ManyResponse, TCEvent } from "../../../types";
 import { Log, PROD, capitalize, getAttrByMachineName, randomChoice } from "../../../util";
 import { addTCListener } from "../../hook";
-import { ClientManager, getClientById, getMinimumClientUpdate, updateClient } from "../client/client";
+import { getClientById, getMinimumClientUpdate, updateClient } from "../client/client";
 import { ClientObject } from "../client/types";
 import { getContractorById, setLookingForJob } from "../contractor/contractor";
 import { LessonObject } from "../lesson/types";
 import { getUserFullName } from "../user/user";
 import { DumbJob, JobObject, UpdateServicePayload } from "./types";
 
-const blairSchools = ["argyle", "eastern", "loiederman", "newport mill", "odessa shannon", "parkland", "silver spring international", "takoma park", "blair"];
-const churchillSchools = ["churchill", "cabin john", "hoover", "bells mill", "seven locks", "stone mill", "cold spring", "potomac", "beverly farms", "wayside"];
+const _blairSchools = ["argyle", "eastern", "loiederman", "newport mill", "odessa shannon", "parkland", "silver spring international", "takoma park", "blair"];
+const _churchillSchools = ["churchill", "cabin john", "hoover", "bells mill", "seven locks", "stone mill", "cold spring", "potomac", "beverly farms", "wayside"];
 const _wjSchools = ["north bethesda", "tilden"];
 const day = Duration.hour(24);
 
@@ -178,7 +179,7 @@ addTCListener("REQUESTED_A_SERVICE", async (event: TCEvent<JobObject>) => {
         updatePayload.pipeline_stage = PipelineStage.NewClient;
         updatePayload.extra_attrs = { student_school: school.value.split(" ").map(capitalize).join(" ") };
 
-        const schoolName = updatePayload.extra_attrs.student_school.toLowerCase();
+        // const schoolName = updatePayload.extra_attrs.student_school.toLowerCase();
         const clientAddress = getAttrByMachineName("home_address", client.extra_attrs);
         const addressResponses: GeoResponse[] = await geocode(clientAddress?.value);
         const milesFound = addressResponses[0]?.display_name?.toLowerCase().includes("connecticut");
@@ -227,6 +228,7 @@ export const addedContractorToService = async (job: JobObject) => {
 
         for (let i = 0; i < job.conjobs.length; i++) {
             const contractor = await getContractorById(job.conjobs[i].contractor);
+            await TutorModel.findOneAndUpdate({cruncher_id: job.conjobs[i].contractor}, { $set: {bias: 0} }).exec();
 
             if (!contractor)
                 return Log.debug(`contractor is null \n ${job.conjobs[i]}`);
