@@ -1,6 +1,5 @@
 import React from "react";
 import ReactDOMServer from "react-dom/server";
-import { getContractorById } from "../integration/tc models/contractor/contractor";
 import { ContractorObject } from "../integration/tc models/contractor/types";
 import { getUserFirstName } from "../integration/tc models/user/user";
 import { PROD, getAttrByMachineName } from "../util";
@@ -10,18 +9,10 @@ import { EmailTypes, MailOpts } from "./mail";
  * @param incompleteEmail Contractor incomplete email scheduled to send
  * @returns {boolean} wether or not to actually send it
  */
-export const contractorIncompleteVerify = async (contractorId?: number): Promise<boolean> => {
-    if(!contractorId)
-        return false;
-    const contractor = await getContractorById(contractorId);
-    if (!contractor)
-        return false;
+export const hasContractorCompletedProfile = (contractor: ContractorObject): boolean => {
     const bio = getAttrByMachineName("contractor_bio", contractor.extra_attrs);
     // if bio doesn't have a value or contractor skills length is 0
-    if (!bio?.value || bio?.value === "" || contractor.skills.length === 0)
-        return true;
-
-    return false;
+    return !(!bio?.value || bio?.value === "" || contractor.skills.length === 0);
 };
 
 export const contractorIncompleteMail = (contractor: ContractorObject): MailOpts => {
@@ -36,17 +27,20 @@ export const contractorIncompleteMail = (contractor: ContractorObject): MailOpts
     };
 };
 
-const ContractorIncomplete = (props: { contractor: ContractorObject }) => {
-    const tutorName = getUserFirstName(props.contractor.user);
+const ContractorIncomplete = ({contractor}: { contractor: ContractorObject }) => {
+    const tutorName = getUserFirstName(contractor.user);
 
     return <p style={{ margin: 0 }}>
         Hi {tutorName},
         <br />
         <br />
-        You have not completed your profile. Please fill in your bio and add your teaching skills.
+        You have not completed your profile. Please fill in your bio and add your teaching skills by editing your profile and
+        clicking the blue actions button below your initials on your dashboard.
         <br />
         <br />
-        We will not be able to review your application until this is complete.
+        We will not be able to review your application until this is complete. <b>When this has been completed, please click
+            <a href={`https://${process.env.ORIGIN_URL}/app/contractor-incomplete/${contractor.id}`}>here</a> to notify us so we can review your application.
+        </b>
         <br />
         <br />
         Thanks,

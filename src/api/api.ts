@@ -1,9 +1,11 @@
 import express from "express";
 import { getJobInfo, runAlgo } from "../algo/algo";
+import { getContractorById } from "../integration/tc models/contractor/contractor";
 import { JobObject } from "../integration/tc models/service/types";
-import { contractorIncompleteVerify } from "../mail/contractorIncomplete";
+import { contractorProfileCompleteEmail } from "../mail/contractorProfileCompleted";
+import { transporter } from "../mail/mail";
 import { Req, Res } from "../types";
-import { Log, PROD } from "../util";
+import { Log } from "../util";
 import ApiFetcher from "./fetch";
 
 const apiRouter = express.Router();
@@ -21,13 +23,6 @@ export function errorMsg(msg: string, userMessage?: string): ApiErrorMsg {
     };
 }
 
-if(!PROD) {
-    apiRouter.get("/contractorIncomplete", async (req: Req, res: Res) => {
-        const result = await contractorIncompleteVerify(parseInt(req.query.id as any));
-        Log.debug(result);
-        res.send(result);
-    });
-}
 
 const lessonLocations = ["in-person", "virtual", "both", "from-lesson"];
 
@@ -48,6 +43,9 @@ const findTutorTypes = {
     "lesson_location": "string",
     "only_high_school": "boolean",
     "only_college": "boolean",
+};
+const contractorCompleteTypes = {
+    "contractor_id": "string"
 };
 
 const verifyField = (optional: boolean, field: any, expectedType: string): boolean => {
@@ -70,6 +68,22 @@ apiRouter.get("/", async (_req: Req, res: Res) => {
 });
 
 const genRanHex = (size: number) => [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join("");
+
+apiRouter.post("/contractor-complete", async (req: Req, res: Res) => {
+    if(!verifyField(false, req.body.contractor_id, "string"))
+        return res.status(400).json(errorMsg("invalid type of \"contractor_id\" expected number"));
+    const cid = parseInt(req.body.contractor_id.trim());
+    if(isNaN(cid))
+        return res.status(400).json(errorMsg("invalid type of \"contractor_id\" expected number"));
+    const contractor = await getContractorById(cid);
+    if(!contractor)
+        return res.status(500).json(errorMsg("couldn't find contractor"));
+    transporter.sendMail(contractorProfileCompleteEmail(contractor), (err, _) => {
+        if(err)
+            Log.error(err);
+    });
+    res.json({});
+});
 
 apiRouter.post("/find/tutor", async (req: Req, res: Res) => {
     const tutorTypes = Object.entries(findTutorTypes);

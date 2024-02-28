@@ -7,6 +7,7 @@ import "./firstLesson";
  */
 export enum EmailTypes {
     Referral="referral",
+    ProfileComplete="profile_complete",
     FirstLesson="first_lesson",
     AwaitingBooking="awaiting_booking",
     AwaitingAvail="awaiting_availability",
