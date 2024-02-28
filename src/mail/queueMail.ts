@@ -53,7 +53,7 @@ if(!TEST){
                     // if so, send email, otherwise return
                     try {
                         if (v.email_type === EmailTypes.ContractorIncomplete && !contractorIncompleteVerify(v.contractor_id)){
-                            await ScheduleMail.findByIdAndDelete(v._id);
+                            await ScheduleMail.findByIdAndDelete(v._id).exec();
                             continue;
                         }
 
@@ -62,7 +62,7 @@ if(!TEST){
                                 Log.error(err);
                         });
 
-                        await ScheduleMail.findByIdAndDelete(v._id);
+                        await ScheduleMail.findByIdAndDelete(v._id).exec();
                     } catch (e) {
                         Log.error(e);
                     }

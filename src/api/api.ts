@@ -32,8 +32,9 @@ if(!PROD) {
 const lessonLocations = ["in-person", "virtual", "both", "from-lesson"];
 
 export interface AlgoFilters {
-    stars: number | null,
     subjects: string[],
+    stars?: number,
+    recent_hours_cutoff?: number,
     lesson_location: "in-person" | "virtual" | "both" | "from-lesson",
     only_high_school: boolean,
     only_college: boolean,
@@ -43,6 +44,7 @@ const findTutorTypes = {
     "job_id": "number",
     "subjects": "[string]",
     "stars?": "number",
+    "recent_hours_cutoff?": "number",
     "lesson_location": "string",
     "only_high_school": "boolean",
     "only_college": "boolean",
@@ -89,6 +91,7 @@ apiRouter.post("/find/tutor", async (req: Req, res: Res) => {
     try {
         service = (await ApiFetcher.sendRequest(`/services/${req.body.job_id}/`)).data;
     } catch (e) {
+        Log.error(e);
         return res.status(500).json(errorMsg("tutor cruncher request failed", "Could not search for Job ID Provided"));
     }
     const jobInfo = await getJobInfo(service);
@@ -106,6 +109,8 @@ apiRouter.post("/find/tutor", async (req: Req, res: Res) => {
         service_name: service.name,
         is_in_person: inPerson,
         student_name: service.rcrs[0].recipient_name,
+        student_grade: jobInfo.studentGrade,
+        school_full_name: jobInfo.schoolName,
         ...tutors,
         ...req.body
     });

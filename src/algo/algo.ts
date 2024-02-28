@@ -4,6 +4,7 @@ import { AlgoFilters, ApiErrorMsg, errorMsg } from "../api/api";
 import { GeoResponse, geocode } from "../geo";
 import { JobObject } from "../integration/tc models/service/types";
 import TutorModel, { ITutor } from "../models/tutor";
+import { capitalize } from "../util";
 import "./applicationSync";
 import "./contractorSync";
 import { gradePossibilities } from "./contractorSync";
@@ -12,9 +13,10 @@ import "./syncDB";
 
 export interface JobInfo {
     locationInfo?: GeoResponse | null,
-    studentGrade: number,
+    studentGrade: string,
     classesNeededTutoringIn: string,
     isOnline: boolean,
+    schoolName?: string
 }
 
 export type AlgoTutor = ITutor & {
@@ -44,8 +46,9 @@ export const getJobInfo = async (job: JobObject): Promise<JobInfo> => {
 
     return {
         locationInfo: isOnline ? undefined : ((await geocode(address + " " + zipCode))[0]??null),
-        studentGrade: gradePossibilities[extractFieldFromJob(job, "student grade")!.toLowerCase()]!,
+        studentGrade: extractFieldFromJob(job, "student grade")!,
         classesNeededTutoringIn: extractFieldFromJob(job, "classes needed tutoring in")!,
+        schoolName: (extractFieldFromJob(job, "school full name") ?? extractFieldFromJob(job, "Student school's full name") ?? "").split(" ").map(val => capitalize(val)).join(" "),
         isOnline,
     };
 };
@@ -57,7 +60,7 @@ export const runAlgo = async (jobInfo: JobInfo, filters: AlgoFilters): Promise<{
     } = {};
     const passed: AlgoTutor[] = [];
     const pipeline: PipelineStage[] = [
-        {$match: {status: "approved", grade: {$gte: jobInfo.studentGrade+2}}},
+        {$match: {status: "approved", grade: {$gte: gradePossibilities[jobInfo.studentGrade]!+2}}},
     ];
     if(filters.stars !== undefined && filters.stars !== null) {
         (pipeline[0] as any)["$match"].stars = {$eq: filters.stars};
@@ -106,6 +109,10 @@ const filterTutor = (jobInfo: JobInfo, location: "virtual" | "in-person" | "both
         } else if (location === "in-person") {
             return i;
         }
+    }
+    i++;
+    if(filters.recent_hours_cutoff && filters.recent_hours_cutoff > 0 && tutor.recent_hours >= filters.recent_hours_cutoff && tutor.bias === 0) {
+        return i;
     }
     i++;
     if(location === "in-person" && (tutor?.grade ?? 13) > 12)
