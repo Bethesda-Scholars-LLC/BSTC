@@ -19,7 +19,7 @@ export const contractorIncompleteMail = (contractor: ContractorObject): MailOpts
     return {
         from: `"${process.env.BUSINESS_EMAIL_FROM}" <${process.env.BUSINESS_EMAIL_ADDRESS}>`, // eslint-disable-line,
         to: PROD ? contractor.user.email : (process.env.TEST_EMAIL_ADDRESS ?? "services@bethesdascholars.com"),
-        cc: process.env.BUSINESS_EMAIL_ADDRESS,
+        // cc: process.env.BUSINESS_EMAIL_ADDRESS,
         subject: "REQUIRED ACTION - Profile Completion",
         html: ReactDOMServer.renderToString(<ContractorIncomplete contractor={contractor} />),
         contractor_id: contractor.id,
@@ -38,7 +38,7 @@ const ContractorIncomplete = ({contractor}: { contractor: ContractorObject }) =>
         clicking the blue actions button below your initials on your dashboard.
         <br />
         <br />
-        We will not be able to review your application until this is complete. <b>When this has been completed, please click
+        We will not be able to review your application until this is complete. <b>When this has been completed, please click&nsbp;
             <a href={`https://${process.env.ORIGIN_URL}/app/contractor-incomplete/${contractor.id}`}>here</a> to notify us so we can review your application.
         </b>
         <br />
