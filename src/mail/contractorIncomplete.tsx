@@ -19,7 +19,7 @@ export const contractorIncompleteMail = (contractor: ContractorObject): MailOpts
     return {
         from: `"${process.env.BUSINESS_EMAIL_FROM}" <${process.env.BUSINESS_EMAIL_ADDRESS}>`, // eslint-disable-line,
         to: PROD ? contractor.user.email : (process.env.TEST_EMAIL_ADDRESS ?? "services@bethesdascholars.com"),
-        // cc: process.env.BUSINESS_EMAIL_ADDRESS,
+        cc: process.env.BUSINESS_EMAIL_ADDRESS,
         subject: "REQUIRED ACTION - Profile Completion",
         html: ReactDOMServer.renderToString(<ContractorIncomplete contractor={contractor} />),
         contractor_id: contractor.id,
