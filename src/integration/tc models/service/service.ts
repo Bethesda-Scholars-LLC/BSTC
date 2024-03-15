@@ -311,8 +311,9 @@ export const onLessonComplete = async (job: JobObject, client_id: number) => {
     if (!client)
         return;
 
-    // matched and booked stage
-    if (client.status === "prospect" && client.pipeline_stage.id === PipelineStage.MatchedAndBooked) {
+    // matched and booked stage and only one lesson on the job
+    if (client.status === "prospect" && client.pipeline_stage.id === PipelineStage.MatchedAndBooked
+        && job.total_apt_units <= 2) {
         for (let i = 0; i < job.labels.length; i++) {
             // first lesson is complete
             if (job.labels[i].id === Labels.firstLessonComplete) {
