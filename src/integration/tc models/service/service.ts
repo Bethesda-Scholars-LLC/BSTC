@@ -247,8 +247,10 @@ export const addedContractorToService = async (job: JobObject) => {
                         client_id: client.id,
                         job_id: job.id
                     }).exec());
-                    // if current tutor has not been added
+                    // if current tutor was just added to job
                     if (hasBeenAdded === null) {
+                        await TutorModel.updateOne({cruncher_id: contractor.id}, {bias: 0}).exec();
+
                         const clientJobRelation = (await AwaitingClient.findOne({
                             client_id: client.id,
                             job_id: job.id
