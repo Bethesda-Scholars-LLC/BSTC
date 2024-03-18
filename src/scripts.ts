@@ -4,10 +4,21 @@ import { getRandomClient } from "./integration/tc models/client/client";
 import { getContractorById, getRandomContractor, setLookingForJob } from "./integration/tc models/contractor/contractor";
 import { ContractorObject } from "./integration/tc models/contractor/types";
 import { getManyServices, getMinimumJobUpdate, getRandomService, getServiceById, updateServiceById } from "./integration/tc models/service/service";
+import { DumbJob } from "./integration/tc models/service/types";
 import clientMatchedMail from "./mail/clientMatched";
 import { transporter } from "./mail/mail";
+import { ManyResponse } from "./types";
 import { Log, getAttrByMachineName, stallFor } from "./util";
 
+const _listRecentServices = async () => {
+    try {
+        const services: ManyResponse<DumbJob> = (await ApiFetcher.sendRequest("/services?last_updated_gte=2024-03-15T00:00:00Z")).data;
+        Log.debug(services);
+    } catch (e) {
+        Log.error(e);
+    }
+};
+// listRecentServices();
 
 const getContractors = async (page?: number): Promise<ContractorObject | null> => {
     try {
