@@ -130,4 +130,9 @@ apiRouter.post("/find/tutor", async (req: Req, res: Res) => {
     });
 });
 
+apiRouter.post("/sheet-signup", async (req: Req, res: Res) => {
+    Log.debug(req.body);
+    res.send("");
+});
+
 export default apiRouter;
