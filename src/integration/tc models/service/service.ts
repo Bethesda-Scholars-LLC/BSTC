@@ -313,7 +313,7 @@ export const onLessonComplete = async (job: JobObject, client_id: number) => {
     if (!client)
         return;
 
-    // matched and booked and only one lesson on the job
+    // matched and booked and only one lesson on the job and only one lesson on the job
     if (client.status === "prospect" && client.pipeline_stage.id === PipelineStage.MatchedAndBooked
         && job.total_apt_units <= 2) {
         for (let i = 0; i < job.labels.length; i++) {
