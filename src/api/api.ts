@@ -7,6 +7,7 @@ import { transporter } from "../mail/mail";
 import { Req, Res } from "../types";
 import { Log } from "../util";
 import ApiFetcher from "./fetch";
+import sheetSignup from "../mail/sheetSignup";
 
 const apiRouter = express.Router();
 apiRouter.use(express.json());
@@ -132,6 +133,14 @@ apiRouter.post("/find/tutor", async (req: Req, res: Res) => {
 
 apiRouter.post("/sheet-signup", async (req: Req, res: Res) => {
     Log.debug(req.body);
+    // transporter.sendMail(sheetSignup(req.body), (error, info) => {
+    //     if (error) {
+    //         Log.debug("Error sending email: ", error);
+    //     } else {
+    //         Log.debug("Email sent: ", info.response);
+    //     }
+    // });
+    res.json({});
     res.send("");
 });
 
