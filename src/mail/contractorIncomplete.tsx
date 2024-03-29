@@ -38,7 +38,7 @@ const ContractorIncomplete = ({contractor}: { contractor: ContractorObject }) =>
         clicking the blue actions button below your initials on your dashboard.
         <br />
         <br />
-        We will not be able to review your application until this is complete. <b>When this has been completed, please click&nsbp;
+        We will not be able to review your application until this is complete. <b>When this has been completed, please click&nbsp;
             <a href={`https://${process.env.ORIGIN_URL}/app/contractor-incomplete/${contractor.id}`}>here</a> to notify us so we can review your application.
         </b>
         <br />
