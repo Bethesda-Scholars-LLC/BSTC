@@ -33,7 +33,9 @@ export type AlgoResult = {
 
 const extractFieldFromJob = (job: JobObject, field: string): string | undefined => {
     const splBio = job.description.toLowerCase().split("\n").map(val => val.trim());
-    const ind = splBio.indexOf(`**${field.toLowerCase()}:**`);
+    let ind = splBio.indexOf(`**${field.toLowerCase()}:**`);
+    if(ind === -1)
+        ind = splBio.indexOf(`${field.toLowerCase()}`);
 
     return ind !== -1 ? splBio[ind+1].trim() : undefined;
 };
