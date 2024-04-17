@@ -7,7 +7,7 @@ import { transporter } from "../mail/mail";
 import { Req, Res } from "../types";
 import { Log } from "../util";
 import ApiFetcher from "./fetch";
-import sheetSignup from "../mail/sheetSignup";
+import { GETJobsByStatus } from "./status_track";
 
 const apiRouter = express.Router();
 apiRouter.use(express.json());
@@ -45,7 +45,7 @@ const findTutorTypes = {
     "only_high_school": "boolean",
     "only_college": "boolean",
 };
-const contractorCompleteTypes = {
+const _contractorCompleteTypes = {
     "contractor_id": "string"
 };
 
@@ -143,5 +143,7 @@ apiRouter.post("/sheet-signup", async (req: Req, res: Res) => {
     res.json({});
     res.send("");
 });
+
+apiRouter.get("/job/status", GETJobsByStatus);
 
 export default apiRouter;

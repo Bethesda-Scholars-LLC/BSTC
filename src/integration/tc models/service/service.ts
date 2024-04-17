@@ -1,5 +1,6 @@
 import { Duration } from "ts-duration";
 import ApiFetcher from "../../../api/fetch";
+import { updateStatusJob } from "../../../api/status_track";
 import { GeoResponse, geocode } from "../../../geo";
 import { awaitingAvailMail } from "../../../mail/awaitingAvail";
 import { queueFirstLessonComplete } from "../../../mail/firstLesson";
@@ -357,8 +358,15 @@ addTCListener("APPLIED_FOR_SERVICE", async (event: TCEvent<any>) => {
     setLookingForJob(contractor, true);
 });
 
-addTCListener("CHANGED_SERVICE_STATUS", async (event: TCEvent<any>) => {
+addTCListener("CHANGED_SERVICE_STATUS", async (event: TCEvent<JobObject>) => {
     const job = event.subject;
+    updateStatusJob(job);
+
+    if(job.rcrs.length === 0) {
+        Log.error("0 rcrs on job");
+        return;
+    }
+    
     const client = await getClientById(job.rcrs[0].paying_client);
     if (!client)
         return;
