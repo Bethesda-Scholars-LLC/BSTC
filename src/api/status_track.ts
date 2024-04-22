@@ -9,9 +9,10 @@ import ApiFetcher from "./fetch";
  * @route /api/job/status
  */
 export const GETJobsByStatus = async (req: Req, res: Res) => {
-    if(!req.query.s || !["pending", "in-progress", "available", "finished", "gone-cold"].includes(req.query.s!.toString()))
+    const status = req.query.s?.toString();
+    if(!status || !["pending", "in-progress", "available", "finished", "gone-cold"].includes(status))
        return res.status(400).json(errorMsg("query field \"s\" invalid"));
-    const jobs = getJobsWithStatus(req.query.s.toString());
+    const jobs = getJobsWithStatus(status);
     res.json({
         count: jobs.length,
         jobs
