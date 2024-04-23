@@ -78,6 +78,10 @@ export const moveToMatchedAndBooked = async (lesson: LessonObject, job: JobObjec
         }
     }
 
+    if (job.total_apt_units > 3) {
+        return;
+    }
+
     await updateClient({
         ...getMinimumClientUpdate(client),
         pipeline_stage: PipelineStage.MatchedAndBooked
