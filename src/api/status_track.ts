@@ -1,6 +1,7 @@
 import { Duration } from "ts-duration";
+import { addTCListener } from "../integration/hook";
 import { DumbJob, JobObject } from "../integration/tc models/service/types";
-import { ManyResponse, Req, Res } from "../types";
+import { ManyResponse, Req, Res, TCEvent } from "../types";
 import { PROD } from "../util";
 import { errorMsg } from "./api";
 import ApiFetcher from "./fetch";
@@ -78,3 +79,8 @@ const syncStatusMap = async () => {
 
 if(!PROD)
     syncStatusMap();
+
+addTCListener("CREATED_A_SERVICE", (ev: TCEvent<JobObject>) => {
+    const service = ev.subject;
+    updateStatusJob(service);
+});
