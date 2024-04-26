@@ -1,6 +1,7 @@
 import { Mutex } from "async-mutex";
 import { Duration } from "ts-duration";
 import { addTCListener } from "../integration/hook";
+import { setTutorBias } from "../integration/tc models/contractor/contractor";
 import { ContractorObject } from "../integration/tc models/contractor/types";
 import LessonModel, { ILesson } from "../models/lesson";
 import TutorModel, { ITutor } from "../models/tutor";
@@ -40,6 +41,15 @@ const skillsHierarchy = [
     "meng",
     "phd",
 ];
+
+/*
+const syncBias = async () => {
+    //
+    const allTutors = await TutorModel.find({}).exec();
+    Log.debug(allTutors);
+};
+syncBias();
+*/
 
 [
     "EDITED_OWN_PROFILE",
@@ -136,14 +146,19 @@ export async function SyncContractor(contractor: ContractorObject) {
             return;
         }
 
+        let biasField: string | null = "bias";
         // on approved
         if(contractor.status.toLowerCase() !== tutor.status && contractor.status.toLowerCase() === "approved") {
             tutor.bias = 1;
+            await setTutorBias(contractor, 1);
+            // overwrite bias in case it was set to 0 on frontend
+            biasField = null;
             tutor.date_approved = new Date();
         }
 
         // attributes we want to check when tutor updates account
         [
+            biasField,
             "first_name",
             "last_name",
             "school_full_name",
@@ -158,7 +173,9 @@ export async function SyncContractor(contractor: ContractorObject) {
             "skills",
             "gpa",
             "status"
-        ].forEach((field: any) => {
+        ].forEach((field: string | null) => {
+            if(!field)
+                return;
             (tutor as any)[field] = (newTutor as any)[field];
         });
 
