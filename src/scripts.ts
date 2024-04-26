@@ -1,24 +1,14 @@
 import { Duration } from "ts-duration";
 import ApiFetcher from "./api/fetch";
 import { getRandomClient } from "./integration/tc models/client/client";
-import { getContractorById, getRandomContractor, setLookingForJob } from "./integration/tc models/contractor/contractor";
+import { getContractorById, getRandomContractor, setLookingForJob, setTutorBias } from "./integration/tc models/contractor/contractor";
 import { ContractorObject } from "./integration/tc models/contractor/types";
 import { getManyServices, getMinimumJobUpdate, getRandomService, getServiceById, updateServiceById } from "./integration/tc models/service/service";
-import { DumbJob } from "./integration/tc models/service/types";
+import { getUserFullName } from "./integration/tc models/user/user";
 import clientMatchedMail from "./mail/clientMatched";
 import { transporter } from "./mail/mail";
-import { ManyResponse } from "./types";
+import TutorModel from "./models/tutor";
 import { Log, getAttrByMachineName, stallFor } from "./util";
-
-const _listRecentServices = async () => {
-    try {
-        const services: ManyResponse<DumbJob> = (await ApiFetcher.sendRequest("/services?last_updated_gte=2024-03-15T00:00:00Z")).data;
-        Log.debug(services);
-    } catch (e) {
-        Log.error(e);
-    }
-};
-// listRecentServices();
 
 const getContractors = async (page?: number): Promise<ContractorObject | null> => {
     try {
@@ -34,7 +24,7 @@ const _editAllContractors = async () => {
     try {
         const allContractors: any = await getContractors();
         
-        // change the lenght of iteration so API limit doesnt get hit
+        // change the length of iteration so API limit doesn't get hit
         // also change page in get request after 100
         for (let i = 0; i < allContractors.results.length; i++) {
             const contractor = await getContractorById(allContractors.results[i].id);
@@ -102,4 +92,20 @@ const _changeDefaultServiceRate = async () => {
             break;
     }
     
+};
+
+const _syncBias = async () => {
+    const allTutors = await TutorModel.find({}).exec();
+    for(let i = 0; i < allTutors.length; i++) {
+        const tutor = allTutors[i];
+        const contractor = await getContractorById(tutor.cruncher_id);
+        if(!contractor){
+            Log.debug(`invalid contractor id: ${tutor.cruncher_id}, name: ${tutor.first_name} ${tutor.last_name}`);
+            continue;
+        }
+        Log.debug(`Syncing ${getUserFullName(contractor.user)} bias`);
+
+        await setTutorBias(contractor, tutor.bias as 0 | 1);
+
+    }
 };

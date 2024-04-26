@@ -42,14 +42,6 @@ const skillsHierarchy = [
     "phd",
 ];
 
-/*
-const syncBias = async () => {
-    //
-    const allTutors = await TutorModel.find({}).exec();
-    Log.debug(allTutors);
-};
-syncBias();
-*/
 
 [
     "EDITED_OWN_PROFILE",
@@ -136,8 +128,9 @@ export async function SyncContractor(contractor: ContractorObject) {
         const tutor = await TutorModel.findOne({cruncher_id: contractor.id}).exec();
 
         const newTutor = tutorFromContractor(contractor);
+
         if(!tutor) {
-            if(!newTutor){
+            if(!newTutor) {
                 lock.release();
                 return;
             }
@@ -155,10 +148,14 @@ export async function SyncContractor(contractor: ContractorObject) {
             biasField = null;
             tutor.date_approved = new Date();
         }
+        if(biasField) {
+            if(newTutor!.bias !== tutor.bias) {
+                tutor.bias = newTutor!.bias;
+            }
+        }
 
         // attributes we want to check when tutor updates account
         [
-            biasField,
             "first_name",
             "last_name",
             "school_full_name",
@@ -233,7 +230,7 @@ function tutorFromContractor(con: ContractorObject): ITutor | null {
                 contract_filled_out: checkBoolExtraAttr(con.extra_attrs, "contract_filled_out")??false,
             },
 
-            bias: 1,
+            bias: parseInt(getAttrByMachineName("bias", con.extra_attrs)?.value) ?? 1,
             stars: getAttrByMachineName("rating", con.extra_attrs)?.value.split("/")[0],
             gender: genderNum,
             phone_number: (con.user.mobile??con.user.phone)??undefined,
