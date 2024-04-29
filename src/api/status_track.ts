@@ -61,6 +61,16 @@ export const getJobStatus = (job_id: string): string | null => {
     return null;
 };
 
+const removeStatusJob = (job: MapJob) => {
+    const statusList = Object.keys(statusMap);
+
+    for(let i = 0; i < statusList.length; i++) {
+        if(statusMap[statusList[i]][job.id]) {
+            delete statusMap[statusList[i]][job.id];
+            break;
+        }
+    }
+};
 
 export const updateStatusJob = async (job: MapJob) => {
     const statusList = Object.keys(statusMap);
@@ -117,12 +127,12 @@ const syncStatusMap = async () => {
 
 syncStatusMap();
 
-addTCListener("CREATED_A_SERVICE", async (ev: TCEvent<JobObject>) => {
+addTCListener(["CREATED_A_SERVICE", "CHANGED_SERVICE_STATUS", "REQUESTED_A_SERVICE"], async (ev: TCEvent<JobObject>) => {
     const service = ev.subject;
     await updateStatusJob(service);
 });
 
-addTCListener("CHANGED_SERVICE_STATUS", async (event: TCEvent<JobObject>) => {
-    const job = event.subject;
-    await updateStatusJob(job);
+addTCListener("DELETED_A_SERVICE", async (ev: TCEvent<JobObject>) => {
+    const service = ev.subject;
+    removeStatusJob(service);
 });

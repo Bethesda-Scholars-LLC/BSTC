@@ -43,7 +43,7 @@ const skillsHierarchy = [
 ];
 
 
-[
+addTCListener([
     "EDITED_OWN_PROFILE",
     "CREATED_A_CONTRACTOR",
     "EDITED_A_CONTRACTOR",
@@ -52,9 +52,7 @@ const skillsHierarchy = [
     "EDITED_QUALIFICATIONS",
     "ADDED_A_LABEL_TO_A_USER",
     "CONTRACTOR_SIGN_UP",
-].forEach(evName => {
-    addTCListener(evName, updatedContractorFunc);
-});
+], updatedContractorFunc);
 
 addTCListener("DELETED_A_CONTRACTOR", async (ev: TCEvent<ContractorObject>) => {
     const contractor = ev.subject;

@@ -9,16 +9,23 @@ const listeners: {
     [key: string]: TCEventListener[]
 } = {};
 
-export const addTCListener = (eventName: string, listener: TCEventListener) => {
-    if(eventName in listeners) {
-        if(listeners[eventName].includes(listener)) {
-            Log.debug(`EXACT SAME LISTENER BINDING TWICE IN ${eventName}`);
+export const addTCListener = (eventNames: string | string[], listener: TCEventListener) => {
+    if(typeof eventNames === "string")
+        eventNames = [eventNames];
+    
+    for(let i = 0; i < eventNames.length; i++) {
+        const eventName: string = eventNames[i];
+
+        if(eventName in listeners) {
+            if(listeners[eventName].includes(listener)) {
+                Log.debug(`EXACT SAME LISTENER BINDING TWICE IN ${eventName}`);
+                return;
+            }
+            listeners[eventName].push(listener);
             return;
         }
-        listeners[eventName].push(listener);
-        return;
+        listeners[eventName] = [listener];
     }
-    listeners[eventName] = [listener];
 };
 
 hookRouter.all("*", (req: Req, res: Res) => {
