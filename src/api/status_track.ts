@@ -109,7 +109,7 @@ export const updateStatusJob = async (job: MapJob) => {
         }
 
         if(isFullJob(job) && !job.details) {
-            const inPerson = job.dft_location === SessionLocation.InPerson;
+            const inPerson = job.dft_location?.id === SessionLocation.InPerson;
             job.details = {
                 student_name: job.rcrs[0].recipient_name,
                 grade: extractFieldFromJob(job, "student grade"),
