@@ -31,7 +31,7 @@ export type AlgoResult = {
 // measured in miles
 // const CUTOFF_DIST = 10;
 
-const extractFieldFromJob = (job: JobObject, field: string): string | undefined => {
+export const extractFieldFromJob = (job: JobObject, field: string): string | undefined => {
     const splBio = job.description.toLowerCase().split("\n").map(val => val.trim());
     let ind = splBio.indexOf(`**${field.toLowerCase()}:**`);
     if(ind === -1)
