@@ -45,11 +45,13 @@ export const enum Labels {
 }
 
 export const updateServiceStatus = async (job: DumbJob | JobObject, status: "in-progress" | "available") => {
-    updateStatusJob({...job, status});
-    await updateServiceById(job.id, {         // change status back to in progress
-        ...getMinimumJobUpdate(job),
-        status,
-    });
+    await Promise.all([
+        updateStatusJob({...job, status}),
+        updateServiceById(job.id, {         // change status back to in progress
+            ...getMinimumJobUpdate(job),
+            status,
+        })
+    ]);
 };
 
 export const updateServiceById = async (id: number, data: UpdateServicePayload) => {
