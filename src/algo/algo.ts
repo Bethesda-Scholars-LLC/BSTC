@@ -31,15 +31,25 @@ export type AlgoResult = {
 // measured in miles
 // const CUTOFF_DIST = 10;
 
-export const extractFieldFromJob = (job: JobObject, field: string): string | undefined => {
-    const splBio = job.description.toLowerCase().split("\n").map(val => val.trim());
-    let ind = splBio.indexOf(`**${field.toLowerCase()}:**`);
-    if(ind === -1)
-        ind = splBio.indexOf(`${field.toLowerCase()}:`);
-    if(ind === -1)
-        ind = splBio.indexOf(`${field.toLowerCase()}`);
+export const extractFieldFromJob = (job: JobObject, fields: string | string[]): string | undefined => {
+    if(typeof fields === "string")
+        fields = [fields];
+    
 
-    return ind !== -1 ? splBio[ind+1].trim() : undefined;
+    for(let i = 0; i < fields.length; i++) {
+        const field = fields[i];
+        const splBio = job.description.toLowerCase().split("\n").map(val => val.trim());
+        let ind = splBio.indexOf(`**${field.toLowerCase()}:**`);
+        if(ind === -1)
+            ind = splBio.indexOf(`${field.toLowerCase()}:`);
+        if(ind === -1)
+            ind = splBio.indexOf(`${field.toLowerCase()}`);
+
+        if(ind !== -1)
+            return splBio[ind+1].trim();
+    }
+
+    return undefined;
 };
 
 export const getJobInfo = async (job: JobObject): Promise<JobInfo> => {

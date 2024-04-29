@@ -25,7 +25,7 @@ export const GETJobsByStatus = async (req: Req, res: Res) => {
 };
 
 
-type MapJob = DumbJob | JobObject & {
+type MapJob = DumbJob | (JobObject & {
     details?: {
         student_name?: string,
         grade?: string,
@@ -33,7 +33,7 @@ type MapJob = DumbJob | JobObject & {
         needed_subjects?: string,
         location?: string,
     }
-};
+});
 
 const statusMap: {
     [status: string]: {
@@ -115,7 +115,7 @@ export const updateStatusJob = async (job: MapJob) => {
                 grade: extractFieldFromJob(job, "student grade"),
                 lesson_frequency: extractFieldFromJob(job, "lesson frequency"),
                 needed_subjects: extractFieldFromJob(job, "classes needed tutoring in"),
-                location: inPerson ? extractFieldFromJob(job, "home address (if in person lessons)") : undefined,
+                location: inPerson ? extractFieldFromJob(job, ["home address (if in person lessons)", "home address"]) : undefined,
             };
         }
     }
