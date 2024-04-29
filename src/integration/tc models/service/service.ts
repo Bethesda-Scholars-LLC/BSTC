@@ -44,6 +44,14 @@ export const enum Labels {
     firstLessonComplete = 169932
 }
 
+export const updateServiceStatus = async (job: DumbJob | JobObject, status: "in-progress" | "available") => {
+    updateStatusJob({...job, status});
+    await updateServiceById(job.id, {         // change status back to in progress
+        ...getMinimumJobUpdate(job),
+        status,
+    });
+};
+
 export const updateServiceById = async (id: number, data: UpdateServicePayload) => {
     try {
         await ApiFetcher.sendRequest(`/services/${id}/`, {
@@ -301,10 +309,8 @@ export const addedContractorToService = async (job: JobObject) => {
             });
         }
     }
-    updateServiceById(job.id, {
-        ...getMinimumJobUpdate(job),
-        status: "in-progress",
-    });
+
+    updateServiceStatus(job, "in-progress");
 };
 /**
  * @description update status to in progress when contract added
@@ -365,7 +371,6 @@ addTCListener("APPLIED_FOR_SERVICE", async (event: TCEvent<any>) => {
 
 addTCListener("CHANGED_SERVICE_STATUS", async (event: TCEvent<JobObject>) => {
     const job = event.subject;
-    updateStatusJob(job);
 
     if(job.rcrs.length === 0) {
         Log.error("0 rcrs on job");
@@ -398,10 +403,7 @@ addTCListener("CHANGED_SERVICE_STATUS", async (event: TCEvent<JobObject>) => {
             // await NotCold.findByIdAndDelete(notCold.id);
             
             
-            updateServiceById(job.id, {         // change status back to in progress
-                ...getMinimumJobUpdate(job),
-                status: "in-progress",
-            });
+            updateServiceStatus(job, "in-progress");
         }
     }
 });

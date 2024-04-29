@@ -2,6 +2,7 @@ import { Duration } from "ts-duration";
 import { addTCListener } from "../integration/hook";
 import { DumbJob, JobObject } from "../integration/tc models/service/types";
 import { ManyResponse, Req, Res, TCEvent } from "../types";
+import { Log } from "../util";
 import { errorMsg } from "./api";
 import ApiFetcher from "./fetch";
 
@@ -52,12 +53,14 @@ export const updateStatusJob = (job: MapJob) => {
         delete statusMap[statusList[i]][job.id];
     }
 
-    if(!job.status)
+    if(!job.status) {
         return;
+    }
     if(!statusMap[job.status])
         statusMap[job.status] = {};
     
     statusMap[job.status][job.id] = job;
+    Log.debug(Object.fromEntries(Object.entries(statusMap).map(([status, jobs]) => [status, Object.keys(jobs)])));
 };
 
 
@@ -78,7 +81,12 @@ const syncStatusMap = async () => {
 
 syncStatusMap();
 
-addTCListener("CREATED_A_SERVICE", (ev: TCEvent<JobObject>) => {
+addTCListener("CREATED_A_SERVICE", async (ev: TCEvent<JobObject>) => {
     const service = ev.subject;
     updateStatusJob(service);
+});
+
+addTCListener("CHANGED_SERVICE_STATUS", async (event: TCEvent<JobObject>) => {
+    const job = event.subject;
+    updateStatusJob(job);
 });
