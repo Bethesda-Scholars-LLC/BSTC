@@ -37,7 +37,7 @@ export const getContractorById = async (id: number): Promise<ContractorObject | 
     }
 };
 
-const updateContractor = async (data: UpdateContractorPayload) => {
+export const updateContractor = async (data: UpdateContractorPayload) => {
     try {
         return await ApiFetcher.sendRequest("/contractors/", {
             method: "POST",
@@ -62,7 +62,7 @@ export const getRandomContractor = async (): Promise<ContractorObject | null> =>
     return null;
 };
 
-const getDefaultContractorUpdate = (tutor: ContractorObject): UpdateContractorPayload => {
+export const getMinimumContractorUpdate = (tutor: {user: { email: string, last_name: string }}): UpdateContractorPayload => {
     return {
         user: {
             email: tutor.user.email,
@@ -71,8 +71,16 @@ const getDefaultContractorUpdate = (tutor: ContractorObject): UpdateContractorPa
     };
 };
 
+export const setTutorBias = async (contractor: {user: { email: string, last_name: string }}, value: 0 | 1) => {
+    const defaultTutor = getMinimumContractorUpdate(contractor);
+
+    defaultTutor.extra_attrs = { bias: value.toString() };
+
+    await updateContractor(defaultTutor);
+};
+
 export const setLookingForJob = async (contractor: ContractorObject, value: boolean) => {
-    const defaultTutor = getDefaultContractorUpdate(contractor);
+    const defaultTutor = getMinimumContractorUpdate(contractor);
 
     defaultTutor.extra_attrs = { looking_for_job: value };
 
@@ -80,7 +88,7 @@ export const setLookingForJob = async (contractor: ContractorObject, value: bool
 };
 
 export const getNewContractorDetails = (contractor: ContractorObject): UpdateContractorPayload => {
-    const defaultTutor = getDefaultContractorUpdate(contractor);
+    const defaultTutor = getMinimumContractorUpdate(contractor);
     const phoneNumber = getAttrByMachineName("phone_number", contractor.extra_attrs);
     const address = getAttrByMachineName("home_street_address", contractor.extra_attrs);
     const city = getAttrByMachineName("city", contractor.extra_attrs);

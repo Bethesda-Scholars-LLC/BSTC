@@ -1,6 +1,7 @@
 import { Mutex } from "async-mutex";
 import { Duration } from "ts-duration";
 import { addTCListener } from "../integration/hook";
+import { setTutorBias } from "../integration/tc models/contractor/contractor";
 import { ContractorObject } from "../integration/tc models/contractor/types";
 import LessonModel, { ILesson } from "../models/lesson";
 import TutorModel, { ITutor } from "../models/tutor";
@@ -40,6 +41,7 @@ const skillsHierarchy = [
     "meng",
     "phd",
 ];
+
 
 [
     "EDITED_OWN_PROFILE",
@@ -126,8 +128,9 @@ export async function SyncContractor(contractor: ContractorObject) {
         const tutor = await TutorModel.findOne({cruncher_id: contractor.id}).exec();
 
         const newTutor = tutorFromContractor(contractor);
+
         if(!tutor) {
-            if(!newTutor){
+            if(!newTutor) {
                 lock.release();
                 return;
             }
@@ -136,10 +139,19 @@ export async function SyncContractor(contractor: ContractorObject) {
             return;
         }
 
+        let biasField: string | null = "bias";
         // on approved
         if(contractor.status.toLowerCase() !== tutor.status && contractor.status.toLowerCase() === "approved") {
             tutor.bias = 1;
+            await setTutorBias(contractor, 1);
+            // overwrite bias in case it was set to 0 on frontend
+            biasField = null;
             tutor.date_approved = new Date();
+        }
+        if(biasField) {
+            if(newTutor!.bias !== tutor.bias) {
+                tutor.bias = newTutor!.bias;
+            }
         }
 
         // attributes we want to check when tutor updates account
@@ -158,7 +170,9 @@ export async function SyncContractor(contractor: ContractorObject) {
             "skills",
             "gpa",
             "status"
-        ].forEach((field: any) => {
+        ].forEach((field: string | null) => {
+            if(!field)
+                return;
             (tutor as any)[field] = (newTutor as any)[field];
         });
 
@@ -216,7 +230,7 @@ function tutorFromContractor(con: ContractorObject): ITutor | null {
                 contract_filled_out: checkBoolExtraAttr(con.extra_attrs, "contract_filled_out")??false,
             },
 
-            bias: 1,
+            bias: parseInt(getAttrByMachineName("bias", con.extra_attrs)?.value) ?? 1,
             stars: getAttrByMachineName("rating", con.extra_attrs)?.value.split("/")[0],
             gender: genderNum,
             phone_number: (con.user.mobile??con.user.phone)??undefined,

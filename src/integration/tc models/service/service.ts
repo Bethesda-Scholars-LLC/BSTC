@@ -17,7 +17,7 @@ import { Log, PROD, capitalize, getAttrByMachineName, randomChoice } from "../..
 import { addTCListener } from "../../hook";
 import { getClientById, getMinimumClientUpdate, updateClient } from "../client/client";
 import { ClientObject } from "../client/types";
-import { getContractorById, setLookingForJob } from "../contractor/contractor";
+import { getContractorById, getMinimumContractorUpdate, setLookingForJob, updateContractor } from "../contractor/contractor";
 import { LessonObject } from "../lesson/types";
 import { getUserFullName } from "../user/user";
 import { DumbJob, JobObject, UpdateServicePayload } from "./types";
@@ -43,6 +43,16 @@ export const enum SessionLocation {
 export const enum Labels {
     firstLessonComplete = 169932
 }
+
+export const updateServiceStatus = async (job: DumbJob | JobObject, status: "in-progress" | "available") => {
+    await Promise.all([
+        updateStatusJob({...job, status}),
+        updateServiceById(job.id, {         // change status back to in progress
+            ...getMinimumJobUpdate(job),
+            status,
+        })
+    ]);
+};
 
 export const updateServiceById = async (id: number, data: UpdateServicePayload) => {
     try {
@@ -229,12 +239,9 @@ export const addedContractorToService = async (job: JobObject) => {
 
         for (let i = 0; i < job.conjobs.length; i++) {
             const contractor = await getContractorById(job.conjobs[i].contractor);
-            await TutorModel.findOneAndUpdate({cruncher_id: job.conjobs[i].contractor}, { $set: {bias: 0} }).exec();
 
             if (!contractor)
                 return Log.debug(`contractor is null \n ${job.conjobs[i]}`);
-
-            await setLookingForJob(contractor, false);
 
             transporter.sendMail(tutorMatchedMail(contractor, client, job), (err) => {
                 if (err)
@@ -248,40 +255,48 @@ export const addedContractorToService = async (job: JobObject) => {
                         client_id: client.id,
                         job_id: job.id
                     }).exec());
+                    // if current tutor has already been added to this job, go next
+                    if (hasBeenAdded)
+                        continue;
                     // if current tutor was just added to job
-                    if (hasBeenAdded === null) {
-                        await TutorModel.updateOne({cruncher_id: contractor.id}, {bias: 0}).exec();
+                    
+                    await TutorModel.updateOne({cruncher_id: contractor.id}, {bias: 0}).exec();
 
-                        const clientJobRelation = (await AwaitingClient.findOne({
+                    const defaultTutor = getMinimumContractorUpdate(contractor);
+
+                    defaultTutor.extra_attrs = { bias: "0", looking_for_job: false };
+
+                    await updateContractor(defaultTutor);
+
+                    const clientJobRelation = (await AwaitingClient.findOne({
+                        client_id: client.id,
+                        job_id: job.id
+                    }).exec());
+                    // if a client job relation has not already been made, create it
+                    if (clientJobRelation === null) {
+                        await new AwaitingClient({
                             client_id: client.id,
-                            job_id: job.id
-                        }).exec());
-                        // if a client job relation has not already been made, create it
-                        if (clientJobRelation === null) {
-                            await new AwaitingClient({
-                                client_id: client.id,
-                                client_name: getUserFullName(client.user),
-                                job_id: job.id,
-                                tutor_ids: [contractor.id],
-                                tutor_names: [getUserFullName(contractor.user)]
-                            }).save();
-                            // otherwise update current one
-                        } else {
-                            clientJobRelation.tutor_ids.push(contractor.id);
-                            await clientJobRelation.save();
+                            client_name: getUserFullName(client.user),
+                            job_id: job.id,
+                            tutor_ids: [contractor.id],
+                            tutor_names: [getUserFullName(contractor.user)]
+                        }).save();
+                        // otherwise update current one
+                    } else {
+                        clientJobRelation.tutor_ids.push(contractor.id);
+                        await clientJobRelation.save();
+                    }
+                    // now add to schedule mail that sends to us in 1 day if availability not set
+                    const inDB = await ScheduleMail.findOne(
+                        {
+                            job_id: job.id,
+                            client_id: client.id,
+                            contractor_id: contractor.id,
+                            email_type: EmailTypes.AwaitingAvail
                         }
-                        // now add to schedule mail that sends to us in 1 day if availability not set
-                        const inDB = await ScheduleMail.findOne(
-                            {
-                                job_id: job.id,
-                                client_id: client.id,
-                                contractor_id: contractor.id,
-                                email_type: EmailTypes.AwaitingAvail
-                            }
-                        ).exec();
-                        if (!inDB) {
-                            queueEmail(PROD ? day : Duration.second(10), awaitingAvailMail(contractor, client, job));
-                        }
+                    ).exec();
+                    if (!inDB) {
+                        queueEmail(PROD ? day : Duration.second(10), awaitingAvailMail(contractor, client, job));
                     }
                 }
             } catch (e) {
@@ -296,10 +311,8 @@ export const addedContractorToService = async (job: JobObject) => {
             });
         }
     }
-    updateServiceById(job.id, {
-        ...getMinimumJobUpdate(job),
-        status: "in-progress",
-    });
+
+    updateServiceStatus(job, "in-progress");
 };
 /**
  * @description update status to in progress when contract added
@@ -360,7 +373,6 @@ addTCListener("APPLIED_FOR_SERVICE", async (event: TCEvent<any>) => {
 
 addTCListener("CHANGED_SERVICE_STATUS", async (event: TCEvent<JobObject>) => {
     const job = event.subject;
-    updateStatusJob(job);
 
     if(job.rcrs.length === 0) {
         Log.error("0 rcrs on job");
@@ -393,10 +405,7 @@ addTCListener("CHANGED_SERVICE_STATUS", async (event: TCEvent<JobObject>) => {
             // await NotCold.findByIdAndDelete(notCold.id);
             
             
-            updateServiceById(job.id, {         // change status back to in progress
-                ...getMinimumJobUpdate(job),
-                status: "in-progress",
-            });
+            updateServiceStatus(job, "in-progress");
         }
     }
 });
