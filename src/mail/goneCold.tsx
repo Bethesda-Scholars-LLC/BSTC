@@ -13,7 +13,7 @@ export const goneColdMail = (job: JobObject, client: ClientObject | null, contra
     return {
         from: MANAGER_EMAIL_FROM, // eslint-disable-line,
         to: PROD ? (client?.user.email ?? process.env.BUSINESS_EMAIL_ADDRESS) : (process.env.TEST_EMAIL_ADDRESS ?? "services@bethesdascholars.com"),
-        cc: [process.env.BUSINESS_EMAIL_ADDRESS!, process.env.MANAGER_EMAIL_FROM!],
+        cc: [process.env.BUSINESS_EMAIL_ADDRESS!, process.env.MANAGER_EMAIL_ADDRESS!],
         subject: `Lessons with ${contractor ? getUserFirstName(contractor.user) : ""}`,
         html: ReactDOMServer.renderToString(<GoneCold job={job} client={client} contractor={contractor}/>)
     };
