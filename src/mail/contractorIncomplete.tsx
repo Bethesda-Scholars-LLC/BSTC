@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOMServer from "react-dom/server";
 import { ContractorObject } from "../integration/tc models/contractor/types";
 import { getUserFirstName } from "../integration/tc models/user/user";
-import { PROD, getAttrByMachineName } from "../util";
+import { BUSINESS_EMAIL_FROM, PROD, getAttrByMachineName } from "../util";
 import { EmailTypes, MailOpts } from "./mail";
 
 /**
@@ -17,7 +17,7 @@ export const hasContractorCompletedProfile = (contractor: ContractorObject): boo
 
 export const contractorIncompleteMail = (contractor: ContractorObject): MailOpts => {
     return {
-        from: `"${process.env.BUSINESS_EMAIL_FROM}" <${process.env.BUSINESS_EMAIL_ADDRESS}>`, // eslint-disable-line,
+        from: BUSINESS_EMAIL_FROM, // eslint-disable-line,
         to: PROD ? contractor.user.email : (process.env.TEST_EMAIL_ADDRESS ?? "services@bethesdascholars.com"),
         cc: process.env.BUSINESS_EMAIL_ADDRESS,
         subject: "REQUIRED ACTION - Profile Completion",
