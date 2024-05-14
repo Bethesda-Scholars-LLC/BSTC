@@ -23,11 +23,19 @@ export interface MailOpts extends MailOptions {
     job_id?: number
 }
 
-export const transporter = nodemailer.createTransport({
+export const transporterPascal = nodemailer.createTransport({
     service: "gmail",
     auth: {
         user: process.env.PERSONAL_EMAIL_ADDRESS,
         pass: process.env.EMAIL_PASSWORD
+    }
+});
+
+export const transporterManager = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+        user: process.env.MANAGER_EMAIL_ADDRESS,
+        pass: process.env.MANAGER_PASSWORD
     }
 });
 

@@ -5,7 +5,7 @@ import { GeoResponse, geocode } from "../../../geo";
 import { awaitingAvailMail } from "../../../mail/awaitingAvail";
 import { queueFirstLessonComplete } from "../../../mail/firstLesson";
 import { goneColdMail } from "../../../mail/goneCold";
-import { EmailTypes, transporter } from "../../../mail/mail";
+import { EmailTypes, transporterManager, transporterPascal } from "../../../mail/mail";
 import { queueEmail } from "../../../mail/queueMail";
 import tutorMatchedMail from "../../../mail/tutorMatched";
 import AwaitingClient from "../../../models/clientAwaiting";
@@ -243,7 +243,7 @@ export const addedContractorToService = async (job: JobObject) => {
             if (!contractor)
                 return Log.debug(`contractor is null \n ${job.conjobs[i]}`);
 
-            transporter.sendMail(tutorMatchedMail(contractor, client, job), (err) => {
+            transporterPascal.sendMail(tutorMatchedMail(contractor, client, job), (err) => {
                 if (err)
                     Log.error(err);
             });
@@ -398,7 +398,7 @@ addTCListener("CHANGED_SERVICE_STATUS", async (event: TCEvent<JobObject>) => {
 
             // COMMENT AFTER THANKSGIVING AND CHRISTMAS
             
-            transporter.sendMail(goneColdMail(job, client, contractor), (err) => {
+            transporterManager.sendMail(goneColdMail(job, client, contractor), (err) => {
                 if (err)
                     Log.error(err);
             });

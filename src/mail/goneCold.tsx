@@ -5,14 +5,15 @@ import { ClientObject } from "../integration/tc models/client/types";
 import { ContractorObject } from "../integration/tc models/contractor/types";
 import { JobObject } from "../integration/tc models/service/types";
 import { getUserFirstName } from "../integration/tc models/user/user";
-import { PROD } from "../util";
+import { MANAGER_EMAIL_FROM, PROD } from "../util";
 import { getTutorPronouns } from "./firstLesson";
+import ManagerSignature from "./managerSignature";
 
 export const goneColdMail = (job: JobObject, client: ClientObject | null, contractor: ContractorObject | null): MailOptions => {
     return {
-        from: `"${process.env.PERSONAL_EMAIL_FROM}" <${process.env.PERSONAL_EMAIL_ADDRESS}>`, // eslint-disable-line,
+        from: MANAGER_EMAIL_FROM, // eslint-disable-line,
         to: PROD ? (client?.user.email ?? process.env.BUSINESS_EMAIL_ADDRESS) : (process.env.TEST_EMAIL_ADDRESS ?? "services@bethesdascholars.com"),
-        cc: process.env.BUSINESS_EMAIL_ADDRESS,
+        cc: [process.env.BUSINESS_EMAIL_ADDRESS!, process.env.MANAGER_EMAIL_FROM!],
         subject: `Lessons with ${contractor ? getUserFirstName(contractor.user) : ""}`,
         html: ReactDOMServer.renderToString(<GoneCold job={job} client={client} contractor={contractor}/>)
     };
@@ -35,14 +36,6 @@ const GoneCold = (props: {job: JobObject, client: ClientObject | null, contracto
         <br/>
         Thanks,
         <br/>
-        <b>{process.env.PERSONAL_EMAIL_FROM}</b>
-        <br/>
-        {process.env.SIGNATURE_DESCRIPTION}
-        <br/>
-        _________________________________
-        <br/>
-        <b>Website</b>: https://www.bethesdascholars.com
-        <br/>
-        <b>Mobile</b>: 202-294-6538
+        <ManagerSignature/>
     </p>;
 };

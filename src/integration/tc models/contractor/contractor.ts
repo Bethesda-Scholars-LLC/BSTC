@@ -4,7 +4,7 @@ import ApiFetcher from "../../../api/fetch";
 import { awaitingBookingMail } from "../../../mail/awaitingBooking";
 import clientMatchedMail from "../../../mail/clientMatched";
 import { contractorIncompleteMail } from "../../../mail/contractorIncomplete";
-import { EmailTypes, transporter } from "../../../mail/mail";
+import { EmailTypes, transporterPascal } from "../../../mail/mail";
 import { queueEmail } from "../../../mail/queueMail";
 import { tutorReferralMail } from "../../../mail/tutorReferral";
 import AwaitingClient, { popTutorFromCA } from "../../../models/clientAwaiting";
@@ -133,7 +133,7 @@ export const popTutorFromCAs = async (contractor: ContractorObject) => {
             if (!job)
                 return;
 
-            transporter.sendMail(clientMatchedMail(contractor, client, job), (err) => {
+            transporterPascal.sendMail(clientMatchedMail(contractor, client, job), (err) => {
                 if (err)
                     Log.error(err);
             });

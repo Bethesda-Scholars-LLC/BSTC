@@ -3,7 +3,7 @@ import { getJobInfo, runAlgo } from "../algo/algo";
 import { getContractorById } from "../integration/tc models/contractor/contractor";
 import { JobObject } from "../integration/tc models/service/types";
 import { contractorProfileCompleteEmail } from "../mail/contractorProfileCompleted";
-import { transporter } from "../mail/mail";
+import { transporterPascal } from "../mail/mail";
 import { Req, Res } from "../types";
 import { Log } from "../util";
 import ApiFetcher from "./fetch";
@@ -79,7 +79,7 @@ apiRouter.post("/contractor-complete", async (req: Req, res: Res) => {
     const contractor = await getContractorById(cid);
     if(!contractor)
         return res.status(500).json(errorMsg("couldn't find contractor"));
-    transporter.sendMail(contractorProfileCompleteEmail(contractor), (err, _) => {
+    transporterPascal.sendMail(contractorProfileCompleteEmail(contractor), (err, _) => {
         if(err)
             Log.error(err);
     });

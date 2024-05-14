@@ -32,6 +32,12 @@ const requiredEnvs = [
     "ORIGIN_URL",
     "SIGNATURE_DESCRIPTION",
 
+    "MANAGER_EMAIL_ADDRESS",
+    "MANAGER_EMAIL_PASSWORD",
+    "MANAGER_EMAIL_FROM",
+    "MANAGER_SIGNATURE_DESCRIPTION",
+    "MANAGER_MOBILE",
+
     "DB_NAME",
     "DB_URI",
 ];
@@ -58,6 +64,8 @@ if(requiredEnvs.reduce((prev, val) => {
 }
 
 export const BUSINESS_EMAIL_FROM = `"Bethesda Scholars" <${process.env.BUSINESS_EMAIL_ADDRESS}>`; // eslint-disable-line
+export const MANAGER_EMAIL_FROM = `"${process.env.MANAGER_EMAIL_FROM}" <${process.env.MANAGER_EMAIL_ADDRESS}>`;
+export const PERSONAL_EMAIL_FROM = `"${process.env.PERSONAL_EMAIL_FROM}" <${process.env.PERSONAL_EMAIL_ADDRESS}>`;
 
 export const DB_URI = process.env.DB_URI! + getDbUri(); // eslint-disable-line
 

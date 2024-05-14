@@ -7,9 +7,10 @@ import { getContractorById } from "../integration/tc models/contractor/contracto
 import { ContractorObject } from "../integration/tc models/contractor/types";
 import { JobObject } from "../integration/tc models/service/types";
 import { cleanPhoneNumber, getUserFirstName } from "../integration/tc models/user/user";
-import { PROD, getAttrByMachineName } from "../util";
+import { MANAGER_EMAIL_FROM, PROD, getAttrByMachineName } from "../util";
 import { EmailTypes } from "./mail";
 import { queueEmail } from "./queueMail";
+import ManagerSignature from "./managerSignature";
 
 export const FirstLesson = (props: { job: JobObject, tutor: ContractorObject, client: ClientObject }) => {
     const tutorFirstName = props.job.conjobs[0].name.split(" ")[0];
@@ -33,15 +34,7 @@ export const FirstLesson = (props: { job: JobObject, tutor: ContractorObject, cl
         <br />
         Thanks,
         <br />
-        <b>{process.env.PERSONAL_EMAIL_FROM}</b>
-        <br />
-        {process.env.SIGNATURE_DESCRIPTION}
-        <br />
-        _________________________________
-        <br />
-        <b>Website</b>: https://www.bethesdascholars.com
-        <br />
-        <b>Mobile</b>: 202-294-6538
+        <ManagerSignature/>
     </p>;
 };
 
@@ -83,9 +76,9 @@ export const queueFirstLessonComplete = async (job: JobObject) => {
     const userEmail = client.user.email;
 
     queueEmail(PROD ? day : Duration.second(10), {
-        from: `"${process.env.PERSONAL_EMAIL_FROM}" <${process.env.PERSONAL_EMAIL_ADDRESS}>`, // eslint-disable-line
-        to: PROD ? userEmail : (process.env.TEST_EMAIL_ADDRESS ?? userEmail),
-        cc: process.env.BUSINESS_EMAIL_ADDRESS,
+        from: MANAGER_EMAIL_FROM, // eslint-disable-line
+        to: PROD ? userEmail : (process.env.TEST_EMAIL_ADDRESS),
+        cc: [process.env.BUSINESS_EMAIL_ADDRESS!, process.env.MANAGER_EMAIL_ADDRESS!],
         email_type: EmailTypes.FirstLesson,
         subject: `Lesson with ${tutorFirstName}`,
         html: ReactDOMServer.renderToString(<FirstLesson job={job} client={client} tutor={tutor} />)

@@ -6,7 +6,7 @@ import ScheduleMail, { IScheduledMail } from "../models/scheduledEmail";
 import { Log, PROD, TEST } from "../util";
 import { hasContractorCompletedProfile } from "./contractorIncomplete";
 import { contractorProfileCompleteEmail } from "./contractorProfileCompleted";
-import { EmailTypes, MailOpts, transporter } from "./mail";
+import { EmailTypes, MailOpts, transporterManager, transporterPascal } from "./mail";
 
 export const scheduledMailMutex = new Mutex();
 
@@ -66,7 +66,7 @@ if(!TEST){
                             // if contractor is pending, check if profile has been completed,
                             // if profile has indeed been completed, send email and delete from db
                             if(hasContractorCompletedProfile(contractor)) {
-                                transporter.sendMail(contractorProfileCompleteEmail(contractor), (err, _) => {
+                                transporterPascal.sendMail(contractorProfileCompleteEmail(contractor), (err, _) => {
                                     if(err)
                                         Log.error(err);
                                 });
@@ -77,10 +77,19 @@ if(!TEST){
                             // as scheduled
                         }
 
-                        transporter.sendMail(v, (err, _) => {
-                            if (err)
-                                Log.error(err);
-                        });
+                        // if email is of the types below, send from manager's transporter and not personal transporter
+                        if (v.email_type === EmailTypes.AwaitingBooking ||
+                            v.email_type === EmailTypes.FirstLesson) {
+                            transporterManager.sendMail(v, (err, _) => {
+                                if (err)
+                                    Log.error(err);
+                            });
+                        } else {
+                            transporterPascal.sendMail(v, (err, _) => {
+                                if (err)
+                                    Log.error(err);
+                            });
+                        }
 
                         await ScheduleMail.findByIdAndDelete(v._id).exec();
                     } catch (e) {

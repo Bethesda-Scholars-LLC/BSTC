@@ -6,7 +6,7 @@ import { ContractorObject } from "./integration/tc models/contractor/types";
 import { getManyServices, getMinimumJobUpdate, getRandomService, getServiceById, updateServiceById } from "./integration/tc models/service/service";
 import { getUserFullName } from "./integration/tc models/user/user";
 import clientMatchedMail from "./mail/clientMatched";
-import { transporter } from "./mail/mail";
+import { transporterPascal } from "./mail/mail";
 import TutorModel from "./models/tutor";
 import { Log, getAttrByMachineName, stallFor } from "./util";
 
@@ -55,7 +55,7 @@ const _testClientMatchedMail = async () => {
     if(!tutor || !client || !service)
         return Log.debug("One is null");
 
-    transporter.sendMail( clientMatchedMail(tutor, client, service), (err) => {
+    transporterPascal.sendMail( clientMatchedMail(tutor, client, service), (err) => {
         if(err)
             Log.error(err);
     });

@@ -1,6 +1,6 @@
 import ApiFetcher from "../../../api/fetch";
 import { dormantBookedMail } from "../../../mail/dormantBooked";
-import { EmailTypes, transporter } from "../../../mail/mail";
+import { EmailTypes, transporterPascal } from "../../../mail/mail";
 import { wrongTutorMail } from "../../../mail/wrongTutor";
 import NotCold from "../../../models/notCold";
 import ScheduleMail from "../../../models/scheduledEmail";
@@ -131,7 +131,7 @@ addTCListener("BOOKED_AN_APPOINTMENT", async (event: TCEvent<LessonObject>) => {
     // check if client is in dormant
     const client = await getClientById(job.rcrs[0].paying_client);
     if (client?.status === "dormant") {
-        transporter.sendMail(dormantBookedMail(job, client), (err) => {
+        transporterPascal.sendMail(dormantBookedMail(job, client), (err) => {
             if(err)
                 Log.error(err);
         });
@@ -151,7 +151,7 @@ addTCListener("BOOKED_AN_APPOINTMENT", async (event: TCEvent<LessonObject>) => {
         }*/
 
         const contractor = await getContractorById(job.conjobs[0].contractor);
-        transporter.sendMail(wrongTutorMail(job, client, contractor), (err) => {
+        transporterPascal.sendMail(wrongTutorMail(job, client, contractor), (err) => {
             if(err)
                 Log.error(err);
         });

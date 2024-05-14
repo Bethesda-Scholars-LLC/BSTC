@@ -10,7 +10,6 @@ export const contractorProfileCompleteEmail = (contractor: ContractorObject): Ma
     return {
         from: `"${process.env.BUSINESS_EMAIL_FROM}" <${process.env.BUSINESS_EMAIL_ADDRESS}>`, // eslint-disable-line,
         to: PROD ? process.env.BUSINESS_EMAIL_ADDRESS : (process.env.TEST_EMAIL_ADDRESS),
-        cc: process.env.BUSINESS_EMAIL_ADDRESS,
         email_type: EmailTypes.ProfileComplete,
         contractor_id: contractor.id,
         contractor_name: getUserFirstName(contractor.user),
