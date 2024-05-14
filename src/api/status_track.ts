@@ -1,6 +1,7 @@
 import { Duration } from "ts-duration";
+import { extractFieldFromJob } from "../algo/algo";
 import { addTCListener } from "../integration/hook";
-import { getServiceById } from "../integration/tc models/service/service";
+import { SessionLocation, getServiceById } from "../integration/tc models/service/service";
 import { DumbJob, JobObject } from "../integration/tc models/service/types";
 import { ManyResponse, Req, Res, TCEvent } from "../types";
 import { Log } from "../util";
@@ -24,7 +25,7 @@ export const GETJobsByStatus = async (req: Req, res: Res) => {
 };
 
 
-type MapJob = DumbJob | JobObject & {
+type MapJob = DumbJob | (JobObject & {
     details?: {
         student_name?: string,
         grade?: string,
@@ -32,7 +33,7 @@ type MapJob = DumbJob | JobObject & {
         needed_subjects?: string,
         location?: string,
     }
-};
+});
 
 const statusMap: {
     [status: string]: {
@@ -61,6 +62,16 @@ export const getJobStatus = (job_id: string): string | null => {
     return null;
 };
 
+const removeStatusJob = (job: MapJob) => {
+    const statusList = Object.keys(statusMap);
+
+    for(let i = 0; i < statusList.length; i++) {
+        if(statusMap[statusList[i]][job.id]) {
+            delete statusMap[statusList[i]][job.id];
+            break;
+        }
+    }
+};
 
 export const updateStatusJob = async (job: MapJob) => {
     const statusList = Object.keys(statusMap);
@@ -85,14 +96,27 @@ export const updateStatusJob = async (job: MapJob) => {
         statusMap[job.status] = {};
 
     // if job is available, make sure we have the complete struct info
-    if(job.status === "available" && !isFullJob(job)) {
-        try {
-            const newJob = await getServiceById(job.id);
+    if(job.status === "available") {
+        if(!isFullJob(job)){
+            try {
+                const newJob = await getServiceById(job.id);
 
-            if(newJob)
-                job = newJob;
-        } catch (e) {
-            Log.error(e);
+                if(newJob)
+                    job = newJob;
+            } catch (e) {
+                Log.error(e);
+            }
+        }
+
+        if(isFullJob(job) && !job.details) {
+            const inPerson = job.dft_location?.id === SessionLocation.InPerson;
+            job.details = {
+                student_name: job.rcrs[0].recipient_name,
+                grade: extractFieldFromJob(job, "student grade"),
+                lesson_frequency: extractFieldFromJob(job, "lesson frequency"),
+                needed_subjects: extractFieldFromJob(job, "classes needed tutoring in"),
+                location: inPerson ? extractFieldFromJob(job, ["home address (if in person lessons)", "home address"]) : undefined,
+            };
         }
     }
     
@@ -117,12 +141,12 @@ const syncStatusMap = async () => {
 
 syncStatusMap();
 
-addTCListener("CREATED_A_SERVICE", async (ev: TCEvent<JobObject>) => {
+addTCListener(["CREATED_A_SERVICE", "CHANGED_SERVICE_STATUS", "REQUESTED_A_SERVICE"], async (ev: TCEvent<JobObject>) => {
     const service = ev.subject;
     await updateStatusJob(service);
 });
 
-addTCListener("CHANGED_SERVICE_STATUS", async (event: TCEvent<JobObject>) => {
-    const job = event.subject;
-    await updateStatusJob(job);
+addTCListener("DELETED_A_SERVICE", async (ev: TCEvent<JobObject>) => {
+    const service = ev.subject;
+    removeStatusJob(service);
 });

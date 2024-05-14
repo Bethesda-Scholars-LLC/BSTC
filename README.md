@@ -2,8 +2,10 @@
 This is the webhook integration between [Bethesda Scholars](https://www.bethesdascholars.com/) and [TutorCruncher](https://tutorcruncher.com/).
 
 ## Setup
-Your project must have a `.env` with your integration secret key in the `API_KEY` field.
-An example `.env` file would be:
+You must include a `.env` in the root directory of this project.
+
+Here's an example of what it might look like:
+
 ```dotenv
 API_KEY=738f2932aaba69529d1ba1c16f683c212c7178ea
 EMAIL_PASSWORD=my_email_password
@@ -21,8 +23,8 @@ DB_URI=mongodb+srv://joe:momma@172.0.0.1/
 ```
 
 ## Development
-Once you've created your .env, and installed dependencies with `npm install`, start your development server with:
-```shell
+Once you've created your .env, and installed dependencies with `npm i`, start your development server with:
+```bash
 npm start
 ```
 ## Documentation
