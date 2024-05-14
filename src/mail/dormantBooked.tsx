@@ -9,8 +9,7 @@ import { BUSINESS_EMAIL_FROM } from "../util";
 export const dormantBookedMail = (job: JobObject, client: ClientObject | null): MailOptions => {
     return {
         from: BUSINESS_EMAIL_FROM,
-        to: "services@bethesdascholars.com",
-        cc: "pascal@bethesdascholars.com",
+        to: process.env.BUSINESS_EMAIL_ADDRESS,
         subject: "Dormant Client Booked a Lesson",
         html: ReactDOMServer.renderToString(<DormantBooked job={job} client={client} />)
     };

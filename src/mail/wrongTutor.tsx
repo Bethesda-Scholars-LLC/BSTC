@@ -10,7 +10,7 @@ import { BUSINESS_EMAIL_FROM } from "../util";
 export const wrongTutorMail = (job: JobObject, client: ClientObject | null, contractor: ContractorObject | null): MailOptions => {
     return {
         from: BUSINESS_EMAIL_FROM,
-        to: "services@bethesdascholars.com",
+        to: process.env.BUSINESS_EMAIL_ADDRESS,
         cc: "pascal@bethesdascholars.com",
         subject: `${client ? getUserFirstName(client.user) : "Unknown Client" } Booked Wrong Lesson`,
         html: ReactDOMServer.renderToString(<WrongTutor job={job} client={client} contractor={contractor}/>)
@@ -25,10 +25,10 @@ const WrongTutor = (props: {job: JobObject, client: ClientObject | null, contrac
         This is a notification that {clientFullName} has booked a lesson with {contractorFullName}. The job's ID is <b>{props.job.id}</b>.
         <br/>
         <br/>
+        <b>MAKE SURE TO SET AUTO-INVOICING SETTING ON THE NEW JOB.</b>
+        <br/>
+        <br/>
         This job was created while booking a lesson through TutorCruncher, often indicating that the client booked a lesson with the wrong tutor.&nbsp;
         The client's pipeline stage has not been changed.
-        <br/>
-        <br/>
-        <b>MAKE SURE TO SET AUTO-INVOICING SETTING ON THE NEW JOB.</b>
     </p>;
 };
