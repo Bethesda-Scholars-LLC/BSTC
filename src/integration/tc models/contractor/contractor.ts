@@ -147,9 +147,9 @@ export const popTutorFromCAs = async (contractor: ContractorObject) => {
                     email_type: EmailTypes.AwaitingBooking
                 }
             ).exec();
-            if (!inDBAwaitingBooking) {
+
+            if (!inDBAwaitingBooking)
                 queueEmail(PROD ? Duration.hour(3 * 24) : Duration.second(10), awaitingBookingMail(contractor, client, job));
-            }
 
             const inDBAwaitingAvail = await ScheduleMail.findOne(
                 {

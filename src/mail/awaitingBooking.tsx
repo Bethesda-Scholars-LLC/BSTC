@@ -1,11 +1,11 @@
 import React from "react";
 import ReactDOMServer from "react-dom/server";
+import { ClientObject } from "../integration/tc models/client/types";
 import { ContractorObject } from "../integration/tc models/contractor/types";
+import { JobObject } from "../integration/tc models/service/types";
 import { getUserFirstName, getUserFullName } from "../integration/tc models/user/user";
 import { MANAGER_EMAIL_FROM, PROD } from "../util";
 import { EmailTypes, MailOpts } from "./mail";
-import { ClientObject } from "../integration/tc models/client/types";
-import { JobObject } from "../integration/tc models/service/types";
 import ManagerSignature from "./managerSignature";
 
 export const awaitingBookingMail = (contractor: ContractorObject, client: ClientObject, job: JobObject): MailOpts => {
