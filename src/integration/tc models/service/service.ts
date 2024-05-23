@@ -146,23 +146,35 @@ const setDftLocation = (job: JobObject): UpdateServicePayload => {
  * @returns {undefined}
  * TODO: make miles found distance from maryland
  */
-const setJobRate = async (client: ClientObject, job: JobObject, milesFound: boolean) => {
+const setJobRate = async (client: ClientObject, job: JobObject, outOfState: boolean) => {
     const studentGrade = getAttrByMachineName("student_grade", client.extra_attrs);
-    if(!studentGrade)
-        return;
+    const location = getAttrByMachineName("lesson_location", client.extra_attrs);
+    const subject = getAttrByMachineName("subjects", client.extra_attrs);
+    const apPrecalc = (subject?.value.toLowerCase().includes("ap") ||
+                       subject?.value.toLowerCase().includes("pre") ||
+                       subject?.value.toLowerCase().includes("calc"));
+    const satACT = (subject?.value.toLowerCase().includes("sat") ||
+                    subject?.value.toLowerCase().includes("act"));
+    
     let chargeRate = 40;
+    let payRate = 25;
 
-    if(!milesFound && studentGrade.value !== "1st-5th grade")
-        return;
-
-    if(milesFound){
-        chargeRate = 65;
-        if (studentGrade.value === "1st-5th grade")
-            chargeRate = 55;
+    if (!studentGrade || studentGrade.value !== "1st-5th grade")
+        chargeRate += 5;
+    if (location && location.value === "In-person lessons at my house")
+        chargeRate += 5;
+    if (outOfState)
+        chargeRate += 10;
+    if (apPrecalc && !satACT) {
+        chargeRate += 5;
+    } else if (satACT) {
+        chargeRate += 15;
+        payRate += 7;
     }
 
     const jobUpdate = getMinimumJobUpdate(job);
     jobUpdate.dft_charge_rate = chargeRate;
+    jobUpdate.dft_contractor_rate = payRate;
     await updateServiceById(job.id, jobUpdate);
 };
 
@@ -193,7 +205,9 @@ addTCListener("REQUESTED_A_SERVICE", async (event: TCEvent<JobObject>) => {
         // const schoolName = updatePayload.extra_attrs.student_school.toLowerCase();
         const clientAddress = getAttrByMachineName("home_address", client.extra_attrs);
         const addressResponses: GeoResponse[] = await geocode(clientAddress?.value);
-        const milesFound = addressResponses[0]?.display_name?.toLowerCase().includes("connecticut");
+        const outOfState = !(addressResponses[0]?.display_name?.toLowerCase().includes("maryland") ||
+                             addressResponses[0]?.display_name?.toLowerCase().includes("virginia") ||
+                             addressResponses[0]?.display_name?.toLowerCase().includes("washington"));
 
         // set sophie hansen (blair), pavani (churchill), or mike (other) as client manager
         /*
@@ -207,7 +221,7 @@ addTCListener("REQUESTED_A_SERVICE", async (event: TCEvent<JobObject>) => {
             updatePayload.associated_admin = ClientManager.Mike;
         }*/
         
-        await setJobRate(client, job, milesFound);
+        await setJobRate(client, job, outOfState);
         await updateClient(updatePayload);
     }
 });
