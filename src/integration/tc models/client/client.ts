@@ -5,11 +5,11 @@ import { wrongTutorMail } from "../../../mail/wrongTutor";
 import NotCold from "../../../models/notCold";
 import ScheduleMail from "../../../models/scheduledEmail";
 import { ManyResponse, TCEvent } from "../../../types";
-import { Log, randomChoice } from "../../../util";
+import { Log, getAttrByMachineName, randomChoice } from "../../../util";
 import { addTCListener } from "../../hook";
 import { getContractorById } from "../contractor/contractor";
 import { LessonObject } from "../lesson/types";
-import { Labels, PipelineStage, getServiceById } from "../service/service";
+import { Labels, PipelineStage, SessionLocation, getMinimumJobUpdate, getServiceById, updateServiceById } from "../service/service";
 import { JobObject } from "../service/types";
 import { DumbUser } from "../user/types";
 import { getUserFullName } from "../user/user";
@@ -120,6 +120,26 @@ export const moveToMatchedAndBooked = async (lesson: LessonObject, job: JobObjec
     }
 };
 
+const handleDormantClient = async (client: ClientObject, job: JobObject) => {
+    // set location to online, post client details in the job description
+    const oldJob = getMinimumJobUpdate(job);
+    const address = getAttrByMachineName("home_address", client.extra_attrs)?.value;
+    const school = getAttrByMachineName("student_school", client.extra_attrs)?.value;
+    const grade = getAttrByMachineName("student_grade", client.extra_attrs)?.value;
+    const freq = getAttrByMachineName("weekly_lessons", client.extra_attrs)?.value;
+    const subjects = getAttrByMachineName("subjects", client.extra_attrs)?.value;
+    const location = "Virtual lessons over Zoom";
+    // const location = getAttrByMachineName("lesson_location", client.extra_attrs)?.value;
+
+    // if it's set to in person, default location is in person, otherwise it's online
+    oldJob.dft_location = SessionLocation.Online;
+    oldJob.description = `Job created while booking a lesson through TutorCruncher\n\n**Home address (if in person lessons):**\n${address}\n\n
+                          **School full name:**\n${school}\n\n**Student grade:**\n${grade}\n\n**Lesson frequency:**${freq}\n\n
+                          **Classes needed tutoring in:**\n${subjects}\n\n**Lesson location:**\n${location}\n\n`;
+
+    await updateServiceById(job.id, oldJob);
+};
+
 addTCListener("BOOKED_AN_APPOINTMENT", async (event: TCEvent<LessonObject>) => {
     const lesson = event.subject;
     const job = await getServiceById(lesson.service.id);
@@ -131,6 +151,7 @@ addTCListener("BOOKED_AN_APPOINTMENT", async (event: TCEvent<LessonObject>) => {
     // check if client is in dormant
     const client = await getClientById(job.rcrs[0].paying_client);
     if (client?.status === "dormant") {
+        await handleDormantClient(client, job);
         transporterPascal.sendMail(dormantBookedMail(job, client), (err) => {
             if(err)
                 Log.error(err);
@@ -149,7 +170,9 @@ addTCListener("BOOKED_AN_APPOINTMENT", async (event: TCEvent<LessonObject>) => {
                 return;
             }
         }*/
-
+        if (client) {
+            await handleDormantClient(client, job);
+        }
         const contractor = await getContractorById(job.conjobs[0].contractor);
         transporterPascal.sendMail(wrongTutorMail(job, client, contractor), (err) => {
             if(err)

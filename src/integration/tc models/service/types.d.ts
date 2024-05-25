@@ -86,5 +86,6 @@ export type UpdateServicePayload = {
     status?: string
     extra_attrs?: {[key: string]: string},
     conjobs?: any[]
+    description?: string
 };
 
