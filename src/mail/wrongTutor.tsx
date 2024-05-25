@@ -22,7 +22,7 @@ const WrongTutor = (props: {job: JobObject, client: ClientObject | null, contrac
     const contractorFullName = props.contractor ? getUserFullName(props.contractor.user) : "Unknown Tutor";
 
     return <p style={{margin: 0}}>
-        This is a notification that {clientFullName} has booked a lesson with {contractorFullName}. The job's ID is <a href={`https://secure.tutorcruncher.com/cal/service/${props.job.id}/`}></a>{props.job.id}.
+        This is a notification that {clientFullName} has booked a lesson with {contractorFullName}. The job's ID is <a href={`https://secure.tutorcruncher.com/cal/service/${props.job.id}/`}>{props.job.id}</a>.
         <br/>
         <br/>
         <b>MAKE SURE TO SET AUTO-INVOICING SETTING ON THE NEW JOB.</b>

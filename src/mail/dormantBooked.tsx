@@ -19,7 +19,7 @@ const DormantBooked = (props: {job: JobObject, client: ClientObject | null}) => 
     const clientFullName = props.client ? getUserFullName(props.client.user) : "Unknown Client";
 
     return <p style={{margin: 0}}>
-        This is a notification that {clientFullName} has booked a lesson. The job's ID is <a href={`https://secure.tutorcruncher.com/cal/service/${props.job.id}/`}></a>{props.job.id}.
+        This is a notification that {clientFullName} has booked a lesson. The job's ID is <a href={`https://secure.tutorcruncher.com/cal/service/${props.job.id}/`}>{props.job.id}</a>.
         <br/>
         <br/>
         Please look into what happened and either check in with the client or move the client to live/prospect.
