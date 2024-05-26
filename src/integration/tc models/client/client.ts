@@ -133,7 +133,7 @@ const handleDormantClient = async (client: ClientObject, job: JobObject) => {
 
     // if it's set to in person, default location is in person, otherwise it's online
     oldJob.dft_location = SessionLocation.Online;
-    oldJob.description = `Job created while booking a lesson through TutorCruncher\n\n**Home address (if in person lessons):**\n${address}\n\n**School full name:**\n${school}\n\n**Student grade:**\n${grade}\n\n**Lesson frequency:**${freq}\n\n**Classes needed tutoring in:**\n${subjects}\n\n**Lesson location:**\n${location}\n\n`;
+    oldJob.description = `Job created while booking a lesson through TutorCruncher\n\n**Home address (if in person lessons):**\n${address}\n\n**School full name:**\n${school}\n\n**Student grade:**\n${grade}\n\n**Lesson frequency:**\n${freq}\n\n**Classes needed tutoring in:**\n${subjects}\n\n**Lesson location:**\n${location}\n\n`;
 
     await updateServiceById(job.id, oldJob);
 };
