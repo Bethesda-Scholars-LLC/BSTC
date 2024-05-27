@@ -154,7 +154,8 @@ const setJobRate = async (client: ClientObject, job: JobObject, outOfState: bool
                        subject?.value.toLowerCase().includes("pre") ||
                        subject?.value.toLowerCase().includes("calc"));
     const satACT = (subject?.value.toLowerCase().includes("sat") ||
-                    subject?.value.toLowerCase().includes("act"));
+                    subject?.value.toLowerCase().includes("act") ||
+                    subject?.value.toLowerCase().includes("ib"));
     
     let chargeRate = 40;
     let payRate = 25;
