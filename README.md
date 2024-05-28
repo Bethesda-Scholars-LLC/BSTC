@@ -29,6 +29,18 @@ npm start
 ```
 ## Documentation
 
+### Clearing DB Collection
+To clear a collection in the `bstc` mongo database:
+1. Open mongo DB compass and open the terminal at the bottom of the app
+2. run `use bstc`
+3. run `db.not_colds.deleteMany({})` to delete all documents in `not_colds` collection
+
+### Adding Environment Variables to EC2 Instance
+Do this before pushing changes using the environment variables to the Github repository
+1. `ssh bstc`
+2. `cd /var/lib/jenkins/workspace/BSTC`
+3. `sudo nano .env` to access the .env file
+
 ### Listeners
 
 | Event Name                          | Action |
