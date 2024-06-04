@@ -18,6 +18,7 @@ export const GETJobsByStatus = async (req: Req, res: Res) => {
     if(!status || !["pending", "in-progress", "available", "finished", "gone-cold"].includes(status))
        return res.status(400).json(errorMsg("query field \"s\" invalid"));
     const jobs = getJobsWithStatus(status);
+    jobs.sort((a, b) => new Date(b.last_updated).getTime() - new Date(a.last_updated).getTime());
     res.json({
         count: jobs.length,
         jobs

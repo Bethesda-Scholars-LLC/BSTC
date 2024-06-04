@@ -1,7 +1,7 @@
 import { Duration } from "ts-duration";
 import ApiFetcher from "../../../api/fetch";
 import { updateStatusJob } from "../../../api/status_track";
-import { GeoResponse, geocode } from "../../../geo";
+import { getStateByZipCode } from "../../../geo";
 import { awaitingAvailMail } from "../../../mail/awaitingAvail";
 import { queueFirstLessonComplete } from "../../../mail/firstLesson";
 import { goneColdMail } from "../../../mail/goneCold";
@@ -204,11 +204,11 @@ addTCListener("REQUESTED_A_SERVICE", async (event: TCEvent<JobObject>) => {
         updatePayload.extra_attrs = { student_school: school.value.split(" ").map(capitalize).join(" ") };
 
         // const schoolName = updatePayload.extra_attrs.student_school.toLowerCase();
-        const clientAddress = getAttrByMachineName("home_address", client.extra_attrs);
-        const addressResponses: GeoResponse[] = await geocode(clientAddress?.value);
-        const outOfState = !(addressResponses[0]?.display_name?.toLowerCase().includes("maryland") ||
-                             addressResponses[0]?.display_name?.toLowerCase().includes("virginia") ||
-                             addressResponses[0]?.display_name?.toLowerCase().includes("washington"));
+        const clientZip = parseInt((getAttrByMachineName("zip code", client.extra_attrs)?.value)??"");
+
+        const state = (getStateByZipCode(clientZip)?.code??"MD").toLowerCase();
+        const outOfState = !(["md", "dc", "va"].includes(state));
+        
 
         // set sophie hansen (blair), pavani (churchill), or mike (other) as client manager
         /*

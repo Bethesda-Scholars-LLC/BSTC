@@ -40,6 +40,8 @@ export type JobObject = {
     labels: any,
     latest_apt_ahc: string,
     name: string,
+    last_updated: string,
+
     net_gross: string,
     rcrs: {
         recipient: number,
