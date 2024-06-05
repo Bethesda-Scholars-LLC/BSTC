@@ -9,7 +9,7 @@ import { Log, getAttrByMachineName, randomChoice } from "../../../util";
 import { addTCListener } from "../../hook";
 import { getContractorById } from "../contractor/contractor";
 import { LessonObject } from "../lesson/types";
-import { Labels, PipelineStage, SessionLocation, getMinimumJobUpdate, getServiceById, updateServiceById } from "../service/service";
+import { Labels, PipelineStage, SessionLocation, checkOutOfState, getMinimumJobUpdate, getServiceById, setJobRate, updateServiceById } from "../service/service";
 import { JobObject } from "../service/types";
 import { DumbUser } from "../user/types";
 import { getUserFullName } from "../user/user";
@@ -136,6 +136,7 @@ const handleDormantClient = async (client: ClientObject, job: JobObject) => {
     oldJob.description = `Job created while booking a lesson through TutorCruncher\n\n**Home address (if in person lessons):**\n${address}\n\n**School full name:**\n${school}\n\n**Student grade:**\n${grade}\n\n**Lesson frequency:**\n${freq}\n\n**Classes needed tutoring in:**\n${subjects}\n\n**Lesson location:**\n${location}\n\n`;
 
     await updateServiceById(job.id, oldJob);
+    await setJobRate(client, job, checkOutOfState(client));
 };
 
 addTCListener("BOOKED_AN_APPOINTMENT", async (event: TCEvent<LessonObject>) => {

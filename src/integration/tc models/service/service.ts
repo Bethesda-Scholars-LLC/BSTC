@@ -146,7 +146,7 @@ const setDftLocation = (job: JobObject): UpdateServicePayload => {
  * @returns {undefined}
  * TODO: make miles found distance from maryland
  */
-const setJobRate = async (client: ClientObject, job: JobObject, outOfState: boolean) => {
+export const setJobRate = async (client: ClientObject, job: JobObject, outOfState: boolean) => {
     const studentGrade = getAttrByMachineName("student_grade", client.extra_attrs);
     const location = getAttrByMachineName("lesson_location", client.extra_attrs);
     const subject = getAttrByMachineName("subjects", client.extra_attrs);
@@ -179,6 +179,13 @@ const setJobRate = async (client: ClientObject, job: JobObject, outOfState: bool
     await updateServiceById(job.id, jobUpdate);
 };
 
+export const checkOutOfState = (client: ClientObject) => {
+    const clientZip = parseInt((getAttrByMachineName("zip code", client.extra_attrs)?.value)??"");
+
+    const state = (getStateByZipCode(clientZip)?.code??"MD").toLowerCase();
+    return !(["md", "dc", "va"].includes(state));
+};
+
 /**
  * @description update job name to only include first name and last initial
  */
@@ -204,10 +211,7 @@ addTCListener("REQUESTED_A_SERVICE", async (event: TCEvent<JobObject>) => {
         updatePayload.extra_attrs = { student_school: school.value.split(" ").map(capitalize).join(" ") };
 
         // const schoolName = updatePayload.extra_attrs.student_school.toLowerCase();
-        const clientZip = parseInt((getAttrByMachineName("zip code", client.extra_attrs)?.value)??"");
-
-        const state = (getStateByZipCode(clientZip)?.code??"MD").toLowerCase();
-        const outOfState = !(["md", "dc", "va"].includes(state));
+        const outOfState = checkOutOfState(client);
         
 
         // set sophie hansen (blair), pavani (churchill), or mike (other) as client manager
