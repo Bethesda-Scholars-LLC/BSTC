@@ -151,7 +151,9 @@ export const setJobRate = async (client: ClientObject, job: JobObject, outOfStat
     const location = getAttrByMachineName("lesson_location", client.extra_attrs);
     const subject = getAttrByMachineName("subjects", client.extra_attrs);
     const apPrecalc = (subject?.value.toLowerCase().includes("ap") ||
-                       subject?.value.toLowerCase().includes("pre") ||
+                       subject?.value.toLowerCase().includes("prec") ||
+                       subject?.value.toLowerCase().includes("pre c") ||
+                       subject?.value.toLowerCase().includes("pre-c") ||
                        subject?.value.toLowerCase().includes("calc"));
     const satACT = (subject?.value.toLowerCase().includes("sat") ||
                     subject?.value.toLowerCase().includes("act") ||
