@@ -150,7 +150,9 @@ export const setJobRate = async (client: ClientObject, job: JobObject, outOfStat
     const studentGrade = getAttrByMachineName("student_grade", client.extra_attrs);
     const location = getAttrByMachineName("lesson_location", client.extra_attrs);
     const subject = getAttrByMachineName("subjects", client.extra_attrs);
-    const apPrecalc = (subject?.value.toLowerCase().includes("ap") ||
+    const apPrecalc = ((subject?.value.toLowerCase().includes("ap") &&
+                        subject?.value.toLowerCase().indexOf(0) === "a") ||
+                        subject?.value.toLowerCase().includes(" ap") ||
                        subject?.value.toLowerCase().includes("prec") ||
                        subject?.value.toLowerCase().includes("pre c") ||
                        subject?.value.toLowerCase().includes("pre-c") ||
