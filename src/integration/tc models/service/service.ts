@@ -25,6 +25,10 @@ import { DumbJob, JobObject, UpdateServicePayload } from "./types";
 const _blairSchools = ["argyle", "eastern", "loiederman", "newport mill", "odessa shannon", "parkland", "silver spring international", "takoma park", "blair"];
 const _churchillSchools = ["churchill", "cabin john", "hoover", "bells mill", "seven locks", "stone mill", "cold spring", "potomac", "beverly farms", "wayside"];
 const _wjSchools = ["north bethesda", "tilden"];
+const exemptClients = ["soueid.erica@gmail.com", "bego.cortina@me.com", "eakhtarzandi@nationaljournal.com",
+                        "marisa.michnick@gmail.com", "sanazshojaie@hotmail.com", "roxana.grieve@gmail.com",
+                        "milias1977@gmail.com", "bannisterrenee@aol.com", "jedmeline@yahoo.com",
+                        "mdmeline@yahoo.com", "mmeline2@yahoo.com", "anjali.kataria@gmail.com", "anjali@mytonomy.com"];
 const day = Duration.hour(24);
 
 export const enum PipelineStage {
@@ -175,6 +179,11 @@ export const setJobRate = async (client: ClientObject, job: JobObject, outOfStat
     } else if (satACT) {
         chargeRate += 15;
         payRate += 7;
+    }
+
+    if (exemptClients.includes(client.user.email)) {
+        chargeRate = 45;
+        payRate = 25;
     }
 
     const jobUpdate = getMinimumJobUpdate(job);
