@@ -150,17 +150,17 @@ const setDftLocation = (job: JobObject): UpdateServicePayload => {
 export const setJobRate = async (client: ClientObject, job: JobObject, outOfState: boolean) => {
     const studentGrade = getAttrByMachineName("student_grade", client.extra_attrs);
     const location = getAttrByMachineName("lesson_location", client.extra_attrs);
-    const subject = getAttrByMachineName("subjects", client.extra_attrs);
-    const apPrecalc = ((subject?.value.toLowerCase().includes("ap") &&
-                        subject?.value.toLowerCase().indexOf(0) === "a") ||
-                        subject?.value.toLowerCase().includes(" ap") ||
-                       subject?.value.toLowerCase().includes("prec") ||
-                       subject?.value.toLowerCase().includes("pre c") ||
-                       subject?.value.toLowerCase().includes("pre-c") ||
-                       subject?.value.toLowerCase().includes("calc"));
-    const satACT = (subject?.value.toLowerCase().includes("sat") ||
-                    subject?.value.toLowerCase().includes("act") ||
-                    subject?.value.toLowerCase().includes("ib"));
+    const subject = getAttrByMachineName("subjects", client.extra_attrs)?.value.toLowerCase;
+    const apPrecalc = ((subject.indexOf("ap") === 0 ||
+                        (subject.indexOf("ap") >= 1 && subject.charAt(subject.indexOf("ap") - 1) === " ")) ||
+                        subject.includes("prec") ||
+                        subject.includes("pre c") ||
+                        subject.includes("pre-c") ||
+                        subject.includes("calc") ||
+                        (subject.indexOf("ib") === 0 ||
+                        (subject.indexOf("ib") >= 1 && subject.charAt(subject.indexOf("ib") - 1) === " ")));
+    const satACT = (subject.includes("sat") ||
+                    subject.includes("act"));
     
     let chargeRate = 40;
     let payRate = 25;
@@ -175,7 +175,7 @@ export const setJobRate = async (client: ClientObject, job: JobObject, outOfStat
         chargeRate += 5;
     } else if (satACT) {
         chargeRate += 15;
-        payRate += 7;
+        payRate += 10;
     }
 
     if (exemptClients.includes(client.user.email)) {
