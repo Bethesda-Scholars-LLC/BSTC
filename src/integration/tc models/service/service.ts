@@ -150,7 +150,7 @@ const setDftLocation = (job: JobObject): UpdateServicePayload => {
 export const setJobRate = async (client: ClientObject, job: JobObject, outOfState: boolean) => {
     const studentGrade = getAttrByMachineName("student_grade", client.extra_attrs);
     const location = getAttrByMachineName("lesson_location", client.extra_attrs);
-    const subject = getAttrByMachineName("subjects", client.extra_attrs)?.value.toLowerCase;
+    const subject = getAttrByMachineName("subjects", client.extra_attrs)?.value.toLowerCase();
     const apPrecalc = ((subject.indexOf("ap") === 0 ||
                         (subject.indexOf("ap") >= 1 && subject.charAt(subject.indexOf("ap") - 1) === " ")) ||
                         subject.includes("prec") ||
