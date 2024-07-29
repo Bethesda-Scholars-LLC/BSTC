@@ -205,6 +205,7 @@ addTCListener("REQUESTED_A_SERVICE", async (event: TCEvent<JobObject>) => {
     job = fixJobName(job) ?? job;
     await updateServiceById(job.id, setDftLocation(job));
 
+    Log.debug("Job name fixed", job.rcrs);
     if (job.rcrs.length > 0) {
         const client = await getClientById(job.rcrs[0].paying_client);
         if (!client)
