@@ -159,6 +159,8 @@ export const getAttrByMachineName = (name: string, extra_attrs: {machine_name: s
     const val: ExtraAttr | undefined = extra_attrs.filter(v => v.machine_name === name)[0] as ExtraAttr ?? undefined;
     if(typeof val?.value === "string")
         val.value = val.value.trim();
+    if(!val)
+        Log.error(`requested machine name ${name} is invalid`);
     return val;
 };
 
