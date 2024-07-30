@@ -27,6 +27,14 @@ Once you've created your .env, and installed dependencies with `npm i`, start yo
 ```bash
 npm start
 ```
+
+### Running Locally
+To run and test hooks locally:
+1. Set up port forwarding to receive webhooks on wifi
+2. Turn off BSTC integration in TC API settings
+3. Turn on BSTC test integration
+4. `npm start` locally
+
 ## Documentation
 
 ### Clearing DB Collection
@@ -42,6 +50,7 @@ Do this before pushing changes using the environment variables to the Github rep
 3. `sudo nano .env` to access the .env file
 
 ### Viewing Logs Locally
+To view AWS console logs from terminal:
 1. `ssh bstc`
 2. `sudo pm2 log 0`
 3. `sudo cat` followed by terminal output for console out or error
