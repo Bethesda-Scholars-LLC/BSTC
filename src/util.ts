@@ -32,7 +32,7 @@ export namespace Log {
         console.error(message, ...optionalParams);
     };
 
-    export const warn = (message?: any, ...optionalParams: any[]) => {
+    export const info = (message?: any, ...optionalParams: any[]) => {
         console.error(message, ...optionalParams);
     };
 

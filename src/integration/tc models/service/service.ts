@@ -79,6 +79,7 @@ export const getManyServices = async (page?: number): Promise<ManyResponse<DumbJ
     try {
         return (await ApiFetcher.sendRequest(`/services?page=${Math.max(page ?? 1, 1)}`))?.data as ManyResponse<DumbJob>;
     } catch (e) {
+        Log.error(e);
         return null;
     }
 };
@@ -92,7 +93,7 @@ export const getRandomService = async (): Promise<JobObject | null> => {
 
         return await getServiceById(randomChoice(services.results).id);
     } catch (e) {
-        Log.debug(e);
+        Log.error(e);
     }
     return null;
 };
@@ -405,7 +406,7 @@ addTCListener("CHANGED_SERVICE_STATUS", async (event: TCEvent<JobObject>) => {
     const job = event.subject;
 
     if(job.rcrs.length === 0) {
-        Log.warn("0 rcrs on job");
+        Log.info("0 rcrs on job");
         return;
     }
     

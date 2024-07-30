@@ -24,6 +24,7 @@ export const getManyContractors = async (page?: number): Promise<ManyResponse<Du
     try {
         return (await ApiFetcher.sendRequest(`/contractors?page=${Math.max(page ?? 1, 1)}`))?.data as ManyResponse<DumbUser>;
     } catch (e) {
+        Log.error(e);
         return null;
     }
 };
@@ -57,7 +58,7 @@ export const getRandomContractor = async (): Promise<ContractorObject | null> =>
 
         return await getContractorById(randomChoice(services.results).id);
     } catch (e) {
-        Log.debug(e);
+        Log.error(e);
     }
     return null;
 };
