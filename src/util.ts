@@ -1,13 +1,38 @@
 import dotenv from "dotenv";
 import fs from "fs";
+import nodemailer from "nodemailer";
+import SMTPTransport from "nodemailer/lib/smtp-transport";
 import path from "path";
 import { Duration } from "ts-duration";
 import { ExtraAttr } from "./types";
 dotenv.config();
 
 export namespace Log {
+    let transporter: nodemailer.Transporter<SMTPTransport.SentMessageInfo> | null = null;
+    export const bindTransporter = (t: nodemailer.Transporter<SMTPTransport.SentMessageInfo>) => {
+        transporter = t;
+    };
     /* eslint-disable no-console */
     export const error = (message?: any, ...optionalParams: any[]) => {
+        if(PROD && transporter) {
+            const dateStr = new Date().toLocaleString().replace(/\/20[0-9]{2},/g, "").replace(/:[0-9]{2} /, "").toLowerCase();
+            transporter.sendMail({
+                from: process.env.MANAGER_EMAIL_ADDRESS,
+                to: "2022946538@tmomail.net",
+                cc: [
+                    "pascal@bethesdascholars.com",
+                    "aksel@bethesdascholars.com",
+                    "2022947555@tmomail.net",
+                ],
+                text: `[BSTC ${dateStr}] Erorr ${message}`
+            });
+            /*
+            */
+        }
+        console.error(message, ...optionalParams);
+    };
+
+    export const warn = (message?: any, ...optionalParams: any[]) => {
         console.error(message, ...optionalParams);
     };
 

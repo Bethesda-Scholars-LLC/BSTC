@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer";
 import { MailOptions } from "nodemailer/lib/sendmail-transport";
+import { Log } from "../util";
 import "./firstLesson";
 
 /**
@@ -39,3 +40,4 @@ export const transporterManager = nodemailer.createTransport({
     }
 });
 
+Log.bindTransporter(transporterPascal);

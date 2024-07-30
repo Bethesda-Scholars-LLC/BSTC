@@ -198,6 +198,10 @@ function tutorFromContractor(con: ContractorObject): ITutor | null {
         } else {
             genderNum = 2;
         }
+        let biasValue = parseInt(getAttrByMachineName("bias", con.extra_attrs)?.value);
+        if(isNaN(biasValue)) {
+            biasValue = 1;
+        }
         // .map(val => {return {...val, qual_level: [val.qual_level]};})
         return {
             first_name: con.user.first_name,
@@ -228,7 +232,7 @@ function tutorFromContractor(con: ContractorObject): ITutor | null {
                 contract_filled_out: checkBoolExtraAttr(con.extra_attrs, "contract_filled_out")??false,
             },
 
-            bias: parseInt(getAttrByMachineName("bias", con.extra_attrs)?.value) ?? 1,
+            bias: biasValue,
             stars: getAttrByMachineName("rating", con.extra_attrs)?.value.split("/")[0],
             gender: genderNum,
             phone_number: (con.user.mobile??con.user.phone)??undefined,

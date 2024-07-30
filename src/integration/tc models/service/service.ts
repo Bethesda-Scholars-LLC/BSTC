@@ -405,7 +405,7 @@ addTCListener("CHANGED_SERVICE_STATUS", async (event: TCEvent<JobObject>) => {
     const job = event.subject;
 
     if(job.rcrs.length === 0) {
-        Log.error("0 rcrs on job");
+        Log.warn("0 rcrs on job");
         return;
     }
     

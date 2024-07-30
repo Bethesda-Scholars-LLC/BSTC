@@ -4,9 +4,10 @@ import { addTCListener } from "../integration/hook";
 import { SessionLocation, getServiceById } from "../integration/tc models/service/service";
 import { DumbJob, JobObject } from "../integration/tc models/service/types";
 import { ManyResponse, Req, Res, TCEvent } from "../types";
+import ApiFetcher from "./fetch";
+
 import { Log } from "../util";
 import { errorMsg } from "./api";
-import ApiFetcher from "./fetch";
 
 // type JobStatus = "pending" | "in-progress" | "available" | "finished" | "gone-cold";
 
@@ -109,10 +110,10 @@ export const updateStatusJob = async (job: MapJob) => {
             }
         }
 
-        if(isFullJob(job) && !job.details) {
+        if(isFullJob(job) && (!job.details || job.details.student_name === "No Students")) {
             const inPerson = job.dft_location?.id === SessionLocation.InPerson;
             job.details = {
-                student_name: job.rcrs[0].recipient_name,
+                student_name: job.rcrs[0]?.recipient_name??"No Students",
                 grade: extractFieldFromJob(job, "student grade"),
                 lesson_frequency: extractFieldFromJob(job, "lesson frequency"),
                 needed_subjects: extractFieldFromJob(job, "classes needed tutoring in"),
