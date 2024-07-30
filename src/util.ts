@@ -7,6 +7,8 @@ import { Duration } from "ts-duration";
 import { ExtraAttr } from "./types";
 dotenv.config();
 
+export const ON_ERROR: string[] = process.env.ON_ERROR?.split(",")??[process.env.PERSONAL_EMAIL_ADDRESS!];
+
 export namespace Log {
     let transporter: nodemailer.Transporter<SMTPTransport.SentMessageInfo> | null = null;
     export const bindTransporter = (t: nodemailer.Transporter<SMTPTransport.SentMessageInfo>) => {
@@ -18,11 +20,9 @@ export namespace Log {
             const dateStr = new Date().toLocaleString().replace(/\/20[0-9]{2},/g, "").replace(/:[0-9]{2} /, "").toLowerCase();
             transporter.sendMail({
                 from: process.env.MANAGER_EMAIL_ADDRESS,
-                to: "2022946538@tmomail.net",
+                to: ON_ERROR[0],
                 cc: [
-                    "pascal@bethesdascholars.com",
-                    "aksel@bethesdascholars.com",
-                    "2022947555@tmomail.net",
+                    ...ON_ERROR.slice(1)
                 ],
                 text: `[BSTC ${dateStr}] Erorr ${message}`
             });
