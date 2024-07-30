@@ -41,6 +41,11 @@ Do this before pushing changes using the environment variables to the Github rep
 2. `cd /var/lib/jenkins/workspace/BSTC`
 3. `sudo nano .env` to access the .env file
 
+### Viewing Logs Locally
+1. `ssh bstc`
+2. `sudo pm2 log 0`
+3. `sudo cat` followed by terminal output for console out or error
+
 ### Listeners
 
 | Event Name                          | Action |
