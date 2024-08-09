@@ -48,9 +48,13 @@ hookRouter.all("*", (req: Req, res: Res) => {
                 continue;
             cbs.forEach(cb => {
                 (async () => {
+                    Log.info(JSON.stringify({
+                        eventName: events[i].action,
+                        webhookSignature: req.headers["webhook-signature"],
+                    }));
                     cb(events[i]);
                 })().catch(err => {
-                    Log.error(`${events[i].action} error: ${err}`);
+                    Log.error(err);
                 });
             });
         }
