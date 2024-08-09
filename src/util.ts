@@ -17,28 +17,39 @@ export namespace Log {
     /* eslint-disable no-console */
     export const error = (message?: any, ...optionalParams: any[]) => {
         if(PROD && transporter) {
-            const dateStr = new Date().toLocaleString().replace(/\/20[0-9]{2},/g, "").replace(/:[0-9]{2} /, "").toLowerCase();
-            transporter.sendMail({
-                from: process.env.MANAGER_EMAIL_ADDRESS,
-                to: ON_ERROR[0],
-                cc: [
-                    ...ON_ERROR.slice(1)
-                ],
-                text: `[BSTC ${dateStr}] Erorr ${message}`
-            });
-            /*
-            */
+            const dateStr = new Date().toLocaleString("en-US", {timeZone: "America/New_York"}).replace(/\/20[0-9]{2},/g, "").replace(/:[0-9]{2} /, "").toLowerCase();
+            try {
+                transporter.sendMail({
+                    from: process.env.MANAGER_EMAIL_ADDRESS,
+                    to: ON_ERROR[0],
+                    cc: [
+                        ...ON_ERROR.slice(1)
+                    ],
+                    text: `[BSTC ${dateStr} EST] Erorr ${message}`
+                });
+            } catch(e) {
+                warn(message, ...optionalParams);
+            }
         }
-        console.error(message, ...optionalParams);
+        warn(message, ...optionalParams);
     };
 
     export const warn = (message?: any, ...optionalParams: any[]) => {
-        console.error(message, ...optionalParams);
+        log(console.error, message, ...optionalParams);
+    };
+
+    export const info = (message?: any, ...optionalParams: any[]) => {
+        log(console.log, message, ...optionalParams);
     };
 
     export const debug = (message?: any, ...optionalParams: any[]) => {
         if(!PROD)
-            console.debug(message, ...optionalParams);
+            log(console.debug, message, ...optionalParams);
+    };
+
+    const log = (func: ((arg1: any, ...arg2: any[]) => void), message: any, ...optionalParams: any[]) => {
+        const dateStr = new Date().toLocaleString("en-US", {timeZone: "America/New_York"}).replace(/\/20[0-9]{2},/g, "").replace(/:[0-9]{2} /, "").toLowerCase();
+        func(`[${dateStr} EST] ${message}`, ...optionalParams);
     };
     /* eslint-enable */
 }
