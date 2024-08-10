@@ -262,7 +262,7 @@ function tutorFromContractor(con: ContractorObject): ITutor | null {
             status: con.status
         };
     } catch(e) {
-        Log.debug(e);
+        Log.error(e);
         return null;
     }
     /* eslint-enable */
