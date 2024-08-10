@@ -55,6 +55,11 @@ To view AWS console logs from terminal:
 2. `sudo pm2 log 0`
 3. `sudo cat` followed by terminal output for console out or error
 
+### Running Scripts
+1. Turn on the testing hook as active (not webhook active)
+2. write new scripts in `scripts.ts`
+3. call new scripts at bottom of the file in an async function
+
 ### Listeners
 
 | Event Name                          | Action |
