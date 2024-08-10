@@ -1,7 +1,7 @@
 import { Duration } from "ts-duration";
 import ApiFetcher from "./api/fetch";
 import { getRandomClient } from "./integration/tc models/client/client";
-import { getContractorById, getRandomContractor, setLookingForJob, setTutorBias } from "./integration/tc models/contractor/contractor";
+import { getContractorById, getRandomContractor, setContractFilledOut, setTutorBias } from "./integration/tc models/contractor/contractor";
 import { ContractorObject } from "./integration/tc models/contractor/types";
 import { getManyServices, getMinimumJobUpdate, getRandomService, getServiceById, updateServiceById } from "./integration/tc models/service/service";
 import { getUserFullName } from "./integration/tc models/user/user";
@@ -9,6 +9,8 @@ import clientMatchedMail from "./mail/clientMatched";
 import { transporterPascal } from "./mail/mail";
 import TutorModel from "./models/tutor";
 import { Log, getAttrByMachineName, stallFor } from "./util";
+
+const numTutors = 358;
 
 const getContractors = async (page?: number): Promise<ContractorObject | null> => {
     try {
@@ -20,25 +22,23 @@ const getContractors = async (page?: number): Promise<ContractorObject | null> =
 };
 
 // function that edits all contractors
-const _editAllContractors = async () => {
+const _editAllContractors = async (page: number) => {
     try {
-        const allContractors: any = await getContractors();
+        const allContractors: any = await getContractors(page);
         
         // change the length of iteration so API limit doesn't get hit
         // also change page in get request after 100
         for (let i = 0; i < allContractors.results.length; i++) {
             const contractor = await getContractorById(allContractors.results[i].id);
-
             if(!contractor)
                 return;
-
+            
             Log.debug(`checking ${contractor.user.first_name} ${contractor.user.last_name}`);
 
             // this should be the function that each contractor
-            if(contractor.labels.reduce((prev, v) => prev || v.machine_name === "looking-for-job", false) &&
-                !getAttrByMachineName("looking_for_job", contractor.extra_attrs)){
-                Log.debug(contractor.user.first_name+" "+contractor.user.last_name);
-                await setLookingForJob(contractor, true);
+            if(contractor.status === "approved" && getAttrByMachineName("contract_filled_out", contractor.extra_attrs)?.value === "True") {
+                Log.debug("updated " + contractor.user.first_name + " " + contractor.user.last_name);
+                await setContractFilledOut(contractor, false);
             }
             await stallFor(Duration.second(1));
         }
@@ -109,3 +109,13 @@ const _syncBias = async () => {
 
     }
 };
+
+const _updateAllContractors = async () => {
+    for (let i = 1; i <= Math.ceil(numTutors / 100); i++) {
+      Log.debug(`Page ${i}`);
+      await _editAllContractors(i);
+    }
+  };
+
+// Uncomment line below to run the script
+// _updateAllContractors().catch(error => Log.error("Error: ", error));

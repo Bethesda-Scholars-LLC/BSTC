@@ -17,7 +17,7 @@ import { Log, PROD, capitalize, getAttrByMachineName, randomChoice } from "../..
 import { addTCListener } from "../../hook";
 import { getClientById, getMinimumClientUpdate, updateClient } from "../client/client";
 import { ClientObject } from "../client/types";
-import { getContractorById, getMinimumContractorUpdate, setLookingForJob, updateContractor } from "../contractor/contractor";
+import { getContractorById, getMinimumContractorUpdate, updateContractor } from "../contractor/contractor";
 import { LessonObject } from "../lesson/types";
 import { getUserFullName } from "../user/user";
 import { DumbJob, JobObject, UpdateServicePayload } from "./types";
@@ -398,7 +398,8 @@ addTCListener("APPLIED_FOR_SERVICE", async (event: TCEvent<any>) => {
     if (!contractor)
         return;
 
-    setLookingForJob(contractor, true);
+    // setLookingForJob(contractor, true);
+    return;
 });
 
 addTCListener("CHANGED_SERVICE_STATUS", async (event: TCEvent<JobObject>) => {

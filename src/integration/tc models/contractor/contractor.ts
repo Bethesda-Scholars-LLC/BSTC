@@ -79,10 +79,10 @@ export const setTutorBias = async (contractor: {user: { email: string, last_name
     await updateContractor(defaultTutor);
 };
 
-export const setLookingForJob = async (contractor: ContractorObject, value: boolean) => {
+export const setContractFilledOut = async (contractor: ContractorObject, value: boolean) => {
     const defaultTutor = getMinimumContractorUpdate(contractor);
 
-    defaultTutor.extra_attrs = { looking_for_job: value };
+    defaultTutor.extra_attrs = { contract_filled_out: value };
 
     await updateContractor(defaultTutor);
 };
