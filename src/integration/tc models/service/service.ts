@@ -45,7 +45,7 @@ export const enum Labels {
     firstLessonComplete = 169932
 }
 
-export const updateServiceStatus = async (job: DumbJob | JobObject, status: "in-progress" | "available") => {
+export const updateServiceStatus = async (job: DumbJob | JobObject, status: "in-progress" | "available" | "finished") => {
     await Promise.all([
         updateStatusJob({...job, status}),
         updateServiceById(job.id, {         // change status back to in progress

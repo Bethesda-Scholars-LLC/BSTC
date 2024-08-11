@@ -44,7 +44,7 @@ const ReferralEmail = (props: {contractor: ContractorObject}) => {
                 Pass our screening process.
             </li>
             <li>
-                Be a high school senior or college student.
+                Be a high school senior or high school junior or college student.
             </li>
         </ol>
         If you have any questions, feel free to reply directly to this email.
