@@ -7,7 +7,7 @@ import { getContractorById } from "../integration/tc models/contractor/contracto
 import { ContractorObject } from "../integration/tc models/contractor/types";
 import { JobObject } from "../integration/tc models/service/types";
 import { cleanPhoneNumber, getUserFirstName } from "../integration/tc models/user/user";
-import { MANAGER_EMAIL_FROM, PROD, getAttrByMachineName } from "../util";
+import { Log, MANAGER_EMAIL_FROM, PROD, getAttrByMachineName } from "../util";
 import { EmailTypes } from "./mail";
 import { queueEmail } from "./queueMail";
 import ManagerSignature from "./managerSignature";
@@ -108,5 +108,6 @@ export const queueFirstLessonComplete = async (job: JobObject) => {
                 </p1>`,
         */
     });
+    Log.info("sucessfully queued first lesson complete email");
 };
 

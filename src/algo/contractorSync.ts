@@ -57,10 +57,11 @@ addTCListener([
 addTCListener("DELETED_A_CONTRACTOR", async (ev: TCEvent<ContractorObject>) => {
     const contractor = ev.subject;
     const lock = await getContractorLock(contractor.id);
+    Log.info("successfully retrieved contractor lock");
     await lock.acquire();
     try {
         const tutor = await TutorModel.findOne({cruncher_id: contractor.id}).exec();
-
+        Log.info(`successfully retrieved contractor object ${tutor?._id}`);
         // deleted but it doesn't matter
         if(!tutor) {
             lock.release();
@@ -74,18 +75,22 @@ addTCListener("DELETED_A_CONTRACTOR", async (ev: TCEvent<ContractorObject>) => {
     } finally {
         lock.release();
     }
+    Log.info("sucessfully executed all tasks for this webhook");
 });
 
 addTCListener("RECOVERED_A_CONTRACTOR", async (ev: TCEvent<ContractorObject>) => {
     const contractor = ev.subject;
     const lock = await getContractorLock(contractor.id);
+    Log.info("successfully retrieved contractor lock");
     await lock.acquire();
     try {
         const tutor = await TutorModel.findOne({cruncher_id: contractor.id}).exec();
+        Log.info(`successfully retrieved contractor object ${tutor?._id}`);
         if(!tutor) {
             const newTutor = tutorFromContractor(contractor);
             if(newTutor) {
                 await TutorModel.create(newTutor);
+                Log.info("successfully created contractor in DB");
             }
             lock.release();
             return;
@@ -98,6 +103,7 @@ addTCListener("RECOVERED_A_CONTRACTOR", async (ev: TCEvent<ContractorObject>) =>
     } finally {
         lock.release();
     }
+    Log.info("sucessfully executed all tasks for this webhook");
 });
 
 function updatedContractorFunc(ev: TCEvent<ContractorObject>) {

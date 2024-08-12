@@ -10,6 +10,7 @@ export const enum ChargeCat {
 
 export const createAdHocCharge = async (payload: CreateAdHocChargePayload): Promise<void> => {
     try {
+        Log.info(`creating adHocCharge for ${JSON.stringify(payload)}`);
         return (await ApiFetcher.sendRequest("/adhoccharges/", {
             method: "POST",
             data: payload

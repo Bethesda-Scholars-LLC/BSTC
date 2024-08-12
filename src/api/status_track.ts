@@ -146,9 +146,11 @@ syncStatusMap();
 addTCListener(["CREATED_A_SERVICE", "CHANGED_SERVICE_STATUS", "REQUESTED_A_SERVICE"], async (ev: TCEvent<JobObject>) => {
     const service = ev.subject;
     await updateStatusJob(service);
+    Log.info("updated job status");
 });
 
 addTCListener("DELETED_A_SERVICE", async (ev: TCEvent<JobObject>) => {
     const service = ev.subject;
     removeStatusJob(service);
+    Log.info("updated job status");
 });

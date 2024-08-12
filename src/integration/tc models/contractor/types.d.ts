@@ -59,5 +59,6 @@ export type UpdateContractorPayload = {
         date_created?: string
         timezone?: string
     },
+    status?: string,
     extra_attrs?: {[key: string]: any}
 };
