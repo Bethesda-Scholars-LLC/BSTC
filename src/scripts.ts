@@ -32,7 +32,7 @@ const getServices = async (page?:number): Promise<JobObject | null> => {
         Log.error(e);
         return null;
     }
-}
+};
 
 const _setContractFilledOutToFalse = async (page: number) => {
     try {

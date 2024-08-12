@@ -207,14 +207,24 @@ addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<ContractorObjec
         const referrerId = parseInt(getAttrByMachineName("referral", contractor.extra_attrs)?.value);
         if (!referrerId || isNaN(referrerId) || Object.values(ClientManager).includes(referrerId))
             return;
-
-        createAdHocCharge({
-            description: `Thank you for referring ${getUserFullName(contractor.user)} to Bethesda Scholars!`,
-            date_occurred: new Date(Date.now()).toISOString().replace("T", " ").split(".")[0],
-            category: ChargeCat.Referral,
-            contractor: referrerId,
-            pay_contractor: 10.0
-        });
+        
+        if (referrerId === 2850125) {
+            createAdHocCharge({
+                description: `Thank you for referring ${getUserFullName(contractor.user)} to Bethesda Scholars!`,
+                date_occurred: new Date(Date.now()).toISOString().replace("T", " ").split(".")[0],
+                category: ChargeCat.Referral,
+                contractor: referrerId,
+                pay_contractor: 20.0
+            });
+        } else {
+            createAdHocCharge({
+                description: `Thank you for referring ${getUserFullName(contractor.user)} to Bethesda Scholars!`,
+                date_occurred: new Date(Date.now()).toISOString().replace("T", " ").split(".")[0],
+                category: ChargeCat.Referral,
+                contractor: referrerId,
+                pay_contractor: 15.0
+            });
+        }
     }
 });
 

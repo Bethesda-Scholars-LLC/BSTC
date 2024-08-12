@@ -35,7 +35,7 @@ const ReferralEmail = (props: {contractor: ContractorObject}) => {
                 Have your friend put your referral code in their profile under the "Referral Code" field.
             </li>
             <li>
-                We will add <b>$10</b> to your monthly pay--see criteria below.
+                We will add <b>$15</b> to your monthly pay--see criteria below.
             </li>
         </ol>
         <b>To recieve your referral payment, the tutor you refer us must:</b>
