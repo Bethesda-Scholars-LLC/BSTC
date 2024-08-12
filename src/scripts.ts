@@ -192,7 +192,7 @@ const _syncBias = async () => {
     }
 };
 
-const _doSomethingAllContractors = async () => {
+const doSomethingAllContractors = async () => {
     for (let i = 1; i <= Math.ceil(numTutors / PAGE_SIZE); i++) {
         Log.debug(`Page ${i}`);
         // await _setContractFilledOutToFalse(i);
@@ -201,7 +201,7 @@ const _doSomethingAllContractors = async () => {
     }
   };
 
-  const _doSomethingAllServices = async () => {
+  const doSomethingAllServices = async () => {
     for (let i = 1; i <= Math.ceil(numJobs / PAGE_SIZE); i++) {
         Log.debug(`Page ${i}`);
         // await _updateAllJobsToFinished(i);
@@ -211,7 +211,7 @@ const _doSomethingAllContractors = async () => {
 // Uncomment lines below to run the script
 if (!PROD) {
     Log.debug("Running scripts.ts");
-    _doSomethingAllContractors().catch(error => Log.error("Error: ", error));
-    _doSomethingAllServices().catch(error => Log.error("Error: ", error));
+    doSomethingAllContractors().catch(error => Log.error("Error: ", error));
+    doSomethingAllServices().catch(error => Log.error("Error: ", error));
 
 }
