@@ -24,10 +24,12 @@ export enum ClientManager {
 
 export const updateClient = async (data: UpdateClientPayload) => {
     try {
+        Log.info(`updating client ${data.user.email} through API`);
         await ApiFetcher.sendRequest("/clients/", {
             method: "POST",
             data
         });
+        Log.info(`successfully updated client ${data.user.email} through API`);
     } catch(e) {
         Log.error(e);
     }
@@ -59,7 +61,10 @@ export const getMinimumClientUpdate = (client: ClientObject): UpdateClientPayloa
 
 export const getClientById = async (id: number): Promise<ClientObject | null> => {
     try {
-        return (await ApiFetcher.sendRequest(`/clients/${id}`))?.data as ClientObject;
+        Log.info(`retreiving client ${id} from API`);
+        const client = (await ApiFetcher.sendRequest(`/clients/${id}`))?.data as ClientObject;
+        Log.info(`successfully retrieved client ${client.id} from API`);
+        return client;
     } catch(e) {
         Log.error(e);
         return null;
@@ -67,18 +72,23 @@ export const getClientById = async (id: number): Promise<ClientObject | null> =>
 };
 
 export const moveToMatchedAndBooked = async (lesson: LessonObject, job: JobObject) => {
+    Log.info(`moving client to matched not booked from job ${job.id}`);
     // deleted matched not booked check, only checks for prospect now
     const client = await getClientById(lesson.rcras[0].paying_client);
-    if (!client || client.status !== "prospect" || client.pipeline_stage.id === PipelineStage.FeedbackRequested)
+    if (!client || client.status !== "prospect" || client.pipeline_stage.id === PipelineStage.FeedbackRequested) {
+        Log.info("client does not meet requirements to move to matched not booked stage");
         return;
+    }
 
     for (let i = 0; i < job.labels.length; i++) {
         if (job.labels[i] === Labels.firstLessonComplete) {
+            Log.info(`first lesson complete on job ${job.id}`);
             return;
         }
     }
 
     if (job.total_apt_units > 3) {
+        Log.info(`more than three appointment units on job ${job.id}`);
         return;
     }
 
@@ -89,8 +99,10 @@ export const moveToMatchedAndBooked = async (lesson: LessonObject, job: JobObjec
 
     // remove matched not booked email that is supposed to send after 3 days here
     const contractor = await getContractorById(lesson.cjas[0].contractor);
-    if (!contractor)
+    if (!contractor) {
+        Log.info(`no contractor found with id ${lesson.cjas[0].contractor}`);
         return;
+    }
 
     const awaitingBookingEmail = await ScheduleMail.findOne(
         { job_id: job.id,
@@ -101,6 +113,7 @@ export const moveToMatchedAndBooked = async (lesson: LessonObject, job: JobObjec
     
     if (awaitingBookingEmail) {
         await ScheduleMail.findByIdAndDelete(awaitingBookingEmail._id);
+        Log.info(`awaiting booking email deleted from DB with _id ${awaitingBookingEmail._id}`);
     }
 
     // add to not cold clients DB if not already there
@@ -117,10 +130,12 @@ export const moveToMatchedAndBooked = async (lesson: LessonObject, job: JobObjec
             tutor_id: contractor.id,
             tutor_name: getUserFullName(contractor.user)
         }).save();
+        Log.info(`saved new not cold object to not cold schema with job id ${job.id}`);
     }
 };
 
 const handleDormantClient = async (client: ClientObject, job: JobObject) => {
+    Log.info(`handling dormant client ${client.id}`);
     // set location to online, post client details in the job description
     const oldJob = getMinimumJobUpdate(job);
     const address = getAttrByMachineName("home_address", client.extra_attrs)?.value;
@@ -144,9 +159,11 @@ addTCListener("BOOKED_AN_APPOINTMENT", async (event: TCEvent<LessonObject>) => {
     const job = await getServiceById(lesson.service.id);
     
     // when booking with random tutor, its possible that there is no job created yet, look into that
-    if (!job)
+    if (!job) {
+        Log.info("no job found");
         return;
-    
+    }
+
     // check if client is in dormant
     const client = await getClientById(job.rcrs[0].paying_client);
     if (client?.status === "dormant") {
@@ -155,6 +172,7 @@ addTCListener("BOOKED_AN_APPOINTMENT", async (event: TCEvent<LessonObject>) => {
             if(err)
                 Log.error(err);
         });
+        Log.info("successfully sent dormant client booked mail");
         return;
     }
 
@@ -177,10 +195,12 @@ addTCListener("BOOKED_AN_APPOINTMENT", async (event: TCEvent<LessonObject>) => {
             if(err)
                 Log.error(err);
         });
+        Log.info("sucessfully sent wront tutor mail");
         return;
     }
 
     if (lesson.rcras.length > 0) {
         moveToMatchedAndBooked(lesson, job);
     }
+    Log.info("sucessfully executed all tasks for this webhook");
 });

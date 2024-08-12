@@ -57,10 +57,12 @@ export const updateServiceStatus = async (job: DumbJob | JobObject, status: "in-
 
 export const updateServiceById = async (id: number, data: UpdateServicePayload) => {
     try {
+        Log.info(`updating service ${id} through API`);
         await ApiFetcher.sendRequest(`/services/${id}/`, {
             method: "PUT",
             data: data
         });
+        Log.info(`sucessfully updated service ${id} through API`);
     } catch (e) {
         Log.error(e);
     }
@@ -68,7 +70,10 @@ export const updateServiceById = async (id: number, data: UpdateServicePayload) 
 
 export const getServiceById = async (id: number): Promise<JobObject | null> => {
     try {
-        return (await ApiFetcher.sendRequest(`/services/${id}/`))?.data as JobObject;
+        Log.info(`retrieving service ${id} from API`);
+        const service = (await ApiFetcher.sendRequest(`/services/${id}/`))?.data as JobObject;
+        Log.info(`successfully retrieved service ${service.id} from API`);
+        return service;
     } catch (e) {
         Log.error(e);
     }
@@ -149,6 +154,7 @@ const setDftLocation = (job: JobObject): UpdateServicePayload => {
  * TODO: make miles found distance from maryland
  */
 export const setJobRate = async (client: ClientObject, job: JobObject, outOfState: boolean) => {
+    Log.info(`updating job rate for job ${job.id}`);
     const studentGrade = getAttrByMachineName("student_grade", client.extra_attrs);
     const location = getAttrByMachineName("lesson_location", client.extra_attrs);
     const subject = getAttrByMachineName("subjects", client.extra_attrs)?.value.toLowerCase();
@@ -213,8 +219,10 @@ addTCListener("REQUESTED_A_SERVICE", async (event: TCEvent<JobObject>) => {
             return;
 
         const school = getAttrByMachineName("student_school", client.extra_attrs);
-        if (!school)
+        if (!school) {
+            Log.info(`no school extr_attr found on client object ${client.id}`);
             return;
+        }
 
         // set school
         const updatePayload = getMinimumClientUpdate(client);
@@ -241,6 +249,7 @@ addTCListener("REQUESTED_A_SERVICE", async (event: TCEvent<JobObject>) => {
         await setJobRate(client, job, outOfState);
         await updateClient(updatePayload);
     }
+    Log.info("sucessfully executed all tasks for this webhook");
 });
 
 addTCListener("REMOVED_CONTRACTOR_FROM_SERVICE", async (event: TCEvent<JobObject>) => {
@@ -248,8 +257,10 @@ addTCListener("REMOVED_CONTRACTOR_FROM_SERVICE", async (event: TCEvent<JobObject
     const realContractors = TCJob.conjobs.map(v => v.contractor);
 
     const DBJob = await AwaitingClient.findOne({ job_id: TCJob.id }).exec();
-    if (!DBJob)
+    if (!DBJob) {
+        Log.info(`no db job found for job ${TCJob.id}`);
         return;
+    }
 
     // keep only if tutor_id is in realContractors array
     DBJob.tutor_ids = DBJob.tutor_ids.filter(v => realContractors.includes(v));
@@ -257,11 +268,12 @@ addTCListener("REMOVED_CONTRACTOR_FROM_SERVICE", async (event: TCEvent<JobObject
 
     if (DBJob.tutor_ids.length === 0) {
         await AwaitingClient.findByIdAndDelete(DBJob._id);
+        Log.info(`deleted awaiting client from db with _id ${DBJob._id}`);
         return;
     }
 
     DBJob.save();
-
+    Log.info("sucessfully executed all tasks for this webhook");
 });
 
 export const addedContractorToService = async (job: JobObject) => {
@@ -278,6 +290,7 @@ export const addedContractorToService = async (job: JobObject) => {
                 if (err)
                     Log.error(err);
             });
+            Log.info("sucessfully sent tutor matched mail");
 
             try {
                 if (client) {
@@ -328,6 +341,7 @@ export const addedContractorToService = async (job: JobObject) => {
                     ).exec();
                     if (!inDB) {
                         queueEmail(PROD ? day : Duration.second(10), awaitingAvailMail(contractor, client, job));
+                        Log.info("sucessfully scheduled availability not set mail to expire in one day");
                     }
                 }
             } catch (e) {
@@ -351,12 +365,15 @@ export const addedContractorToService = async (job: JobObject) => {
 addTCListener("ADDED_CONTRACTOR_TO_SERVICE", async (event: TCEvent<JobObject>) => {
     const job = event.subject;
     addedContractorToService(job);
+    Log.info("sucessfully executed all tasks for this webhook");
 });
 
 export const onLessonComplete = async (job: JobObject, client_id: number) => {
     const client = await getClientById(client_id);
-    if (!client)
+    if (!client) {
+        Log.info(`no client found with id ${client_id}`);
         return;
+    }
 
     // matched and booked and only one lesson on the job and only one lesson on the job
     if (client.status === "prospect" && client.pipeline_stage.id === PipelineStage.MatchedAndBooked
@@ -364,6 +381,7 @@ export const onLessonComplete = async (job: JobObject, client_id: number) => {
         for (let i = 0; i < job.labels.length; i++) {
             // first lesson is complete
             if (job.labels[i].id === Labels.firstLessonComplete) {
+                Log.info("queueing first lesson complete mail");
                 await queueFirstLessonComplete(job);
                 const updatePayload = getMinimumClientUpdate(client);
                 updatePayload.pipeline_stage = PipelineStage.FeedbackRequested;
@@ -372,6 +390,7 @@ export const onLessonComplete = async (job: JobObject, client_id: number) => {
             }
         }
     }
+    Log.info("sucessfully executed all tasks for this webhook");
 };
 
 addTCListener("ADDED_A_LABEL_TO_A_SERVICE", async (event: TCEvent<JobObject>) => {
@@ -379,6 +398,7 @@ addTCListener("ADDED_A_LABEL_TO_A_SERVICE", async (event: TCEvent<JobObject>) =>
     if (job.rcrs.length > 0) {
         await onLessonComplete(job, job.rcrs[0].paying_client);
     }
+    Log.info("sucessfully executed all tasks for this webhook");
 });
 
 addTCListener("MARKED_AN_APPOINTMENT_AS_COMPLETE", async (event: TCEvent<LessonObject>) => {
@@ -391,6 +411,7 @@ addTCListener("MARKED_AN_APPOINTMENT_AS_COMPLETE", async (event: TCEvent<LessonO
 
         await onLessonComplete(job, job.rcrs[0].paying_client);
     }
+    Log.info("sucessfully executed all tasks for this webhook");
 });
 
 addTCListener("APPLIED_FOR_SERVICE", async (event: TCEvent<any>) => {
@@ -400,6 +421,7 @@ addTCListener("APPLIED_FOR_SERVICE", async (event: TCEvent<any>) => {
         return;
 
     // setLookingForJob(contractor, true);
+    Log.info("sucessfully executed all tasks for this webhook");
     return;
 });
 
@@ -418,8 +440,10 @@ addTCListener("CHANGED_SERVICE_STATUS", async (event: TCEvent<JobObject>) => {
     // add other checks here, maybe time frame near winter break cancel this
     if (job.status === "gone-cold" && client.status === "live") {
         const contractor = await getContractorById(job.conjobs[0].contractor);
-        if (!contractor)
+        if (!contractor) {
+            Log.info(`no contractor found with id ${job.conjobs[0].contractor}`);
             return;
+        }
         
         const notCold = await NotCold.findOne({
             job_id: job.id,
@@ -434,10 +458,12 @@ addTCListener("CHANGED_SERVICE_STATUS", async (event: TCEvent<JobObject>) => {
                 if (err)
                     Log.error(err);
             });
+            Log.info(`sucessfully sent gone cold mail for job ${job.id}`);
             // await NotCold.findByIdAndDelete(notCold.id);
             
             
             updateServiceStatus(job, "in-progress");
         }
     }
+    Log.info("sucessfully executed all tasks for this webhook");
 });

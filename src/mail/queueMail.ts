@@ -41,6 +41,7 @@ export const queueEmail = async (timestamp: Duration, mailData: MailOpts) => {
             ...mailData,
             send_at: Date.now() + timestamp.milliseconds,
         }).save();
+        Log.info("scheduled mail sucessfully");
         Log.debug("saving");
     } catch (e) {
         Log.error(e);

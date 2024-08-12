@@ -31,7 +31,10 @@ export const getManyContractors = async (page?: number): Promise<ManyResponse<Du
 
 export const getContractorById = async (id: number): Promise<ContractorObject | null> => {
     try {
-        return (await ApiFetcher.sendRequest(`/contractors/${id}`))?.data as ContractorObject;
+        Log.info(`retrieving contractor ${id} from API`);
+        const contractor = (await ApiFetcher.sendRequest(`/contractors/${id}`))?.data as ContractorObject;
+        Log.info(`successfully retrieved contractor ${contractor.id} from API`);
+        return contractor;
     } catch (e) {
         Log.error(e);
         return null;
@@ -40,6 +43,7 @@ export const getContractorById = async (id: number): Promise<ContractorObject | 
 
 export const updateContractor = async (data: UpdateContractorPayload) => {
     try {
+        Log.info(`updating contractor ${data.user.email}`);
         return await ApiFetcher.sendRequest("/contractors/", {
             method: "POST",
             data
@@ -73,6 +77,7 @@ export const getMinimumContractorUpdate = (tutor: {user: { email: string, last_n
 };
 
 export const setTutorBias = async (contractor: {user: { email: string, last_name: string }}, value: 0 | 1) => {
+    Log.info(`setting tutor bias for tutor ${contractor.user.email}`);
     const defaultTutor = getMinimumContractorUpdate(contractor);
 
     defaultTutor.extra_attrs = { bias: value.toString() };
@@ -113,13 +118,16 @@ export const getNewContractorDetails = (contractor: ContractorObject): UpdateCon
 
 export const updateContractorDetails = async (contractor: ContractorObject) => {
     await updateContractor(getNewContractorDetails(contractor));
+    Log.info(`sucessfully updated contractor ${contractor.id}`);
 };
 
 export const popTutorFromCAs = async (contractor: ContractorObject) => {
+    Log.info(`popping contractor ${contractor.id} from client_awaiting DB`);
 
     const dbAwaitings = await AwaitingClient.find({
         tutor_ids: contractor.id
     }).exec();
+    Log.debug(`sucessfully found client from DB ${JSON.stringify(dbAwaitings)}`);
 
     for (let i = 0; i < dbAwaitings.length; i++) {
         const awaitingClient = popTutorFromCA(dbAwaitings[i], contractor.id);
@@ -127,17 +135,22 @@ export const popTutorFromCAs = async (contractor: ContractorObject) => {
         if (awaitingClient.tutor_ids.length === 0) {
             // send email
             const client = await getClientById(awaitingClient.client_id);
-            if (!client)
+            if (!client) {
+                Log.info(`no client found ${awaitingClient.client_id}`);
                 return;
+            }
 
             const job = await getServiceById(awaitingClient.job_id);
-            if (!job)
+            if (!job) {
+                Log.info(`no service found ${awaitingClient.job_id}`);
                 return;
+            }
 
             transporterPascal.sendMail(clientMatchedMail(contractor, client, job), (err) => {
                 if (err)
                     Log.error(err);
             });
+            Log.info("sucessfully sent client matched mail");
 
             // add to scheduled email to send in three days if client has not booked yet
             const inDBAwaitingBooking = await ScheduleMail.findOne(
@@ -162,9 +175,11 @@ export const popTutorFromCAs = async (contractor: ContractorObject) => {
             ).exec();
             if (inDBAwaitingAvail) {
                 await ScheduleMail.findByIdAndDelete(inDBAwaitingAvail._id);
+                Log.info(`sucessfully deleted mail from scheduled mail DB id ${inDBAwaitingAvail._id}`);
             }
 
             await AwaitingClient.findByIdAndDelete(awaitingClient._id);
+            Log.info(`sucessfully deleted client from client awaiting DB id ${awaitingClient._id}`);
 
             if (client.status === "prospect" && client.pipeline_stage.id === PipelineStage.AvailabilityNotBooked) {
                 await updateClient({
@@ -184,10 +199,13 @@ addTCListener("EDITED_AVAILABILITY", async (event: TCEvent<ContractorObject>) =>
     const contractor = event.subject;
 
     await popTutorFromCAs(contractor);
+    Log.info("sucessfully executed all tasks for this webhook");
 });
 
 addTCListener("EDITED_A_CONTRACTOR", async (event: TCEvent<ContractorObject>) => {
+    Log.info(`updating contractor details ${event.subject.id}`);
     await updateContractorDetails(event.subject);
+    Log.info("sucessfully executed all tasks for this webhook");
 });
 
 const day = Duration.hour(24);
@@ -201,13 +219,16 @@ addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<ContractorObjec
             looking_for_job: true
         };
         await updateContractor(toUpdate);
+        Log.info(`sucessfully updated contractor ${contractor.id} through API`);
 
         queueEmail(PROD ? Duration.hour(24 * 5) : Duration.second(10), tutorReferralMail(contractor));
 
         const referrerId = parseInt(getAttrByMachineName("referral", contractor.extra_attrs)?.value);
-        if (!referrerId || isNaN(referrerId) || Object.values(ClientManager).includes(referrerId))
+        if (!referrerId || isNaN(referrerId) || Object.values(ClientManager).includes(referrerId)) {
+            Log.info(`no referral id found ${referrerId}`);
             return;
-        
+        }
+
         if (referrerId === 2850125) {
             createAdHocCharge({
                 description: `Thank you for referring ${getUserFullName(contractor.user)} to Bethesda Scholars!`,
@@ -226,35 +247,45 @@ addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<ContractorObjec
             });
         }
     }
+    Log.info("sucessfully executed all tasks for this webhook");
 });
 
 addTCListener("CREATED_AN_APPOINTMENT", async (event: TCEvent<any>) => {
     const lesson = event.subject;
     const job = await getServiceById(lesson.service.id);
-    if (!job)
+    if (!job) {
+        Log.info(`no job found under lesson ${lesson.service.id}`);
         return;
+    }
 
     if (lesson.rcras.length > 0) {
         moveToMatchedAndBooked(lesson, job);
     }
+    Log.info("sucessfully executed all tasks for this webhook");
 });
 
 addTCListener("CREATED_REPORT", async (event: TCEvent<any>) => {
     const report: any = event.subject;
     const job = await getServiceById(report.appointment.service.id);
-    if (!job)
+    if (!job) {
+        Log.info(`no job found with id ${report.appointment.service.id}`);
         return;
+    }
 
     await onLessonComplete(job, report.client.id);
+    Log.info("sucessfully executed all tasks for this webhook");
 });
 
 addTCListener("TENDER_WAS_ACCEPTED", async (event: TCEvent<ApplicationObject>) => {
     const application = event.subject;     // add application to types?
     const job = await getServiceById(application.service.id);
-    if (!job)
+    if (!job) {
+        Log.info(`no job found with id ${application.service.id}`);
         return;
+    }
 
     addedContractorToService(job);
+    Log.info("sucessfully executed all tasks for this webhook");
 });
 
 addTCListener("CONTRACTOR_SIGN_UP", async (event: TCEvent<ContractorObject>) => {
@@ -262,4 +293,6 @@ addTCListener("CONTRACTOR_SIGN_UP", async (event: TCEvent<ContractorObject>) => 
 
     // schedule email here
     queueEmail(PROD ? day : Duration.second(10), contractorIncompleteMail(contractor));
+    Log.info("sucessfully queued contractor incomplete mail");
+    Log.info("sucessfully executed all tasks for this webhook");
 });
