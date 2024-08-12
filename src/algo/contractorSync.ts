@@ -1,7 +1,7 @@
 import { Mutex } from "async-mutex";
 import { Duration } from "ts-duration";
 import { addTCListener } from "../integration/hook";
-import { setTutorBias } from "../integration/tc models/contractor/contractor";
+import { getContractorById, setTutorBias } from "../integration/tc models/contractor/contractor";
 import { ContractorObject } from "../integration/tc models/contractor/types";
 import LessonModel, { ILesson } from "../models/lesson";
 import TutorModel, { ITutor } from "../models/tutor";
@@ -123,6 +123,13 @@ async function getContractorLock(contractor_id: number): Promise<Mutex> {
         newLockLock.release();
     }
     return contractorLocks[contractor_id];
+}
+
+export async function SyncContractorById(id: number) {
+    const contractor = await getContractorById(id);
+    if(!contractor)
+        return;
+    await SyncContractor(contractor);
 }
 
 export async function SyncContractor(contractor: ContractorObject) {

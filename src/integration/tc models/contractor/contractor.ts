@@ -1,5 +1,6 @@
 
 import { Duration } from "ts-duration";
+import { SyncContractor } from "../../../algo/contractorSync";
 import ApiFetcher from "../../../api/fetch";
 import { awaitingBookingMail } from "../../../mail/awaitingBooking";
 import clientMatchedMail from "../../../mail/clientMatched";
@@ -48,10 +49,11 @@ export const getContractorById = async (id: number): Promise<ContractorObject | 
 export const updateContractor = async (data: UpdateContractorPayload) => {
     try {
         Log.info(`updating contractor ${data.user.email}`);
-        return await ApiFetcher.sendRequest("/contractors/", {
+        const contractor = await ApiFetcher.sendRequest("/contractors/", {
             method: "POST",
             data
         });
+        await SyncContractor(contractor.data.role as any);
     } catch (e) {
         Log.error(e);
     }
