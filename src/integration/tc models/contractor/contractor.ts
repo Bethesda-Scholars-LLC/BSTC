@@ -20,6 +20,10 @@ import { DumbUser } from "../user/types";
 import { getUserFullName } from "../user/user";
 import { ContractorObject, UpdateContractorPayload } from "./types";
 
+const recruiterIds = {
+    evelynGoldin: 2850125
+};
+
 export const getManyContractors = async (page?: number): Promise<ManyResponse<DumbUser> | null> => {
     try {
         return (await ApiFetcher.sendRequest(`/contractors?page=${Math.max(page ?? 1, 1)}`))?.data as ManyResponse<DumbUser>;
@@ -229,7 +233,7 @@ addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<ContractorObjec
             return;
         }
 
-        if (referrerId === 2850125) {
+        if (Object.values(recruiterIds).includes(referrerId)) {
             createAdHocCharge({
                 description: `Thank you for referring ${getUserFullName(contractor.user)} to Bethesda Scholars!`,
                 date_occurred: new Date(Date.now()).toISOString().replace("T", " ").split(".")[0],
