@@ -139,6 +139,24 @@ const _changeDefaultServiceRate = async () => {
     
 };
 
+const _syncDB = async () => {
+    const allTutors = await TutorModel.find({}).exec();
+    for(let i = 0; i < allTutors.length; i++) {
+        const tutor = allTutors[i];
+        const contractor = await getContractorById(tutor.cruncher_id);
+        if(!contractor){
+            Log.debug(`invalid contractor id: ${tutor.cruncher_id}, name: ${tutor.first_name} ${tutor.last_name}`);
+            continue;
+        }
+        Log.debug(`Syncing ${getUserFullName(contractor.user)}`);
+
+        tutor.bias = parseFloat(getAttrByMachineName("bias", contractor.extra_attrs)?.value);
+        tutor.status = contractor.status;
+        tutor.stars = getAttrByMachineName("rating", contractor.extra_attrs)?.value.split("/")[0],
+        await tutor.save();
+    }
+};
+
 const _syncBias = async () => {
     const allTutors = await TutorModel.find({}).exec();
     for(let i = 0; i < allTutors.length; i++) {

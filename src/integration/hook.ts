@@ -46,12 +46,12 @@ hookRouter.all("*", (req: Req, res: Res) => {
             const cbs = listeners[events[i].action];
             if(!cbs)
                 continue;
+            Log.info(JSON.stringify({
+                eventName: events[i].action,
+                webhookSignature: req.headers["webhook-signature"],
+            }));
             cbs.forEach(cb => {
                 (async () => {
-                    Log.info(JSON.stringify({
-                        eventName: events[i].action,
-                        webhookSignature: req.headers["webhook-signature"],
-                    }));
                     cb(events[i]);
                 })().catch(err => {
                     Log.error(err);
