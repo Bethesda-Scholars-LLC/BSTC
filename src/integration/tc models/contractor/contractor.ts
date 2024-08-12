@@ -127,7 +127,7 @@ export const popTutorFromCAs = async (contractor: ContractorObject) => {
     const dbAwaitings = await AwaitingClient.find({
         tutor_ids: contractor.id
     }).exec();
-    Log.debug(`sucessfully found client from DB ${JSON.stringify(dbAwaitings)}`);
+    Log.info(`sucessfully found client from DB ${JSON.stringify(dbAwaitings)}`);
 
     for (let i = 0; i < dbAwaitings.length; i++) {
         const awaitingClient = popTutorFromCA(dbAwaitings[i], contractor.id);
