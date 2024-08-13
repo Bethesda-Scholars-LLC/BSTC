@@ -35,6 +35,25 @@ To run and test hooks locally:
 3. Turn on BSTC test integration
 4. `npm start` locally
 
+### Accessing AWS EC2 Instance
+1. login to AWS
+2. click on EC2
+3. click on instances
+4. click on the instance id
+
+### Stopping the Server
+PM2 is a command line utility that lets us schedule processes to be restarted when the crash. If the server falls into an infinite loop of trying to restart, you can stop the server by running the following in your terminal:
+1. `ssh bstc`
+2. `sudo stop bstc`
+
+### Starting the Server
+1. The easiest way to start the server is to push to the master branch. Jenkins will deploy this branch automatically to the server
+2. If this does not work, log into Jenkins at http://tc.bethesdascholars.com:8080 and navigate to BSTC. Then click "Build Now" to start the build
+3. Last option is manually restarting through AWS:
+  a. `ssh bstc`
+  b. `cd /var/lib/jenkins/workspace/BSTC`
+  c. `do ./build.sh`
+
 ## Documentation
 
 ### Clearing DB Collection
@@ -45,9 +64,10 @@ To clear a collection in the `bstc` mongo database:
 
 ### Adding Environment Variables to EC2 Instance
 Do this before pushing changes using the environment variables to the Github repository
-1. `ssh bstc`
-2. `cd /var/lib/jenkins/workspace/BSTC`
-3. `sudo nano .env` to access the .env file
+1. add environment variable to `.env` file locally and to `requiredEnvs` variable in `util.ts` on line 60
+2. `ssh bstc`
+3. `cd /var/lib/jenkins/workspace/BSTC`
+4. `sudo nano .env` to access the .env file
 
 ### Viewing Logs Locally
 To view AWS console logs from terminal:
@@ -59,6 +79,16 @@ To view AWS console logs from terminal:
 1. Turn on the testing hook as active (not webhook active)
 2. write new scripts in `scripts.ts`
 3. call new scripts at bottom of the file in an async function
+
+### Adding Recruiters
+Currently recruiters are paid $20 for referrals while all other tutors are paid $15. To change this, add recruiters and customize their referral payment in `contractor.ts`:
+1. add recruiters to `recruiterIds` variable
+2. in webhook `CHANGED_CONTRACTOR_STATUS` add logic after line 238
+
+### Adding Exempt Clients
+Currently there are 12 clients exempt from extra lesson fees including in person fees, higher level subject fees, etc. These clients will only be charged $45 regardless of their tutoring request (except test prep). To change this, modify `service.ts`:
+1. add to `exemptClients` variable
+2. any logic changes must be made in `setJobRate()` on line 156
 
 ### Listeners
 
