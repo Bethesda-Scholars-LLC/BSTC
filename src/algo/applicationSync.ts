@@ -15,11 +15,11 @@ import { Log } from "../util";
 });
 
 async function syncApplication(wasAccepted: boolean, applicationEvent: TCEvent<ApplicationObject>): Promise<IApplication> {
-    Log.info(`syncing application with database and applicationEvent=${JSON.stringify(applicationEvent)}`);
+    Log.info("syncing application with database and applicationEvent");
     const application = applicationEvent.subject;
     const app = await ApplicationModel.findOne({tutor_id: application.contractor.id, job_id: application.service.id}).exec();
     if(!app) {
-        Log.info(`creating new db application with applicationEvent=${JSON.stringify(applicationEvent)}`);
+        Log.info("creating new db application with applicationEvent");
         return ApplicationModel.create({
             status: application.status,
             job_id: application.service.id,

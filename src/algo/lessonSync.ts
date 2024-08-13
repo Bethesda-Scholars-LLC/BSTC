@@ -9,7 +9,7 @@ import { Log } from "../util";
 addTCListener("MARKED_AN_APPOINTMENT_AS_COMPLETE", async (ev: TCEvent<LessonObject>) => {
     const lesson = ev.subject;
     const dbLessons = await LessonModel.find({cruncher_id: lesson.id}).exec();
-    Log.info(`successfully retrieved lesson object from DB ${JSON.stringify(dbLessons)}`);
+    Log.info(`successfully retrieved lesson object from DB ${lesson.id}`);
     const localLessons = getLesson(lesson);
     if(dbLessons.length > 0) {
         Log.info("db lesson has length 0");

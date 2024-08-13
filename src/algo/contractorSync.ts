@@ -346,7 +346,7 @@ export async function syncTutorHours(tutor: ITutor): Promise<[Date, number]> {
 }
 
 function checkBoolExtraAttr(extra_attrs: any, attr: string): boolean | undefined {
-    Log.info(`checking bool extra attr for attr=${attr} and extra attr=${JSON.stringify(extra_attrs)}`);
+    Log.info(`checking bool extra attr for attr=${attr}`);
     const walue = getAttrByMachineName(attr, extra_attrs);
     if(!walue) {
         return undefined;
