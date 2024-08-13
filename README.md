@@ -45,9 +45,10 @@ To clear a collection in the `bstc` mongo database:
 
 ### Adding Environment Variables to EC2 Instance
 Do this before pushing changes using the environment variables to the Github repository
-1. `ssh bstc`
-2. `cd /var/lib/jenkins/workspace/BSTC`
-3. `sudo nano .env` to access the .env file
+1. add environment variable to `.env` file locally and to `requiredEnvs` variable in `util.ts` on line 60
+2. `ssh bstc`
+3. `cd /var/lib/jenkins/workspace/BSTC`
+4. `sudo nano .env` to access the .env file
 
 ### Viewing Logs Locally
 To view AWS console logs from terminal:
@@ -59,6 +60,16 @@ To view AWS console logs from terminal:
 1. Turn on the testing hook as active (not webhook active)
 2. write new scripts in `scripts.ts`
 3. call new scripts at bottom of the file in an async function
+
+### Adding Recruiters
+Currently recruiters are paid $20 for referrals while all other tutors are paid $15. To change this, add recruiters and customize their referral payment in `contractor.ts`:
+1. add recruiters to `recruiterIds` variable
+2. in webhook `CHANGED_CONTRACTOR_STATUS` add logic after line 238
+
+### Adding Exempt Clients
+Currently there are 12 clients exempt from extra lesson fees including in person fees, higher level subject fees, etc. These clients will only be charged $45 regardless of their tutoring request (except test prep). To change this, modify `service.ts`:
+1. add to `exemptClients` variable
+2. any logic changes must be made in `setJobRate()` on line 156
 
 ### Listeners
 
