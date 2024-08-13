@@ -38,7 +38,7 @@ export type ContractorObject = {
     work_done_details: {
         amount_owed: number
         amount_paid: number
-        total_paid_hours: string
+        total_paid_hours: string | number
     }
 }
 

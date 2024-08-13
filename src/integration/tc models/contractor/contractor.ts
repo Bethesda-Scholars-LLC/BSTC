@@ -290,7 +290,7 @@ addTCListener("TENDER_WAS_ACCEPTED", async (event: TCEvent<ApplicationObject>) =
         return;
     }
 
-    addedContractorToService(job);
+    await addedContractorToService(job);
     Log.info("sucessfully executed all tasks for this webhook");
 });
 
@@ -298,7 +298,7 @@ addTCListener("CONTRACTOR_SIGN_UP", async (event: TCEvent<ContractorObject>) => 
     const contractor = event.subject;
 
     // schedule email here
-    queueEmail(PROD ? day : Duration.second(10), contractorIncompleteMail(contractor));
+    await queueEmail(PROD ? day : Duration.second(10), contractorIncompleteMail(contractor));
     Log.info("sucessfully queued contractor incomplete mail");
     Log.info("sucessfully executed all tasks for this webhook");
 });

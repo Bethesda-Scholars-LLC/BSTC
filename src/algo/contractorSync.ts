@@ -238,7 +238,7 @@ function tutorFromContractor(con: ContractorObject): ITutor | null {
 
             recent_hours: 0,
 
-            total_paid_hours: con.work_done_details ? convertPaidHours(con.work_done_details.total_paid_hours) : undefined,
+            total_paid_hours: con.work_done_details ? convertPaidHours(typeof con.work_done_details.total_paid_hours === "number" ? "" : con.work_done_details.total_paid_hours) : undefined,
 
             work_ready: {
                 w9_filled_out: checkBoolExtraAttr(con.extra_attrs, "w9_filled_out")??false,
