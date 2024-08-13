@@ -35,6 +35,25 @@ To run and test hooks locally:
 3. Turn on BSTC test integration
 4. `npm start` locally
 
+### Accessing AWS EC2 Instance
+1. login to AWS
+2. click on EC2
+3. click on instances
+4. click on the instance id
+
+### Stopping the Server
+PM2 is a command line utility that lets us schedule processes to be restarted when the crash. If the server falls into an infinite loop of trying to restart, you can stop the server by running the following in your terminal:
+1. `ssh bstc`
+2. `sudo stop bstc`
+
+### Starting the Server
+1. The easiest way to start the server is to push to the master branch. Jenkins will deploy this branch automatically to the server
+2. If this does not work, log into Jenkins at http://tc.bethesdascholars.com:8080 and navigate to BSTC. Then click "Build Now" to start the build
+3. Last option is manually restarting through AWS:
+  a. `ssh bstc`
+  b. `cd /var/lib/jenkins/workspace/BSTC`
+  c. `do ./build.sh`
+
 ## Documentation
 
 ### Clearing DB Collection
