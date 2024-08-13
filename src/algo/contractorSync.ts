@@ -133,6 +133,7 @@ export async function SyncContractorById(id: number) {
 }
 
 export async function SyncContractor(contractor: ContractorObject) {
+    Log.info(`syncing ${contractor.id} tutor with db`);
     const lock = await getContractorLock(contractor.id);
     await lock.acquire();
     try {
@@ -211,7 +212,7 @@ function tutorFromContractor(con: ContractorObject): ITutor | null {
         } else {
             genderNum = 2;
         }
-        let biasValue = parseInt(getAttrByMachineName("bias", con.extra_attrs)?.value);
+        let biasValue = parseInt(getAttrByMachineName("bias", con.extra_attrs)?.value) ?? 1;
         if(isNaN(biasValue)) {
             biasValue = 1;
         }
