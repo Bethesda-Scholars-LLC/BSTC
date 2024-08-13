@@ -212,7 +212,7 @@ function tutorFromContractor(con: ContractorObject): ITutor | null {
         } else {
             genderNum = 2;
         }
-        let biasValue = parseInt(getAttrByMachineName("bias", con.extra_attrs)?.value) ?? 1;
+        let biasValue = parseInt(getAttrByMachineName("bias", con.extra_attrs)?.value);
         if(isNaN(biasValue)) {
             biasValue = 1;
         }
