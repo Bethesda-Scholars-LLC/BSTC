@@ -112,6 +112,7 @@ export const getMinimumJobUpdate = (job: JobObject | DumbJob): UpdateServicePayl
 };
 
 const fixJobName = (job: JobObject): JobObject | null => {
+    Log.info(`fixing job name ${job.id}`);
     // if name has only one word in it, return and exit
     if (job.name.split("from")[1].trim().split(" ").length === 1)
         return null;
@@ -133,6 +134,7 @@ const fixJobName = (job: JobObject): JobObject | null => {
 };
 
 const setDftLocation = (job: JobObject): UpdateServicePayload => {
+    Log.info(`setting default location ${job.id}`);
     const jobLocation = job.description.toLowerCase()
         .split("lesson location:**\n")[1]
         .split("\n**")[0]
@@ -154,7 +156,7 @@ const setDftLocation = (job: JobObject): UpdateServicePayload => {
  * TODO: make miles found distance from maryland
  */
 export const setJobRate = async (client: ClientObject, job: JobObject, outOfState: boolean) => {
-    Log.info(`updating job rate for job ${job.id}`);
+    Log.info(`setting job rate for job ${job.id}`);
     const studentGrade = getAttrByMachineName("student_grade", client.extra_attrs);
     const location = getAttrByMachineName("lesson_location", client.extra_attrs);
     const subject = getAttrByMachineName("subjects", client.extra_attrs)?.value.toLowerCase();
@@ -197,6 +199,7 @@ export const setJobRate = async (client: ClientObject, job: JobObject, outOfStat
 };
 
 export const checkOutOfState = (client: ClientObject) => {
+    Log.info(`checking out of state ${client.id}`);
     const clientZip = parseInt((getAttrByMachineName("zip code", client.extra_attrs)?.value)??"");
 
     const state = (getStateByZipCode(clientZip)?.code??"MD").toLowerCase();
@@ -277,6 +280,7 @@ addTCListener("REMOVED_CONTRACTOR_FROM_SERVICE", async (event: TCEvent<JobObject
 });
 
 export const addedContractorToService = async (job: JobObject) => {
+    Log.info(`handling added contractor to service ${job.id}`);
     if (job.rcrs.length > 0) {
         const client = await getClientById(job.rcrs[0].paying_client);
 
@@ -308,7 +312,7 @@ export const addedContractorToService = async (job: JobObject) => {
 
                     const defaultTutor = getMinimumContractorUpdate(contractor);
 
-                    defaultTutor.extra_attrs = { bias: "0", looking_for_job: false };
+                    defaultTutor.extra_attrs = { bias: "0" };
 
                     await updateContractor(defaultTutor);
 
@@ -357,7 +361,7 @@ export const addedContractorToService = async (job: JobObject) => {
         }
     }
 
-    updateServiceStatus(job, "in-progress");
+    await updateServiceStatus(job, "in-progress");
 };
 /**
  * @description update status to in progress when contract added

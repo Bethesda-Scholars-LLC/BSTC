@@ -53,6 +53,7 @@ export const updateContractor = async (data: UpdateContractorPayload) => {
             method: "POST",
             data
         });
+        Log.info(`sucessfully updated contractor ${data.user.email}`);
         await SyncContractor(contractor.data.role as any);
     } catch (e) {
         Log.error(e);
@@ -100,6 +101,7 @@ export const setContractFilledOut = async (contractor: ContractorObject, value: 
 };
 
 export const getNewContractorDetails = (contractor: ContractorObject): UpdateContractorPayload => {
+    Log.info(`getting new contractor details ${contractor.id}`);
     const defaultTutor = getMinimumContractorUpdate(contractor);
     const phoneNumber = getAttrByMachineName("phone_number", contractor.extra_attrs);
     const address = getAttrByMachineName("home_street_address", contractor.extra_attrs);
@@ -123,8 +125,8 @@ export const getNewContractorDetails = (contractor: ContractorObject): UpdateCon
 };
 
 export const updateContractorDetails = async (contractor: ContractorObject) => {
+    Log.info(`updating contractor details ${contractor.id}`);
     await updateContractor(getNewContractorDetails(contractor));
-    Log.info(`sucessfully updated contractor ${contractor.id}`);
 };
 
 export const popTutorFromCAs = async (contractor: ContractorObject) => {
@@ -197,6 +199,7 @@ export const popTutorFromCAs = async (contractor: ContractorObject) => {
             continue;
         }
         awaitingClient.save();
+        Log.info(`saved awaiting client to db with id=${awaitingClient.id}`);
     }
     //
 };
@@ -209,7 +212,6 @@ addTCListener("EDITED_AVAILABILITY", async (event: TCEvent<ContractorObject>) =>
 });
 
 addTCListener("EDITED_A_CONTRACTOR", async (event: TCEvent<ContractorObject>) => {
-    Log.info(`updating contractor details ${event.subject.id}`);
     await updateContractorDetails(event.subject);
     Log.info("sucessfully executed all tasks for this webhook");
 });
@@ -222,7 +224,7 @@ addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<ContractorObjec
         const toUpdate = getNewContractorDetails(contractor);
         toUpdate.extra_attrs = {
             ...toUpdate.extra_attrs,
-            looking_for_job: true
+            bais: "1"
         };
         await updateContractor(toUpdate);
         Log.info(`sucessfully updated contractor ${contractor.id} through API`);

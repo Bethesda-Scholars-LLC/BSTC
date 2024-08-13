@@ -76,6 +76,7 @@ const removeStatusJob = (job: MapJob) => {
 };
 
 export const updateStatusJob = async (job: MapJob) => {
+    Log.info("updating status map");
     const statusList = Object.keys(statusMap);
 
     for(let i = 0; i < statusList.length; i++) {
@@ -127,6 +128,7 @@ export const updateStatusJob = async (job: MapJob) => {
 
 
 const syncStatusMap = async () => {
+    Log.info("syncing status map");
     const twoMonthsAgo = new Date(new Date().getTime() - Duration.hour(24 * 7 * 4 * 2).milliseconds).toISOString();
 
     // loop through each page

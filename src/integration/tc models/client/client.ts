@@ -36,6 +36,7 @@ export const updateClient = async (data: UpdateClientPayload) => {
 };
 
 export const getRandomClient = async (): Promise<ClientObject | null> => {
+    Log.info("getting random client");
     try {
         const clients = (await ApiFetcher.sendRequest("/clients"))?.data as ManyResponse<DumbUser>;
 
