@@ -200,7 +200,7 @@ addTCListener("BOOKED_AN_APPOINTMENT", async (event: TCEvent<LessonObject>) => {
     }
 
     if (lesson.rcras.length > 0) {
-        moveToMatchedAndBooked(lesson, job);
+        await moveToMatchedAndBooked(lesson, job);
     }
     Log.info("sucessfully executed all tasks for this webhook");
 });

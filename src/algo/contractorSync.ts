@@ -57,7 +57,6 @@ addTCListener([
 addTCListener("DELETED_A_CONTRACTOR", async (ev: TCEvent<ContractorObject>) => {
     const contractor = ev.subject;
     const lock = await getContractorLock(contractor.id);
-    Log.info("successfully retrieved contractor lock");
     await lock.acquire();
     try {
         const tutor = await TutorModel.findOne({cruncher_id: contractor.id}).exec();
@@ -70,6 +69,7 @@ addTCListener("DELETED_A_CONTRACTOR", async (ev: TCEvent<ContractorObject>) => {
         tutor.deleted_on = new Date();
 
         await tutor.save();
+        Log.info(`updated db with new contractor object ${tutor.id}`);
     } catch (e) {
         Log.error(e);
     } finally {
@@ -81,16 +81,15 @@ addTCListener("DELETED_A_CONTRACTOR", async (ev: TCEvent<ContractorObject>) => {
 addTCListener("RECOVERED_A_CONTRACTOR", async (ev: TCEvent<ContractorObject>) => {
     const contractor = ev.subject;
     const lock = await getContractorLock(contractor.id);
-    Log.info("successfully retrieved contractor lock");
     await lock.acquire();
     try {
         const tutor = await TutorModel.findOne({cruncher_id: contractor.id}).exec();
-        Log.info(`successfully retrieved contractor object ${tutor?._id}`);
+        Log.info(`sucessfully retrieved contractor object ${tutor?.id}`);
         if(!tutor) {
             const newTutor = tutorFromContractor(contractor);
             if(newTutor) {
                 await TutorModel.create(newTutor);
-                Log.info("successfully created contractor in DB");
+                Log.info(`created in db new contractor object ${newTutor.cruncher_id}`);
             }
             lock.release();
             return;
@@ -98,6 +97,7 @@ addTCListener("RECOVERED_A_CONTRACTOR", async (ev: TCEvent<ContractorObject>) =>
 
         tutor.deleted_on = undefined;
         tutor.save();
+        Log.info(`updated contractor ${tutor.id} in db`);
     } catch (e) {
         Log.error(e);
     } finally {
@@ -108,13 +108,16 @@ addTCListener("RECOVERED_A_CONTRACTOR", async (ev: TCEvent<ContractorObject>) =>
 
 function updatedContractorFunc(ev: TCEvent<ContractorObject>) {
     const contractor = ev.subject;
+    Log.info(`updating contractor function for contractor ${contractor.id}`);
     if(!("skills" in contractor)) {
+        Log.info(`no skills found for contractor ${ev.subject.id}`);
         return;
     }
     SyncContractor(contractor);
 }
 
 async function getContractorLock(contractor_id: number): Promise<Mutex> {
+    Log.info(`getting contractor lock ${contractor_id}`);
     if(!contractorLocks[contractor_id]) {
         await newLockLock.acquire();
         if(!contractorLocks[contractor_id])
@@ -126,14 +129,17 @@ async function getContractorLock(contractor_id: number): Promise<Mutex> {
 }
 
 export async function SyncContractorById(id: number) {
+    Log.info(`syncing contractor by id ${id}`);
     const contractor = await getContractorById(id);
-    if(!contractor)
+    if(!contractor) {
+        Log.info(`no contractor found to sync ${id}`);
         return;
+    }
     await SyncContractor(contractor);
 }
 
 export async function SyncContractor(contractor: ContractorObject) {
-    Log.info(`syncing ${contractor.id} tutor with db`);
+    Log.info(`syncing contractor with db ${contractor.id}`);
     const lock = await getContractorLock(contractor.id);
     await lock.acquire();
     try {
@@ -144,10 +150,12 @@ export async function SyncContractor(contractor: ContractorObject) {
         if(!tutor) {
             if(!newTutor) {
                 lock.release();
+                Log.info(`no contractor found in db ${contractor.id}`);
                 return;
             }
             TutorModel.create(newTutor);
             lock.release();
+            Log.info(`sucessfully created new contractor in db ${newTutor.cruncher_id}`);
             return;
         }
 
@@ -189,6 +197,7 @@ export async function SyncContractor(contractor: ContractorObject) {
         });
 
         await tutor.save();
+        Log.info(`sucessfully saved updated contractor ${tutor.id} in db`);
     } catch (e) {
         Log.error(e);
     }
@@ -196,6 +205,7 @@ export async function SyncContractor(contractor: ContractorObject) {
 }
 
 function tutorFromContractor(con: ContractorObject): ITutor | null {
+    Log.info(`building new contractor object ${con.id}`);
     try {
         /* eslint-disable @typescript-eslint/no-non-null-assertion */
         const grade = getAttrByMachineName("grade_1",  con.extra_attrs);
@@ -217,6 +227,7 @@ function tutorFromContractor(con: ContractorObject): ITutor | null {
             biasValue = 1;
         }
         // .map(val => {return {...val, qual_level: [val.qual_level]};})
+        Log.info(`returning new contractor object ${con.id}`);
         return {
             first_name: con.user.first_name,
             last_name: con.user.last_name,
@@ -283,6 +294,7 @@ function tutorFromContractor(con: ContractorObject): ITutor | null {
 }
 
 export async function addTutorHours(lesson: ILesson) {
+    Log.info(`adding tutor hours from lesson ${lesson.cruncher_id}`);
     const lock = await getContractorLock(lesson.tutor_id);
     lock.acquire();
     try {
@@ -304,6 +316,7 @@ export async function addTutorHours(lesson: ILesson) {
         }
 
         await tutor.save();
+        Log.info(`sucessfully saved tutor ${tutor.cruncher_id} to database`);
     } catch (e) {
         Log.error(e);
     } finally {
@@ -312,6 +325,7 @@ export async function addTutorHours(lesson: ILesson) {
 }
 
 export async function syncTutorHours(tutor: ITutor): Promise<[Date, number]> {
+    Log.info(`syncing tutor hours for contractor ${tutor.cruncher_id}`);
     // get tutor lessons sorted in ascending order by date completed
     const tutorLessons = await LessonModel.find({tutor_id: tutor?.cruncher_id}, undefined, {sort: {completed_on: 1}}).exec();
     // purge all lessons at beginning of array that are before 30 day cutoff
@@ -332,6 +346,7 @@ export async function syncTutorHours(tutor: ITutor): Promise<[Date, number]> {
 }
 
 function checkBoolExtraAttr(extra_attrs: any, attr: string): boolean | undefined {
+    Log.info(`checking bool extra attr for attr=${attr} and extra attr=${JSON.stringify(extra_attrs)}`);
     const walue = getAttrByMachineName(attr, extra_attrs);
     if(!walue) {
         return undefined;
@@ -341,6 +356,7 @@ function checkBoolExtraAttr(extra_attrs: any, attr: string): boolean | undefined
 
 const paidHoursRE = new RegExp(/^([0-9]+ )?[0-9]{2}:[0-9]{2}:[0-9]{2}$/);
 function convertPaidHours(paidHours: string): number {
+    Log.info(`converting paid hours with paidHours=${paidHours}`);
     if(!paidHours.match(paidHoursRE))
         return 0;
     let hours = 0;

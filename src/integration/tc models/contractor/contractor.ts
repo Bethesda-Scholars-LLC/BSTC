@@ -236,7 +236,7 @@ addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<ContractorObjec
         }
 
         if (Object.values(recruiterIds).includes(referrerId)) {
-            createAdHocCharge({
+            await createAdHocCharge({
                 description: `Thank you for referring ${getUserFullName(contractor.user)} to Bethesda Scholars!`,
                 date_occurred: new Date(Date.now()).toISOString().replace("T", " ").split(".")[0],
                 category: ChargeCat.Referral,
@@ -244,7 +244,7 @@ addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<ContractorObjec
                 pay_contractor: 20.0
             });
         } else {
-            createAdHocCharge({
+            await createAdHocCharge({
                 description: `Thank you for referring ${getUserFullName(contractor.user)} to Bethesda Scholars!`,
                 date_occurred: new Date(Date.now()).toISOString().replace("T", " ").split(".")[0],
                 category: ChargeCat.Referral,
@@ -265,7 +265,7 @@ addTCListener("CREATED_AN_APPOINTMENT", async (event: TCEvent<any>) => {
     }
 
     if (lesson.rcras.length > 0) {
-        moveToMatchedAndBooked(lesson, job);
+        await moveToMatchedAndBooked(lesson, job);
     }
     Log.info("sucessfully executed all tasks for this webhook");
 });
@@ -299,6 +299,5 @@ addTCListener("CONTRACTOR_SIGN_UP", async (event: TCEvent<ContractorObject>) => 
 
     // schedule email here
     await queueEmail(PROD ? day : Duration.second(10), contractorIncompleteMail(contractor));
-    Log.info("sucessfully queued contractor incomplete mail");
     Log.info("sucessfully executed all tasks for this webhook");
 });

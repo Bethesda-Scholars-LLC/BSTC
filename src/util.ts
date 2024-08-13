@@ -32,24 +32,25 @@ export namespace Log {
             }
         }
         warn(message, ...optionalParams);
+        info(message, "ERROR", ...optionalParams);
     };
 
     export const warn = (message?: any, ...optionalParams: any[]) => {
-        log(console.error, message, ...optionalParams);
+        log(console.error, message, "ERROR", ...optionalParams);
     };
 
-    export const info = (message?: any, ...optionalParams: any[]) => {
-        log(console.log, message, ...optionalParams);
+    export const info = (message?: any, level?: string, ...optionalParams: any[]) => {
+        log(console.log, message, level ?? "INFO", ...optionalParams);
     };
 
     export const debug = (message?: any, ...optionalParams: any[]) => {
         if(!PROD)
-            log(console.debug, message, ...optionalParams);
+            log(console.debug, message, "DEBUG", ...optionalParams);
     };
 
-    const log = (func: ((arg1: any, ...arg2: any[]) => void), message: any, ...optionalParams: any[]) => {
+    const log = (func: ((arg1: any, ...arg2: any[]) => void), message: any, level: string, ...optionalParams: any[]) => {
         const dateStr = new Date().toLocaleString("en-US", {timeZone: "America/New_York"}).replace(/\/20[0-9]{2},/g, "").replace(/:[0-9]{2} /, "").toLowerCase();
-        func(`[${dateStr} EST] ${message}`, ...optionalParams);
+        func(`[${dateStr} EST] ${JSON.stringify({level: level, message: message, ...optionalParams})}`);
     };
     /* eslint-enable */
 }

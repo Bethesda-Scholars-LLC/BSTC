@@ -272,7 +272,7 @@ addTCListener("REMOVED_CONTRACTOR_FROM_SERVICE", async (event: TCEvent<JobObject
         return;
     }
 
-    DBJob.save();
+    await DBJob.save();
     Log.info("sucessfully executed all tasks for this webhook");
 });
 
@@ -364,7 +364,7 @@ export const addedContractorToService = async (job: JobObject) => {
  */
 addTCListener("ADDED_CONTRACTOR_TO_SERVICE", async (event: TCEvent<JobObject>) => {
     const job = event.subject;
-    addedContractorToService(job);
+    await addedContractorToService(job);
     Log.info("sucessfully executed all tasks for this webhook");
 });
 
@@ -462,7 +462,7 @@ addTCListener("CHANGED_SERVICE_STATUS", async (event: TCEvent<JobObject>) => {
             // await NotCold.findByIdAndDelete(notCold.id);
             
             
-            updateServiceStatus(job, "in-progress");
+            await updateServiceStatus(job, "in-progress");
         }
     }
     Log.info("sucessfully executed all tasks for this webhook");

@@ -13,20 +13,10 @@ import TutorModel from "./models/tutor";
 import { ManyResponse } from "./types";
 import { Log, PROD, getAttrByMachineName, stallFor } from "./util";
 
-const PAGE_SIZE = 100;
 
 const getContractors = async (page?: number): Promise<ManyResponse<ContractorObject> | null> => {
     try {
         return (await ApiFetcher.sendRequest(`/contractors?page=${page ?? 1}`))?.data;
-    } catch(e) {
-        Log.error(e);
-        return null;
-    }
-};
-
-const getServices = async (page?:number): Promise<JobObject | null> => {
-    try {
-        return (await ApiFetcher.sendRequest(`/services?page=${page ?? 1}`))?.data;
     } catch(e) {
         Log.error(e);
         return null;
