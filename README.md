@@ -56,6 +56,9 @@ PM2 is a command line utility that lets us schedule processes to be restarted wh
 
 ## Documentation
 
+### Manager Transition
+All the steps for transitions between managers can be found here: https://docs.google.com/document/d/1Ho0omnMopqdi1EI6uxW2LRXPn60rhJwCBa2fYh8quQA/edit
+
 ### Clearing DB Collection
 To clear a collection in the `bstc` mongo database:
 1. Open mongo DB compass and open the terminal at the bottom of the app
