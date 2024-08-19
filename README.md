@@ -65,6 +65,12 @@ To clear a collection in the `bstc` mongo database:
 2. run `use bstc`
 3. run `db.not_colds.deleteMany({})` to delete all documents in `not_colds` collection
 
+### Syncing All Contractors with DB
+To sync all contractors from TutorCruncher with MangoDB:
+1. Mark test webhook as active (not webhook active)
+2. start server locally on the test webhook
+3. uncomment line 55 in `syncDB.ts`
+
 ### Adding Environment Variables to EC2 Instance
 Do this before pushing changes using the environment variables to the Github repository
 1. add environment variable to `.env` file locally and to `requiredEnvs` variable in `util.ts` on line 60
