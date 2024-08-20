@@ -159,21 +159,6 @@ export async function SyncContractor(contractor: ContractorObject) {
             return;
         }
 
-        let biasField: string | null = "bias";
-        // on approved
-        if(contractor.status.toLowerCase() !== tutor.status && contractor.status.toLowerCase() === "approved") {
-            tutor.bias = 1;
-            await setTutorBias(contractor, 1);
-            // overwrite bias in case it was set to 0 on frontend
-            biasField = null;
-            tutor.date_approved = new Date();
-        }
-        if(biasField) {
-            if(newTutor!.bias !== tutor.bias) {
-                tutor.bias = newTutor!.bias;
-            }
-        }
-
         // attributes we want to check when tutor updates account
         [
             "first_name",
@@ -189,7 +174,8 @@ export async function SyncContractor(contractor: ContractorObject) {
             "phone_number",
             "skills",
             "gpa",
-            "status"
+            "status",
+            "bias"
         ].forEach((field: string | null) => {
             if(!field)
                 return;
@@ -225,7 +211,7 @@ function tutorFromContractor(con: ContractorObject): ITutor | null {
         }
         let biasValue = parseInt(getAttrByMachineName("bias", con.extra_attrs)?.value);
         if(isNaN(biasValue)) {
-            biasValue = 1;
+            biasValue = 0;
         }
         // .map(val => {return {...val, qual_level: [val.qual_level]};})
         Log.info(`returning new contractor object ${con.id}`);

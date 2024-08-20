@@ -20,6 +20,7 @@ import { PipelineStage, addedContractorToService, getServiceById, onLessonComple
 import { DumbUser } from "../user/types";
 import { getUserFullName } from "../user/user";
 import { ContractorObject, UpdateContractorPayload } from "./types";
+import TutorModel from "../../../models/tutor";
 
 const recruiterIds = {
     evelynGoldin: 2850125
@@ -228,6 +229,15 @@ addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<ContractorObjec
         };
         await updateContractor(toUpdate);
         Log.info(`sucessfully updated contractor ${contractor.id} through API`);
+
+        const tutorDb = await TutorModel.findOne({cruncher_id: contractor.id}).exec();
+        if (!tutorDb) {
+            Log.info(`no contractor ${contractor.id} found in db and date approved not updated`);
+        } else {
+            tutorDb.date_approved = new Date();
+            await tutorDb.save();
+            Log.info(`updated date approved in db for contractor ${contractor.id}`);
+        }
 
         queueEmail(PROD ? Duration.hour(24 * 5) : Duration.second(10), tutorReferralMail(contractor));
 
