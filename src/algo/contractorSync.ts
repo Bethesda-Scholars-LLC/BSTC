@@ -106,7 +106,7 @@ addTCListener("RECOVERED_A_CONTRACTOR", async (ev: TCEvent<ContractorObject>) =>
     Log.info("sucessfully executed all tasks for this webhook");
 });
 
-function updatedContractorFunc(ev: TCEvent<ContractorObject>) {
+async function updatedContractorFunc(ev: TCEvent<ContractorObject>) {
     const contractor = ev.subject;
     Log.info(`updating contractor function for contractor ${contractor.id}`);
     if(!("skills" in contractor)) {
