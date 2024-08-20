@@ -200,6 +200,8 @@ export async function SyncContractor(contractor: ContractorObject) {
         Log.info(`sucessfully saved updated contractor ${tutor.id} in db`);
     } catch (e) {
         Log.error(e);
+    } finally {
+        lock.release();  // Ensure lock is released
     }
     lock.release();
 }

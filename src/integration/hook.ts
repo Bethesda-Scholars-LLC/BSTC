@@ -50,13 +50,15 @@ hookRouter.all("*", (req: Req, res: Res) => {
                 eventName: events[i].action,
                 webhookSignature: req.headers["webhook-signature"],
             }));
-            cbs.forEach(cb => {
+            for (let i = 0; i < cbs.length; i++) {
                 (async () => {
+                    const cb = cbs[i];
+                    Log.info(`Calling callback number ${i} for this webhook`);
                     await cb(events[i]);
                 })().catch(err => {
                     Log.error(err);
                 });
-            });
+            }
         }
     }
     res.status(200).send();
