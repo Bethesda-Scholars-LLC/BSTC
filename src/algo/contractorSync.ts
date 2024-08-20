@@ -203,7 +203,6 @@ export async function SyncContractor(contractor: ContractorObject) {
     } finally {
         lock.release();  // Ensure lock is released
     }
-    lock.release();
 }
 
 function tutorFromContractor(con: ContractorObject): ITutor | null {

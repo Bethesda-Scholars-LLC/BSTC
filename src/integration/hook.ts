@@ -28,7 +28,7 @@ export const addTCListener = (eventNames: string | string[], listener: TCEventLi
     }
 };
 
-hookRouter.all("*", (req: Req, res: Res) => {
+hookRouter.all("*", async (req: Req, res: Res) => {
     if(req.body?.events && req.rawBody){
         const verifyHook = createHmac("sha256", process.env.API_KEY!) // eslint-disable-line
             .update(req.rawBody)
@@ -50,14 +50,14 @@ hookRouter.all("*", (req: Req, res: Res) => {
                 eventName: events[i].action,
                 webhookSignature: req.headers["webhook-signature"],
             }));
-            for (let i = 0; i < cbs.length; i++) {
-                (async () => {
-                    const cb = cbs[i];
-                    Log.info(`Calling callback number ${i} for this webhook`);
+            for (let j = 0; j < cbs.length; j++) {
+                const cb = cbs[j];
+                Log.info(`Calling callback ${j} for this webhook`);
+                try {
                     await cb(events[i]);
-                })().catch(err => {
-                    Log.error(err);
-                });
+                } catch(err) {
+                    Log.error(`Error in callback ${j}: ${err}`);
+                }
             }
         }
     }
