@@ -113,7 +113,7 @@ async function updatedContractorFunc(ev: TCEvent<ContractorObject>) {
         Log.info(`no skills found for contractor ${ev.subject.id}`);
         return;
     }
-    SyncContractor(contractor);
+    await SyncContractor(contractor);
 }
 
 async function getContractorLock(contractor_id: number): Promise<Mutex> {
