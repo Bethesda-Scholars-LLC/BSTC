@@ -252,7 +252,7 @@ addTCListener("REQUESTED_A_SERVICE", async (event: TCEvent<JobObject>) => {
         await setJobRate(client, job, outOfState);
         await updateClient(updatePayload);
     }
-    Log.info("sucessfully executed all tasks for this webhook");
+    Log.info("sucessfully executed all tasks for this callback function");
 });
 
 addTCListener("REMOVED_CONTRACTOR_FROM_SERVICE", async (event: TCEvent<JobObject>) => {
@@ -276,7 +276,7 @@ addTCListener("REMOVED_CONTRACTOR_FROM_SERVICE", async (event: TCEvent<JobObject
     }
 
     await DBJob.save();
-    Log.info("sucessfully executed all tasks for this webhook");
+    Log.info("sucessfully executed all tasks for this callback function");
 });
 
 export const addedContractorToService = async (job: JobObject) => {
@@ -344,7 +344,7 @@ export const addedContractorToService = async (job: JobObject) => {
                         }
                     ).exec();
                     if (!inDB) {
-                        queueEmail(PROD ? day : Duration.second(10), awaitingAvailMail(contractor, client, job));
+                        await queueEmail(PROD ? day : Duration.second(10), awaitingAvailMail(contractor, client, job));
                         Log.info("sucessfully scheduled availability not set mail to expire in one day");
                     }
                 }
@@ -369,7 +369,7 @@ export const addedContractorToService = async (job: JobObject) => {
 addTCListener("ADDED_CONTRACTOR_TO_SERVICE", async (event: TCEvent<JobObject>) => {
     const job = event.subject;
     await addedContractorToService(job);
-    Log.info("sucessfully executed all tasks for this webhook");
+    Log.info("sucessfully executed all tasks for this callback function");
 });
 
 export const onLessonComplete = async (job: JobObject, client_id: number) => {
@@ -394,7 +394,7 @@ export const onLessonComplete = async (job: JobObject, client_id: number) => {
             }
         }
     }
-    Log.info("sucessfully executed all tasks for this webhook");
+    Log.info("sucessfully executed all tasks for this callback function");
 };
 
 addTCListener("ADDED_A_LABEL_TO_A_SERVICE", async (event: TCEvent<JobObject>) => {
@@ -402,7 +402,7 @@ addTCListener("ADDED_A_LABEL_TO_A_SERVICE", async (event: TCEvent<JobObject>) =>
     if (job.rcrs.length > 0) {
         await onLessonComplete(job, job.rcrs[0].paying_client);
     }
-    Log.info("sucessfully executed all tasks for this webhook");
+    Log.info("sucessfully executed all tasks for this callback function");
 });
 
 addTCListener("MARKED_AN_APPOINTMENT_AS_COMPLETE", async (event: TCEvent<LessonObject>) => {
@@ -415,7 +415,7 @@ addTCListener("MARKED_AN_APPOINTMENT_AS_COMPLETE", async (event: TCEvent<LessonO
 
         await onLessonComplete(job, job.rcrs[0].paying_client);
     }
-    Log.info("sucessfully executed all tasks for this webhook");
+    Log.info("sucessfully executed all tasks for this callback function");
 });
 
 addTCListener("APPLIED_FOR_SERVICE", async (event: TCEvent<any>) => {
@@ -425,7 +425,7 @@ addTCListener("APPLIED_FOR_SERVICE", async (event: TCEvent<any>) => {
         return;
 
     // setLookingForJob(contractor, true);
-    Log.info("sucessfully executed all tasks for this webhook");
+    Log.info("sucessfully executed all tasks for this callback function");
     return;
 });
 
@@ -469,5 +469,5 @@ addTCListener("CHANGED_SERVICE_STATUS", async (event: TCEvent<JobObject>) => {
             await updateServiceStatus(job, "in-progress");
         }
     }
-    Log.info("sucessfully executed all tasks for this webhook");
+    Log.info("sucessfully executed all tasks for this callback function");
 });

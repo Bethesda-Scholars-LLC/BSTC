@@ -87,7 +87,8 @@ To view AWS console logs from terminal:
 ### Running Scripts
 1. Turn on the testing hook as active (not webhook active)
 2. write new scripts in `scripts.ts`
-3. call new scripts at bottom of the file in an async function
+3. change `RUN_SCRIPTS` variable to `true` on line 18
+4. call new scripts at bottom of the file in an async function
 
 ### Adding Recruiters
 Currently recruiters are paid $20 for referrals while all other tutors are paid $15. To change this, add recruiters and customize their referral payment in `contractor.ts`:

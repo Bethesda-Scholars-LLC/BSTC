@@ -172,7 +172,7 @@ export const popTutorFromCAs = async (contractor: ContractorObject) => {
             ).exec();
 
             if (!inDBAwaitingBooking)
-                queueEmail(PROD ? Duration.hour(3 * 24) : Duration.second(10), awaitingBookingMail(contractor, client, job));
+                await queueEmail(PROD ? Duration.hour(3 * 24) : Duration.second(10), awaitingBookingMail(contractor, client, job));
 
             const inDBAwaitingAvail = await ScheduleMail.findOne(
                 {
@@ -209,12 +209,12 @@ addTCListener("EDITED_AVAILABILITY", async (event: TCEvent<ContractorObject>) =>
     const contractor = event.subject;
 
     await popTutorFromCAs(contractor);
-    Log.info("sucessfully executed all tasks for this webhook");
+    Log.info("sucessfully executed all tasks for this callback function");
 });
 
 addTCListener("EDITED_A_CONTRACTOR", async (event: TCEvent<ContractorObject>) => {
     await updateContractorDetails(event.subject);
-    Log.info("sucessfully executed all tasks for this webhook");
+    Log.info("sucessfully executed all tasks for this callback function");
 });
 
 const day = Duration.hour(24);
@@ -239,7 +239,7 @@ addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<ContractorObjec
             Log.info(`updated date approved in db for contractor ${contractor.id}`);
         }
 
-        queueEmail(PROD ? Duration.hour(24 * 5) : Duration.second(10), tutorReferralMail(contractor));
+        await queueEmail(PROD ? Duration.hour(24 * 5) : Duration.second(10), tutorReferralMail(contractor));
 
         const referrerId = parseInt(getAttrByMachineName("referral", contractor.extra_attrs)?.value);
         if (!referrerId || isNaN(referrerId) || Object.values(ClientManager).includes(referrerId)) {
@@ -265,7 +265,7 @@ addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<ContractorObjec
             });
         }
     }
-    Log.info("sucessfully executed all tasks for this webhook");
+    Log.info("sucessfully executed all tasks for this callback function");
 });
 
 addTCListener("CREATED_AN_APPOINTMENT", async (event: TCEvent<any>) => {
@@ -279,7 +279,7 @@ addTCListener("CREATED_AN_APPOINTMENT", async (event: TCEvent<any>) => {
     if (lesson.rcras.length > 0) {
         await moveToMatchedAndBooked(lesson, job);
     }
-    Log.info("sucessfully executed all tasks for this webhook");
+    Log.info("sucessfully executed all tasks for this callback function");
 });
 
 addTCListener("CREATED_REPORT", async (event: TCEvent<any>) => {
@@ -291,7 +291,7 @@ addTCListener("CREATED_REPORT", async (event: TCEvent<any>) => {
     }
 
     await onLessonComplete(job, report.client.id);
-    Log.info("sucessfully executed all tasks for this webhook");
+    Log.info("sucessfully executed all tasks for this callback function");
 });
 
 addTCListener("TENDER_WAS_ACCEPTED", async (event: TCEvent<ApplicationObject>) => {
@@ -303,7 +303,7 @@ addTCListener("TENDER_WAS_ACCEPTED", async (event: TCEvent<ApplicationObject>) =
     }
 
     await addedContractorToService(job);
-    Log.info("sucessfully executed all tasks for this webhook");
+    Log.info("sucessfully executed all tasks for this callback function");
 });
 
 addTCListener("CONTRACTOR_SIGN_UP", async (event: TCEvent<ContractorObject>) => {
@@ -311,5 +311,5 @@ addTCListener("CONTRACTOR_SIGN_UP", async (event: TCEvent<ContractorObject>) => 
 
     // schedule email here
     await queueEmail(PROD ? day : Duration.second(10), contractorIncompleteMail(contractor));
-    Log.info("sucessfully executed all tasks for this webhook");
+    Log.info("sucessfully executed all tasks for this callback function");
 });

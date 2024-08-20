@@ -75,7 +75,7 @@ export const queueFirstLessonComplete = async (job: JobObject) => {
     const tutorFirstName = job.conjobs[0].name.split(" ")[0];
     const userEmail = client.user.email;
 
-    queueEmail(PROD ? day : Duration.second(10), {
+    await queueEmail(PROD ? day : Duration.second(10), {
         from: MANAGER_EMAIL_FROM, // eslint-disable-line
         to: PROD ? userEmail : (process.env.TEST_EMAIL_ADDRESS),
         cc: [process.env.BUSINESS_EMAIL_ADDRESS!, process.env.MANAGER_EMAIL_ADDRESS!],

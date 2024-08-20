@@ -10,16 +10,30 @@ import clientMatchedMail from "./mail/clientMatched";
 import { transporterPascal } from "./mail/mail";
 import { tutorReferralMail } from "./mail/tutorReferral";
 import TutorModel from "./models/tutor";
-import { ManyResponse } from "./types";
+import { ManyResponse, TCEvent } from "./types";
 import { Log, PROD, getAttrByMachineName, stallFor } from "./util";
+import { SyncContractor, addTutorHours } from "./algo/contractorSync";
+import { LessonObject } from "./integration/tc models/lesson/types";
+import LessonModel from "./models/lesson";
+import { getLesson } from "./algo/lessonSync";
 
 const SKIP_SERVICES = [1017486, 1015613, 1012669, 1012879, 1013245, 1016810, 1018292, 1018293, 990253, 971344, 1016014, 980516, 997913, 1005419, 1007580, 1009557];
 const SKIP_CONTRACTORS: number[] = [];
+const RUN_SCRIPTS = false;
 
 const getContractors = async (page?: number): Promise<ManyResponse<ContractorObject> | null> => {
     try {
         return (await ApiFetcher.sendRequest(`/contractors?page=${page ?? 1}`))?.data;
     } catch(e) {
+        Log.error(e);
+        return null;
+    }
+};
+
+const getManyLessons = async (page?: number): Promise<ManyResponse<LessonObject> | null> => {
+    try {
+        return (await ApiFetcher.sendRequest(`/appointments?page=${Math.max(page ?? 1, 1)}`))?.data as ManyResponse<LessonObject>;
+    } catch (e) {
         Log.error(e);
         return null;
     }
@@ -94,6 +108,25 @@ const _testClientMatchedMail = async () => {
     });
 };
 
+const _syncLesson = async (ev: TCEvent<LessonObject>) => {
+    const lesson = ev.subject;
+    const dbLessons = await LessonModel.find({cruncher_id: lesson.id}).exec();
+    Log.info(`successfully retrieved lesson object from DB ${lesson.id}`);
+    const localLessons = getLesson(lesson);
+    if(dbLessons.length > 0) {
+        Log.info("lesson already exists in db");
+        return;
+    }
+
+    for(let i = 0; i < localLessons.length; i++) {
+        await LessonModel.create(localLessons[i]);
+        Log.info("sucessfully created local lesson");
+        await addTutorHours(localLessons[i]);
+        Log.info("sucessfully added to tutor hours");
+    }
+    Log.info("sucessfully executed all tasks for this callback function");
+};
+
 const _changeDefaultServiceRate = async () => {
     for(let i = 1; ; i++){
         const services = (await getManyServices(i));
@@ -127,39 +160,6 @@ const _changeDefaultServiceRate = async () => {
     
 };
 
-const _syncDB = async () => {
-    const allTutors = await TutorModel.find({}).exec();
-    for(let i = 0; i < allTutors.length; i++) {
-        const tutor = allTutors[i];
-        const contractor = await getContractorById(tutor.cruncher_id);
-        if(!contractor){
-            Log.debug(`invalid contractor id: ${tutor.cruncher_id}, name: ${tutor.first_name} ${tutor.last_name}`);
-            continue;
-        }
-        Log.debug(`Syncing ${getUserFullName(contractor.user)}`);
-
-        tutor.bias = parseFloat(getAttrByMachineName("bias", contractor.extra_attrs)?.value);
-        tutor.status = contractor.status;
-        tutor.stars = getAttrByMachineName("rating", contractor.extra_attrs)?.value.split("/")[0],
-        await tutor.save();
-    }
-};
-
-const _syncBias = async () => {
-    const allTutors = await TutorModel.find({}).exec();
-    for(let i = 0; i < allTutors.length; i++) {
-        const tutor = allTutors[i];
-        const contractor = await getContractorById(tutor.cruncher_id);
-        if(!contractor){
-            Log.debug(`invalid contractor id: ${tutor.cruncher_id}, name: ${tutor.first_name} ${tutor.last_name}`);
-            continue;
-        }
-        Log.debug(`Syncing ${getUserFullName(contractor.user)} bias`);
-
-        await setTutorBias(contractor, tutor.bias as 0 | 1);
-
-    }
-};
 
 const doSomethingAllContractors = async (action: (contractor: ContractorObject) => Promise<void>) => {
     for (let i = 1; ; i++) {
@@ -171,9 +171,9 @@ const doSomethingAllContractors = async (action: (contractor: ContractorObject) 
             Log.debug(`Contractor ${100 * (i - 1) + j}`);
             if (SKIP_CONTRACTORS.includes(allContractors.results[j].id))
                 continue;
-            // const contractor = await getContractorById(allContractors.results[j].id);
-            // if (contractor)
-            //     await action(contractor);
+            const contractor = await getContractorById(allContractors.results[j].id);
+            if (contractor)
+                await action(contractor);
         }
         if(!allContractors.next)
             break;
@@ -198,16 +198,39 @@ const doSomethingAllContractors = async (action: (contractor: ContractorObject) 
     }
   };
 
+  const doSomethingAllLessons = async (action: (service: LessonObject) => Promise<void>) => {
+
+    for(let i = 1; ; i++){
+        const lessons = (await getManyLessons(i));
+        if(!lessons)
+            return;
+        Log.debug(`Lessons Page ${i}`);
+        for(let j = 0; j < lessons.results.length; j++) {
+            Log.debug(`Service ${100 * (i - 1) + j}`);
+            await action(lessons.results[j]);
+        }
+        if(!lessons.next)
+            break;
+    }
+  };
+
 // Uncomment lines below to run the script
 if (!PROD) {
-    Log.debug("Running scripts.ts");
-    doSomethingAllContractors(async (c: ContractorObject) => {
-        // await _setContractFilledOutToFalse(c);
-        // await _sendReferrals(c);
-        // await _setContractorStatusToDormant(c);
-    })
-        .catch(Log.error)
-        .finally(() => doSomethingAllServices(async (j: DumbJob) => {
-            // await _updateAllJobsToFinished(j);
-        }).catch(Log.error));
+    if (RUN_SCRIPTS) {
+        Log.debug("Running scripts.ts");
+        doSomethingAllContractors(async (c: ContractorObject) => {
+            // await _setContractFilledOutToFalse(c);
+            // await _sendReferrals(c);
+            // await _setContractorStatusToDormant(c);
+            // await SyncContractor(c);
+        }).catch(Log.error);
+        
+        // doSomethingAllServices(async (j: DumbJob) => {
+        //     await _updateAllJobsToFinished(j);
+        // }).catch(Log.error);
+
+        // doSomethingAllLessons(async (l: LessonObject) => {
+        //     await _syncLesson(l);
+        // });
+    }
 }

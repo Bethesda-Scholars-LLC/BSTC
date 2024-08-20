@@ -127,23 +127,25 @@ export const updateStatusJob = async (job: MapJob) => {
 };
 
 
-const syncStatusMap = async () => {
+export const syncStatusMap = async () => {
     Log.info("syncing status map");
     const twoMonthsAgo = new Date(new Date().getTime() - Duration.hour(24 * 7 * 4 * 2).milliseconds).toISOString();
 
     // loop through each page
     for(let page = 1; ; page++) {
+        Log.debug(`Syncing status map page ${page}`);
         const currResp: ManyResponse<DumbJob> = (await ApiFetcher.sendRequest(`/services?last_updated_gte=${twoMonthsAgo}&page=${page}`)).data;
 
-        for(let i = 0; i < currResp.results.length; i++)
+        for(let i = 0; i < currResp.results.length; i++) {
+            Log.debug(`Syncing job ${(page - 1) * 100 + i}`);
             await updateStatusJob(currResp.results[i]);
+        }
 
         if(currResp.next === null)
             break;
     }
 };
 
-syncStatusMap();
 
 addTCListener(["CREATED_A_SERVICE", "CHANGED_SERVICE_STATUS", "REQUESTED_A_SERVICE"], async (ev: TCEvent<JobObject>) => {
     const service = ev.subject;

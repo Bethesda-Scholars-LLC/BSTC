@@ -75,7 +75,7 @@ addTCListener("DELETED_A_CONTRACTOR", async (ev: TCEvent<ContractorObject>) => {
     } finally {
         lock.release();
     }
-    Log.info("sucessfully executed all tasks for this webhook");
+    Log.info("sucessfully executed all tasks for this callback function");
 });
 
 addTCListener("RECOVERED_A_CONTRACTOR", async (ev: TCEvent<ContractorObject>) => {
@@ -103,7 +103,7 @@ addTCListener("RECOVERED_A_CONTRACTOR", async (ev: TCEvent<ContractorObject>) =>
     } finally {
         lock.release();
     }
-    Log.info("sucessfully executed all tasks for this webhook");
+    Log.info("sucessfully executed all tasks for this callback function");
 });
 
 async function updatedContractorFunc(ev: TCEvent<ContractorObject>) {

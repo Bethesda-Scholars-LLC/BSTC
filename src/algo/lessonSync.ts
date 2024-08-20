@@ -12,7 +12,7 @@ addTCListener("MARKED_AN_APPOINTMENT_AS_COMPLETE", async (ev: TCEvent<LessonObje
     Log.info(`successfully retrieved lesson object from DB ${lesson.id}`);
     const localLessons = getLesson(lesson);
     if(dbLessons.length > 0) {
-        Log.info("db lesson has length 0");
+        Log.info("lesson already exists in db");
         return;
     }
 
@@ -22,10 +22,10 @@ addTCListener("MARKED_AN_APPOINTMENT_AS_COMPLETE", async (ev: TCEvent<LessonObje
         await addTutorHours(localLessons[i]);
         Log.info("sucessfully added to tutor hours");
     }
-    Log.info("sucessfully executed all tasks for this webhook");
+    Log.info("sucessfully executed all tasks for this callback function");
 });
 
-function getLesson(lesson: LessonObject): ILesson[] {
+export function getLesson(lesson: LessonObject): ILesson[] {
     const completedOn = new Date();
     return lesson.cjas.map(val => {
         return {
