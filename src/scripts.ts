@@ -13,6 +13,8 @@ import TutorModel from "./models/tutor";
 import { ManyResponse } from "./types";
 import { Log, PROD, getAttrByMachineName, stallFor } from "./util";
 
+const SKIP_SERVICES = [1017486, 1015613, 1012669, 1012879, 1013245, 1016810, 1018292, 1018293, 990253, 971344, 1016014, 980516, 997913, 1005419, 1007580, 1009557];
+const SKIP_CONTRACTORS: number[] = [];
 
 const getContractors = async (page?: number): Promise<ManyResponse<ContractorObject> | null> => {
     try {
@@ -40,13 +42,10 @@ const _setContractFilledOutToFalse = async (contractor: ContractorObject) => {
 const _setContractorStatusToDormant = async (contractor: ContractorObject) => {
     try {
         Log.debug(`checking ${contractor.user.first_name} ${contractor.user.last_name} contract filled out`);
-
-        // this should be the function that each contractor
         if(contractor.status === "approved" && getAttrByMachineName("contract_filled_out", contractor.extra_attrs)?.value === "False") {
             const defaultTutor = getMinimumContractorUpdate(contractor);
             defaultTutor.status = "dormant";
             await updateContractor(defaultTutor);
-            Log.debug("updated " + contractor.user.first_name + " " + contractor.user.last_name + " status to dormant");
         }
     } catch (error) {
         Log.error("Error: ", error);
@@ -75,7 +74,6 @@ const _updateAllJobsToFinished = async (job: DumbJob) => {
 
         if(job.status === "gone-cold" || job.status === "in-progress" || job.status === "pending") {
             await updateServiceStatus(job, "finished");
-            Log.debug("updated job " + job.id + " status to finished");
         }
     } catch (error) {
         Log.error("Error: ", error);
@@ -168,9 +166,14 @@ const doSomethingAllContractors = async (action: (contractor: ContractorObject) 
         const allContractors = await getContractors(i);
         if(!allContractors)
             return;
-        Log.debug(`Page ${i}`);
+        Log.debug(`Contractors Page ${i}`);
         for(let j = 0; j < allContractors.results.length; j++) {
-            await action(allContractors.results[j]);
+            Log.debug(`Contractor ${100 * (i - 1) + j}`);
+            if (SKIP_CONTRACTORS.includes(allContractors.results[j].id))
+                continue;
+            // const contractor = await getContractorById(allContractors.results[j].id);
+            // if (contractor)
+            //     await action(contractor);
         }
         if(!allContractors.next)
             break;
@@ -183,8 +186,11 @@ const doSomethingAllContractors = async (action: (contractor: ContractorObject) 
         const services = (await getManyServices(i));
         if(!services)
             return;
-        Log.debug(`Page ${i}`);
+        Log.debug(`Services Page ${i}`);
         for(let j = 0; j < services.results.length; j++) {
+            Log.debug(`Service ${100 * (i - 1) + j}`);
+            if (SKIP_SERVICES.includes(services.results[j].id))
+                continue;
             await action(services.results[j]);
         }
         if(!services.next)
