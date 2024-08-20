@@ -38,7 +38,7 @@ const ReferralEmail = (props: {contractor: ContractorObject}) => {
                 We will add <b>$15</b> to your monthly pay--see criteria below.
             </li>
         </ol>
-        <b>To recieve your referral payment, the tutor you refer us must:</b>
+        <b>To receive your referral payment, the tutor you refer us must:</b>
         <ol style={mediumIndent}>
             <li>
                 Pass our screening process.
