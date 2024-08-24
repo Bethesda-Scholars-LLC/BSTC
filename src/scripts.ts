@@ -11,7 +11,7 @@ import { transporterPascal } from "./mail/mail";
 import { tutorReferralMail } from "./mail/tutorReferral";
 import TutorModel from "./models/tutor";
 import { ManyResponse, TCEvent } from "./types";
-import { Log, PROD, getAttrByMachineName, stallFor } from "./util";
+import { Log, PROD, RUN_SCRIPTS, getAttrByMachineName, stallFor } from "./util";
 import { SyncContractor, addTutorHours } from "./algo/contractorSync";
 import { LessonObject } from "./integration/tc models/lesson/types";
 import LessonModel from "./models/lesson";
@@ -19,7 +19,6 @@ import { getLesson } from "./algo/lessonSync";
 
 const SKIP_SERVICES = [1017486, 1015613, 1012669, 1012879, 1013245, 1016810, 1018292, 1018293, 990253, 971344, 1016014, 980516, 997913, 1005419, 1007580, 1009557];
 const SKIP_CONTRACTORS: number[] = [];
-const RUN_SCRIPTS = false;
 
 const getContractors = async (page?: number): Promise<ManyResponse<ContractorObject> | null> => {
     try {

@@ -8,6 +8,7 @@ import { ExtraAttr } from "./types";
 dotenv.config();
 
 export const ON_ERROR: string[] = process.env.ON_ERROR?.split(",")??[process.env.PERSONAL_EMAIL_ADDRESS!];
+export const RUN_SCRIPTS = false;
 
 export namespace Log {
     let transporter: nodemailer.Transporter<SMTPTransport.SentMessageInfo> | null = null;
@@ -112,6 +113,8 @@ function getDbUri(): string {
         return process.env.DB_NAME!;
     if(process.env.NODE_ENV === "testing")
         return process.env.DB_TEST_NAME!;
+    if(RUN_SCRIPTS)
+        return process.env.DB_NAME!;
     return process.env.DB_DEV_NAME!;
     /* eslint-enable */
 }

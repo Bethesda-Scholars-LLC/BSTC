@@ -134,6 +134,7 @@ const filterTutor = (jobInfo: JobInfo, location: "virtual" | "in-person" | "both
     i++;
     if(filters.only_college && (tutor?.grade ?? 12) < 13)
         return i;
-
+    if (tutor.hours_valid_until && new Date().getTime() > tutor.hours_valid_until.getTime())
+        return {...tutor, recent_hours: 0, estimated_distance: dist};
     return {...tutor, estimated_distance: dist};
 };

@@ -10,14 +10,13 @@ import "./integration/tc models/service/service";
 import "./mail/mail";
 import "./scripts";
 import { Req } from "./types";
-import { DB_URI, Log, PROD, TEST } from "./util";
+import { DB_URI, Log, PROD, RUN_SCRIPTS, TEST } from "./util";
 import { syncStatusMap } from "./api/status_track";
 
 const main = async () => {
-
     try {
         await mongoose.connect(DB_URI).then(() => {
-            Log.debug(`Connected to ${(PROD ? process.env.DB_NAME : process.env.DB_DEV_NAME)}`);
+            Log.debug(`Connected to ${(PROD || RUN_SCRIPTS ? process.env.DB_NAME : process.env.DB_DEV_NAME)}`);
         }).catch(Log.error);
 
         const app = express();
