@@ -149,6 +149,16 @@ const setDftLocation = (job: JobObject): UpdateServicePayload => {
 };
 
 /**
+ * @param {string} allSubjects all subjects listed in the job description
+ * @param {string} subject subject to check if in string
+ * @returns {boolean}
+ * TODO: check if the given subject is listed in the list of subjects
+ */
+const checkSubject = (allSubjects: string, subject: string) => {
+    return (allSubjects.indexOf(subject) === 0 || (allSubjects.indexOf(subject) >= 1 && subject.charAt(subject.indexOf(subject) - 1) === " "));
+};
+
+/**
  * @param {ClientObject} client client who's child is getting tutored
  * @param {JobObject} job job object
  * @param {boolean} milesFound if client is in connecticut
@@ -160,16 +170,14 @@ export const setJobRate = async (client: ClientObject, job: JobObject, outOfStat
     const studentGrade = getAttrByMachineName("student_grade", client.extra_attrs);
     const location = getAttrByMachineName("lesson_location", client.extra_attrs);
     const subject = getAttrByMachineName("subjects", client.extra_attrs)?.value.toLowerCase();
-    const apPrecalc = ((subject.indexOf("ap") === 0 ||
-                        (subject.indexOf("ap") >= 1 && subject.charAt(subject.indexOf("ap") - 1) === " ")) ||
-                        subject.includes("prec") ||
-                        subject.includes("pre c") ||
-                        subject.includes("pre-c") ||
-                        subject.includes("calc") ||
-                        (subject.indexOf("ib") === 0 ||
-                        (subject.indexOf("ib") >= 1 && subject.charAt(subject.indexOf("ib") - 1) === " ")));
-    const satACT = (subject.includes("sat") ||
-                    subject.includes("act"));
+    const apPrecalcIB = (checkSubject(subject, "ap") ||
+                       checkSubject(subject, "precalc") ||
+                       checkSubject(subject, "pre calc") ||
+                       checkSubject(subject, "pre-calc") ||
+                       checkSubject(subject, "calc") ||
+                       checkSubject(subject, "prec") ||
+                       checkSubject(subject, "ib"));
+    const satACT = (checkSubject(subject, "sat") || checkSubject(subject, "act"));
     
     let chargeRate = 40;
     let payRate = 25;
@@ -180,7 +188,7 @@ export const setJobRate = async (client: ClientObject, job: JobObject, outOfStat
         chargeRate += 5;
     if (outOfState)
         chargeRate += 10;
-    if (apPrecalc && !satACT) {
+    if (apPrecalcIB && !satACT) {
         chargeRate += 5;
     } else if (satACT) {
         chargeRate += 15;
