@@ -69,7 +69,8 @@ To clear a collection in the `bstc` mongo database:
 To sync all contractors from TutorCruncher with MangoDB:
 1. Mark test webhook as active (not webhook active)
 2. start server locally on the test webhook
-3. uncomment line 55 in `syncDB.ts`
+3. change `RUN_SCRIPTS` variable to `true` on line 11 in `utils.ts`
+5. uncomment line 55 in `syncDB.ts`
 
 ### Adding Environment Variables to EC2 Instance
 Do this before pushing changes using the environment variables to the Github repository
@@ -85,9 +86,10 @@ To view AWS console logs from terminal:
 3. `sudo cat` followed by terminal output for console out or error
 
 ### Running Scripts
+Important Note: Scripts will run on the production db, not dev db
 1. Turn on the testing hook as active (not webhook active)
 2. write new scripts in `scripts.ts`
-3. change `RUN_SCRIPTS` variable to `true` on line 18
+3. change `RUN_SCRIPTS` variable to `true` on line 11 in `utils.ts`
 4. call new scripts at bottom of the file in an async function
 
 ### Adding Recruiters
