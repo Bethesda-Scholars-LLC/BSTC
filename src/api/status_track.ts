@@ -112,10 +112,10 @@ export const updateStatusJob = async (job: MapJob) => {
         }
 
         if(isFullJob(job) && (!job.details || job.details.student_name === "No Students")) {
-            const inPerson = job.dft_location?.id === SessionLocation.InPerson || job?.description?.toLowerCase()
+            const inPerson = job.dft_location?.id === SessionLocation.InPerson || (job.description && job.description.toLowerCase()
                 .split("lesson location:**\n")[1]
                 .split("\n**")[0]
-                .trim().includes("in-person");
+                .trim().includes("in-person"));
             job.details = {
                 student_name: job.rcrs[0]?.recipient_name??"No Students",
                 grade: extractFieldFromJob(job, "student grade"),
