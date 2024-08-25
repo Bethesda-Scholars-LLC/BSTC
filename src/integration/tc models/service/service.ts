@@ -1,6 +1,6 @@
 import { Duration } from "ts-duration";
 import ApiFetcher from "../../../api/fetch";
-import { updateStatusJob } from "../../../api/status_track";
+import { removeStatusJob, updateStatusJob } from "../../../api/status_track";
 import { getStateByZipCode } from "../../../geo";
 import { awaitingAvailMail } from "../../../mail/awaitingAvail";
 import { queueFirstLessonComplete } from "../../../mail/firstLesson";
@@ -213,6 +213,18 @@ export const checkOutOfState = (client: ClientObject) => {
     const state = (getStateByZipCode(clientZip)?.code??"MD").toLowerCase();
     return !(["md", "dc", "va"].includes(state));
 };
+
+addTCListener(["CREATED_A_SERVICE", "CHANGED_SERVICE_STATUS", "REQUESTED_A_SERVICE"], async (ev: TCEvent<JobObject>) => {
+    const service = ev.subject;
+    await updateStatusJob(service);
+    Log.info("updated job status");
+});
+
+addTCListener("DELETED_A_SERVICE", async (ev: TCEvent<JobObject>) => {
+    const service = ev.subject;
+    removeStatusJob(service);
+    Log.info("updated job status");
+});
 
 /**
  * @description update job name to only include first name and last initial
