@@ -214,18 +214,6 @@ export const checkOutOfState = (client: ClientObject) => {
     return !(["md", "dc", "va"].includes(state));
 };
 
-addTCListener(["CREATED_A_SERVICE", "CHANGED_SERVICE_STATUS", "REQUESTED_A_SERVICE"], async (ev: TCEvent<JobObject>) => {
-    const service = ev.subject;
-    await updateStatusJob(service);
-    Log.info("updated job status");
-});
-
-addTCListener("DELETED_A_SERVICE", async (ev: TCEvent<JobObject>) => {
-    const service = ev.subject;
-    removeStatusJob(service);
-    Log.info("updated job status");
-});
-
 /**
  * @description update job name to only include first name and last initial
  */
@@ -273,6 +261,18 @@ addTCListener("REQUESTED_A_SERVICE", async (event: TCEvent<JobObject>) => {
         await updateClient(updatePayload);
     }
     Log.info("sucessfully executed all tasks for this callback function");
+});
+
+addTCListener(["CREATED_A_SERVICE", "CHANGED_SERVICE_STATUS", "REQUESTED_A_SERVICE"], async (ev: TCEvent<JobObject>) => {
+    const service = ev.subject;
+    await updateStatusJob(service);
+    Log.info("updated job status");
+});
+
+addTCListener("DELETED_A_SERVICE", async (ev: TCEvent<JobObject>) => {
+    const service = ev.subject;
+    removeStatusJob(service);
+    Log.info("updated job status");
 });
 
 addTCListener("REMOVED_CONTRACTOR_FROM_SERVICE", async (event: TCEvent<JobObject>) => {
