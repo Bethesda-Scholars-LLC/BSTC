@@ -133,12 +133,15 @@ const fixJobName = (job: JobObject): JobObject | null => {
     return job;
 };
 
-const setDftLocation = (job: JobObject): UpdateServicePayload => {
+export const setDftLocation = (job: JobObject): UpdateServicePayload => {
     Log.info(`setting default location ${job.id}`);
-    const jobLocation = job.description.toLowerCase()
-        .split("lesson location:**\n")[1]
-        .split("\n**")[0]
-        .trim();
+    let jobLocation = "";
+    if (job.description.toLowerCase().includes("lesson location:**")) {
+        jobLocation = job.description.toLowerCase()
+            .split("lesson location:**")[1]
+            .split("\n**")[0]
+            .trim();
+    }
 
     const oldJob = getMinimumJobUpdate(job);
 

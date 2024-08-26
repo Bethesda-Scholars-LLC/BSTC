@@ -1,7 +1,7 @@
 import { Duration } from "ts-duration";
 import { extractFieldFromJob } from "../algo/algo";
 import { addTCListener } from "../integration/hook";
-import { SessionLocation, getServiceById } from "../integration/tc models/service/service";
+import { SessionLocation, getServiceById, setDftLocation } from "../integration/tc models/service/service";
 import { DumbJob, JobObject } from "../integration/tc models/service/types";
 import { ManyResponse, Req, Res, TCEvent } from "../types";
 import ApiFetcher from "./fetch";
@@ -112,7 +112,19 @@ export const updateStatusJob = async (job: MapJob) => {
         }
 
         if(isFullJob(job) && (!job.details || job.details.student_name === "No Students")) {
-            const inPerson = checkInPerson(job);
+            if (!job.dft_location) {
+               job.dft_location = {
+                    id: setDftLocation(job).dft_location ?? 0,
+                    name: "",
+                    description: "",
+                    can_conflict: false,
+                    role: 0,
+                    latitude: "",
+                    longitude: "",
+                    address: ""
+                };
+            }
+            const inPerson = job.dft_location.id === SessionLocation.InPerson;
             job.details = {
                 student_name: job.rcrs[0]?.recipient_name??"No Students",
                 grade: extractFieldFromJob(job, "student grade"),
@@ -124,15 +136,6 @@ export const updateStatusJob = async (job: MapJob) => {
     }
     
     statusMap[job.status][job.id] = job;
-};
-
-const checkInPerson = (job: JobObject) => {
-    return (job.dft_location?.id === SessionLocation.InPerson ||
-            (job.description && job.description.includes("lesson location**") && job.description.toLowerCase()
-                .split("lesson location:**")[1]
-                .split("\n**")[0]
-                .trim()
-                .includes("in-person")));
 };
 
 export const syncStatusMap = async () => {
