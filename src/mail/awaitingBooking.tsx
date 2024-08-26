@@ -19,7 +19,7 @@ export const awaitingBookingMail = (contractor: ContractorObject, client: Client
         contractor_id: contractor.id,
         contractor_name: getUserFirstName(contractor.user),
         job_id: job.id,
-        subject: "Booking a Lesson",
+        subject: `Booking a Lesson with ${getUserFirstName(contractor.user)}`,
         html: ReactDOMServer.renderToString(<AwaitingBooking contractor={contractor} client={client} job={job}/>)
     };
 };
