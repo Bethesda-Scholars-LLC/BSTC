@@ -222,12 +222,7 @@ addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<ContractorObjec
     const contractor = event.subject;
 
     if (contractor.status === "approved") {
-        const toUpdate = getNewContractorDetails(contractor);
-        toUpdate.extra_attrs = {
-            ...toUpdate.extra_attrs,
-            bais: "1"
-        };
-        await updateContractor(toUpdate);
+        await setTutorBias(contractor, 1);
         Log.info(`sucessfully updated contractor ${contractor.id} through API`);
 
         const tutorDb = await TutorModel.findOne({cruncher_id: contractor.id}).exec();
