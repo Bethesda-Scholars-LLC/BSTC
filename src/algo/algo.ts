@@ -55,7 +55,7 @@ export const extractFieldFromJob = (job: JobObject, fields: string | string[]): 
 export const getJobInfo = async (job: JobObject): Promise<JobInfo> => {
     const location = extractFieldFromJob(job, "lesson location")?.toLocaleLowerCase();
     const address = extractFieldFromJob(job, "home address") ?? extractFieldFromJob(job, "Home address (if in person lessons)")!;
-    const zipCode = extractFieldFromJob(job, "zip code");
+    const zipCode = extractFieldFromJob(job, "zip_code");
     const isOnline = location === "either" ? true : location !== "in-person lessons at my house";
 
     return {
