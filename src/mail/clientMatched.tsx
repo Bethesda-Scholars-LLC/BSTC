@@ -6,7 +6,7 @@ import { ClientObject } from "../integration/tc models/client/types";
 import { cleanPhoneNumber, getUserFirstName, getUserFullName } from "../integration/tc models/user/user";
 import { JobObject } from "../integration/tc models/service/types";
 import { getTutorPronouns } from "./firstLesson";
-import { capitalize, getAttrByMachineName, calcStripeFee, PROD, BUSINESS_EMAIL_FROM } from "../util";
+import { capitalize, getAttrByMachineName, calcStripeFee, PROD, BUSINESS_EMAIL_FROM, Log } from "../util";
 
 export const clientMatchedMail = (tutor: ContractorObject, client: ClientObject, job: JobObject): MailOptions => {
     return {
@@ -18,6 +18,16 @@ export const clientMatchedMail = (tutor: ContractorObject, client: ClientObject,
     };
 };
 
+const getSubjectFromJob = (job: JobObject) => {
+    Log.info(`Getting subject from job ${job.id}`);
+    const subjectArr = job.description.split("Classes needed tutoring in:**\n");
+    if (subjectArr.length <= 1){
+        Log.info(`No subject associated with job ${job.id}`);
+        return null;
+    }
+    return subjectArr[1].split("\n**")[0].trim();
+};
+
 const ClientMatched = (props: {tutor: ContractorObject, client: ClientObject, job: JobObject}) => {
     const tutorPronouns = getTutorPronouns(props.tutor);
     const tutorName = getUserFirstName(props.tutor.user);
@@ -25,6 +35,7 @@ const ClientMatched = (props: {tutor: ContractorObject, client: ClientObject, jo
     const tutorGrade = getAttrByMachineName("grade_1", props.tutor.extra_attrs)?.value;
     const tutorSchool = getAttrByMachineName("school_1", props.tutor.extra_attrs)?.value;
     const stripeFee = calcStripeFee(props.job.dft_charge_rate);
+    const subjects = getSubjectFromJob(props.job);
     return <p style={{margin: "0"}}>
         Hi {getUserFirstName(props.client.user)},
         <br/>
@@ -36,6 +47,7 @@ const ClientMatched = (props: {tutor: ContractorObject, client: ClientObject, jo
             {tutorSchool && <li><b>Tutor School: </b>{tutorSchool}</li>}
             {props.tutor.user.mobile && <li><b>Phone Number: </b>{cleanPhoneNumber(props.tutor.user.mobile)}</li>}
             {props.tutor.user.email && <li><b>Email: </b>{props.tutor.user.email}</li>}
+            {subjects && <li><b>Subjects: </b>{subjects}</li>}
         </ul>
         {props.job.dft_location && <>
             Lessons will be {props.job.dft_location?.name}.
