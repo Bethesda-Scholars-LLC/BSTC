@@ -184,7 +184,6 @@ export const setJobRate = async (client: ClientObject, job: JobObject, outOfStat
                        checkSubject(subject, "prec") ||
                        checkSubject(subject, "ib"));
     const satACT = (checkSubject(subject, "sat") || checkSubject(subject, "act"));
-    Log.debug(satACT);
     let chargeRate = 40;
     let payRate = 25;
 
@@ -209,15 +208,12 @@ export const setJobRate = async (client: ClientObject, job: JobObject, outOfStat
     const jobUpdate = getMinimumJobUpdate(job);
     jobUpdate.dft_charge_rate = chargeRate;
     jobUpdate.dft_contractor_rate = payRate;
-    Log.debug(jobUpdate.dft_charge_rate);
-    Log.debug(jobUpdate.dft_contractor_rate);
-    // await updateServiceById(job.id, jobUpdate);
+    await updateServiceById(job.id, jobUpdate);
 };
 
 export const checkOutOfState = (client: ClientObject) => {
     Log.info(`checking out of state ${client.id}`);
     const clientZip = parseInt((getAttrByMachineName("zip_code", client.extra_attrs)?.value)??"");
-    Log.debug(clientZip);
     const state = (getStateByZipCode(clientZip)?.code??"MD").toLowerCase();
     return !(["md", "dc", "va"].includes(state));
 };
