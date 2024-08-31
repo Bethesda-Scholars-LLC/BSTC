@@ -20,7 +20,7 @@ export const clientMatchedMail = (tutor: ContractorObject, client: ClientObject,
 
 const getSubjectFromJob = (job: JobObject) => {
     Log.info(`Getting subject from job ${job.id}`);
-    const subjectArr = job.description.split("Classes needed tutoring in:**\n");
+    const subjectArr = job.description.split("Classes needed tutoring in:**");
     if (subjectArr.length <= 1){
         Log.info(`No subject associated with job ${job.id}`);
         return null;
