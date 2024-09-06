@@ -144,11 +144,10 @@ const handleDormantClient = async (client: ClientObject, job: JobObject) => {
     const grade = getAttrByMachineName("student_grade", client.extra_attrs)?.value;
     const freq = getAttrByMachineName("weekly_lessons", client.extra_attrs)?.value;
     const subjects = getAttrByMachineName("subjects", client.extra_attrs)?.value;
-    const location = "Virtual lessons over Zoom";
-    // const location = getAttrByMachineName("lesson_location", client.extra_attrs)?.value;
+    const location = getAttrByMachineName("lesson_location", client.extra_attrs)?.value;
 
     // if it's set to in person, default location is in person, otherwise it's online
-    oldJob.dft_location = SessionLocation.Online;
+    oldJob.dft_location = location && location.includes("in-person") ? SessionLocation.InPerson : SessionLocation.Online;
     oldJob.description = `Job created while booking a lesson through TutorCruncher\n\n**Home address (if in person lessons):**\n${address}\n\n**School full name:**\n${school}\n\n**Student grade:**\n${grade}\n\n**Lesson frequency:**\n${freq}\n\n**Classes needed tutoring in:**\n${subjects}\n\n**Lesson location:**\n${location}\n\n`;
 
     await updateServiceById(job.id, oldJob);
