@@ -18,12 +18,13 @@ export const FirstLesson = (props: { job: JobObject, tutor: ContractorObject, cl
     const tutorEmailAddress = props.tutor.user.email;
     const userFirstName = getUserFirstName(props.client.user);
     const pronouns = getTutorPronouns(props.tutor);
+    const studentName = props.job.rcrs[0]?.recipient_name.split(" ")[0] ?? "your child";
 
     return <p style={{ margin: 0 }}>
         Hi {userFirstName},
         <br />
         <br />
-        Just wanted to check in on the lesson with {tutorFirstName} - how did it go? Would you like to continue lessons with {pronouns.pronouns[1]}?
+        Just wanted to check in on the lesson with {tutorFirstName} - how did it go? Would {studentName} like to continue lessons with {pronouns.pronouns[1]}?
         {(tutorPhoneNumber || tutorEmailAddress) && <>
             <br />
             <br />
