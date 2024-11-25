@@ -48,7 +48,6 @@ export const extractFieldFromJob = (job: JobObject, fields: string | string[]): 
         if(ind !== -1)
             return splBio[ind+1].trim();
     }
-
     return undefined;
 };
 
