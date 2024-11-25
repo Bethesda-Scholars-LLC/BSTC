@@ -457,8 +457,8 @@ addTCListener("APPLIED_FOR_SERVICE", async (event: TCEvent<any>) => {
 addTCListener("CHANGED_SERVICE_STATUS", async (event: TCEvent<JobObject>) => {
     const job = event.subject;
 
-    if(job.rcrs.length === 0) {
-        Log.info("0 rcrs on job");
+    if(job.rcrs.length === 0 || job.conjobs.length === 0) {
+        Log.info("0 rcrs/contractors on job");
         return;
     }
     
@@ -468,6 +468,7 @@ addTCListener("CHANGED_SERVICE_STATUS", async (event: TCEvent<JobObject>) => {
 
     // add other checks here, maybe time frame near winter break cancel this
     if (job.status === "gone-cold" && client.status === "live") {
+
         const contractor = await getContractorById(job.conjobs[0].contractor);
         if (!contractor) {
             Log.info(`no contractor found with id ${job.conjobs[0].contractor}`);

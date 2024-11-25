@@ -76,7 +76,7 @@ export const removeStatusJob = (job: MapJob) => {
 };
 
 export const updateStatusJob = async (job: MapJob) => {
-    Log.info("updating status map");
+    Log.info(`updating status map for job ${job.id}`);
     const statusList = Object.keys(statusMap);
 
     for(let i = 0; i < statusList.length; i++) {

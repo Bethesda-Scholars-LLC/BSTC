@@ -20,7 +20,7 @@ export const contractorIncompleteMail = (contractor: ContractorObject): MailOpts
         from: BUSINESS_EMAIL_FROM, // eslint-disable-line,
         to: PROD ? contractor.user.email : (process.env.TEST_EMAIL_ADDRESS ?? "services@bethesdascholars.com"),
         cc: process.env.BUSINESS_EMAIL_ADDRESS,
-        subject: "REQUIRED ACTION - Profile Completion",
+        subject: "[REQUIRED ACTION] Tutor Profile Completion Requested",
         html: ReactDOMServer.renderToString(<ContractorIncomplete contractor={contractor} />),
         contractor_id: contractor.id,
         email_type: EmailTypes.ContractorIncomplete
@@ -34,8 +34,8 @@ const ContractorIncomplete = ({contractor}: { contractor: ContractorObject }) =>
         Hi {tutorName},
         <br />
         <br />
-        You have not completed your profile. Please fill in your bio and add your teaching skills by editing your profile and
-        clicking the blue actions button below your initials on your dashboard.
+        You have not completed your profile. You are missing either your bio or your teaching skills in your profile.
+        Please complete these fields by editing your profile and clicking the blue actions button below your initials on your dashboard.
         <br />
         <br />
         We will not be able to review your application until this is complete. <b>When this has been completed, please click&nbsp;

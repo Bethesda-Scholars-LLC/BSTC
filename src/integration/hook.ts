@@ -49,6 +49,7 @@ hookRouter.all("*", async (req: Req, res: Res) => {
             Log.info(JSON.stringify({
                 eventName: events[i].action,
                 webhookSignature: req.headers["webhook-signature"],
+                subject: events[i].subject
             }));
             for (let j = 0; j < cbs.length; j++) {
                 const cb = cbs[j];
