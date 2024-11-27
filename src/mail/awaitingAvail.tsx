@@ -10,8 +10,7 @@ import { EmailTypes, MailOpts } from "./mail";
 export const awaitingAvailMail = (contractor: ContractorObject, client: ClientObject, job: JobObject): MailOpts => {
     return {
         from: BUSINESS_EMAIL_FROM,
-        to: PROD ? "services@bethesdascholars.com" : (process.env.TEST_EMAIL_ADDRESS),
-        cc: "pascal@bethesdascholars.com",
+        to: PROD ? process.env.BUSINESS_EMAIL_ADDRESS : (process.env.TEST_EMAIL_ADDRESS),
         email_type: EmailTypes.AwaitingAvail,
         client_id: client.id,
         client_name: getUserFullName(client.user),

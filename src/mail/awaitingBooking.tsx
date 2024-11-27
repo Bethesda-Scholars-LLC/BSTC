@@ -12,7 +12,7 @@ export const awaitingBookingMail = (contractor: ContractorObject, client: Client
     return {
         from: MANAGER_EMAIL_FROM, // eslint-disable-line,
         to: PROD ? client.user.email : process.env.TEST_EMAIL_ADDRESS,
-        cc: [process.env.MANAGER_EMAIL_ADDRESS!, "services@bethesdascholars.com"],
+        cc: [process.env.MANAGER_EMAIL_ADDRESS!, process.env.BUSINESS_EMAIL_ADDRESS!],
         email_type: EmailTypes.AwaitingBooking,
         client_id: client.id,
         client_name: getUserFullName(client.user),

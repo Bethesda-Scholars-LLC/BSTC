@@ -12,7 +12,7 @@ export const clientMatchedMail = (tutor: ContractorObject, client: ClientObject,
     return {
         from: BUSINESS_EMAIL_FROM, // eslint-disable-line
         to: PROD ? client.user.email : (process.env.TEST_EMAIL_ADDRESS ?? client.user.email),
-        cc: "services@bethesdascholars.com",
+        cc: process.env.BUSINESS_EMAIL_ADDRESS,
         subject: `Tutor for ${job.rcrs[0].recipient_name.split(" ")[0]}`,
         html: ReactDOMServer.renderToString(<ClientMatched tutor={tutor} client={client} job={job}/>)
     };
