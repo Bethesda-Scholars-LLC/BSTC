@@ -40,13 +40,15 @@ const TutorMatched = (props: {tutor: ContractorObject, client: ClientObject | nu
                     <li>Once logged in, click on the blue "Actions" button below your initials and select "Set availability."</li>
                 </ol>
             </li>
-            <li>Carefully <b>review these <a href="https://drive.google.com/file/d/1rhc03JLNxR-P2_lc17KqeKY8QnuftVp8/view">tutoring guidelines</a></b> before your first lesson. <b>Please note that this is an ongoing commitment throughout the year, and you are expected to be responsive with your client.</b></li>
+            <li><b>IMPORTANT:</b> Read the following <b><a href="https://drive.google.com/file/d/1rhc03JLNxR-P2_lc17KqeKY8QnuftVp8/view">tutoring guidelines</a></b> thoroughly before your first lesson. Please note that this is <b>an ongoing commitment throughout the year</b>, and you are expected to be <b>responsive and professional</b> with your client.</li>
             <li>
-                When your client books a lesson with you, you will be notified and must confirm the lesson.
-                Once the lesson is confirmed, <b>contact your client using the information below</b> (text usually works best), and ask for any work to look over in advance if you would like.
+                When your client books a lesson with you, you will be notified and must accept the lesson. If the booked time no longer works with your schedule, decline the lesson and <b>contact your client to reschedule a different time.</b>
                 <ol style={smallIndent} type="a">
                     <li style={{fontStyle: "italic"}}>You may coordinate lessons through text with the client, just make sure that the coordinated time is booked on TutorCruncher, so we can pay you accordingly.</li>
                 </ol>
+            </li>
+            <li>
+                Once the lesson is confirmed, contact your client using the information below (text usually works best), and <b>ask for any material to look over in advance</b> so you are fully prepared.
             </li>
         </ol>
         <b>Client Information:</b>
