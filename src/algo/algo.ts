@@ -123,7 +123,7 @@ const filterTutor = (jobInfo: JobInfo, location: "virtual" | "in-person" | "both
         }
     }
     i++;
-    if(filters.recent_hours_cutoff && filters.recent_hours_cutoff > 0 && tutor.recent_hours >= filters.recent_hours_cutoff && tutor.bias === 0) {
+    if(filters.recent_hours_cutoff && filters.recent_hours_cutoff > 0 && tutor.recent_hours >= filters.recent_hours_cutoff && tutor.bias !== 1) {
         return i;
     }
     i++;
