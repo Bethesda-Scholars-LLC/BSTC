@@ -11,10 +11,13 @@ export const ON_ERROR: string[] = process.env.ON_ERROR?.split(",")??[process.env
 export const RUN_SCRIPTS = false;
 
 export namespace Log {
+
     let transporter: nodemailer.Transporter<SMTPTransport.SentMessageInfo> | null = null;
+
     export const bindTransporter = (t: nodemailer.Transporter<SMTPTransport.SentMessageInfo>) => {
         transporter = t;
     };
+
     /* eslint-disable no-console */
     export const error = (message?: any, ...optionalParams: any[]) => {
         if(PROD && transporter) {
@@ -33,15 +36,15 @@ export namespace Log {
             }
         }
         warn(message, ...optionalParams);
-        info(message, "ERROR", ...optionalParams);
     };
 
+    /* Same as error logger, except doesn't send notification */
     export const warn = (message?: any, ...optionalParams: any[]) => {
         log(console.error, message, "ERROR", ...optionalParams);
     };
 
-    export const info = (message?: any, level?: string, ...optionalParams: any[]) => {
-        log(console.log, message, level ?? "INFO", ...optionalParams);
+    export const info = (message?: any, ...optionalParams: any[]) => {
+        log(console.log, message, "INFO", ...optionalParams);
     };
 
     export const debug = (message?: any, ...optionalParams: any[]) => {
@@ -49,9 +52,9 @@ export namespace Log {
             log(console.debug, message, "DEBUG", ...optionalParams);
     };
 
-    const log = (func: ((arg1: any, ...arg2: any[]) => void), message: any, level: string, ...optionalParams: any[]) => {
+    const log = (func: ((arg1: any, ...arg2: any[]) => void), message: any, level: "INFO" | "DEBUG" | "ERROR", ...optionalParams: any[]) => {
         const dateStr = new Date().toLocaleString("en-US", {timeZone: "America/New_York"}).replace(/\/20[0-9]{2},/g, "").replace(/:[0-9]{2} /, "").toLowerCase();
-        func(`[${dateStr} EST] ${JSON.stringify({level: level, message: message, ...optionalParams})}`);
+        func(`${dateStr} EST [${level}] ${message}`, ...optionalParams);
     };
     /* eslint-enable */
 }

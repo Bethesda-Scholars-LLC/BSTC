@@ -86,7 +86,7 @@ export const getMinimumContractorUpdate = (tutor: {user: { email: string, last_n
     };
 };
 
-export const setTutorBias = async (contractor: {user: { email: string, last_name: string }}, value: 0 | 1) => {
+export const setTutorBias = async (contractor: {user: { email: string, last_name: string }}, value: -1 | 0 | 1) => {
     Log.info(`setting tutor bias for tutor ${contractor.user.email}`);
     const defaultTutor = getMinimumContractorUpdate(contractor);
 
