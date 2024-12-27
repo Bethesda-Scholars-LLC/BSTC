@@ -240,7 +240,6 @@ function tutorFromContractor(con: ContractorObject): ITutor | null {
 
             work_ready: {
                 w9_filled_out: checkBoolExtraAttr(con.extra_attrs, "w9_filled_out")??false,
-                on_remindme: checkBoolExtraAttr(con.extra_attrs, "on_remindme")??false,
                 contract_filled_out: checkBoolExtraAttr(con.extra_attrs, "contract_filled_out")??false,
             },
 

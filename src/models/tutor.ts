@@ -8,7 +8,7 @@ export interface TutorSkill {
 
 export interface IWorkReady {
     w9_filled_out: boolean,
-    on_remindme: boolean,
+    on_remindme?: boolean,
     contract_filled_out: boolean,
 }
 
@@ -67,7 +67,10 @@ export interface ITutor {
 
 const WorkReadySchema = new Schema<IWorkReady>({
     w9_filled_out: Boolean,
-    on_remindme: Boolean,
+    on_remindme: {
+        type: Boolean,
+        required: false
+    },
     contract_filled_out: Boolean,
 });
 
