@@ -12,6 +12,7 @@ import "./scripts";
 import { Req } from "./types";
 import { DB_URI, Log, PROD, RUN_SCRIPTS, TEST } from "./util";
 import { syncStatusMap } from "./api/status_track";
+import "./tasks/dailyTasks";
 
 const main = async () => {
     try {

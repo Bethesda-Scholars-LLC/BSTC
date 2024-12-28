@@ -116,7 +116,7 @@ async function updatedContractorFunc(ev: TCEvent<ContractorObject>) {
     await SyncContractor(contractor);
 }
 
-async function getContractorLock(contractor_id: number): Promise<Mutex> {
+export async function getContractorLock(contractor_id: number): Promise<Mutex> {
     Log.info(`getting contractor lock ${contractor_id}`);
     if(!contractorLocks[contractor_id]) {
         await newLockLock.acquire();
@@ -282,7 +282,7 @@ function tutorFromContractor(con: ContractorObject): ITutor | null {
 export async function addTutorHours(lesson: ILesson) {
     Log.info(`adding tutor hours from lesson ${lesson.cruncher_id}`);
     const lock = await getContractorLock(lesson.tutor_id);
-    lock.acquire();
+    await lock.acquire();
     try {
         const tutor = await TutorModel.findOne({cruncher_id: lesson.tutor_id}).exec();
         if(!tutor) {

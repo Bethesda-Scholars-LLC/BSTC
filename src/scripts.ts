@@ -217,12 +217,12 @@ const doSomethingAllContractors = async (action: (contractor: ContractorObject) 
 if (!PROD) {
     if (RUN_SCRIPTS) {
         Log.debug("Running scripts.ts");
-        doSomethingAllContractors(async (c: ContractorObject) => {
+        // doSomethingAllContractors(async (c: ContractorObject) => {
             // await _setContractFilledOutToFalse(c);
             // await _sendReferrals(c);
             // await _setContractorStatusToDormant(c);
             // await SyncContractor(c);
-        }).catch(Log.error);
+        // }).catch(Log.error);
         
         // doSomethingAllServices(async (j: DumbJob) => {
         //     await _updateAllJobsToFinished(j);
