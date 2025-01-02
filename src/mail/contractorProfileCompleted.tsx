@@ -10,7 +10,7 @@ export const contractorProfileCompleteEmail = (contractor: ContractorObject): Ma
     return {
         from: BUSINESS_EMAIL_FROM, // eslint-disable-line,
         to: PROD ? process.env.BUSINESS_EMAIL_ADDRESS : (process.env.TEST_EMAIL_ADDRESS),
-        cc: "pascal@bethesdascholars.com", // copy who is responsible for screenings
+        cc: ["spencerbradley1351@gmail.com", "pascal@bethesdascholars.com"], // copy who is responsible for screenings
         email_type: EmailTypes.ProfileComplete,
         contractor_id: contractor.id,
         contractor_name: getUserFirstName(contractor.user),
