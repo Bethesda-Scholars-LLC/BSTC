@@ -29,8 +29,8 @@ const syncRecentHours = async () => {
     }
 };
 
-// schedule cron job for every day at 10PM EST
-cron.schedule("0 3 * * *", async () => {
+// schedule cron job for every day at 2AM EST
+cron.schedule("0 7 * * *", async () => {
     Log.info("running daily tasks cron job");
 
     try {
