@@ -73,10 +73,33 @@ export const getClientById = async (id: number): Promise<ClientObject | null> =>
 };
 
 export const moveToMatchedAndBooked = async (lesson: LessonObject, job: JobObject) => {
-    Log.info(`moving client to matched not booked from job ${job.id}`);
-    // deleted matched not booked check, only checks for prospect now
+
+    // add to not cold clients DB if not already there
+    const contractor = await getContractorById(lesson.cjas[0].contractor);
     const client = await getClientById(lesson.rcras[0].paying_client);
-    if (!client || client.status !== "prospect" || client.pipeline_stage.id === PipelineStage.FeedbackRequested) {
+    if (!contractor || !client) {
+        Log.info(`"no contractor or no client on job ${job.id}"`);
+        return;
+    }
+
+    const notCold = await NotCold.findOne({
+        job_id: job.id,
+        client_id: client.id,
+        tutor_id: contractor.id
+    }).exec();
+    if (!notCold && (job.status === "in-progress" || job.status === "gone-cold")) {
+        await new NotCold({
+            client_id: client.id,
+            client_name: getUserFullName(client.user),
+            job_id: job.id,
+            tutor_id: contractor.id,
+            tutor_name: getUserFullName(contractor.user)
+        }).save();
+        Log.info(`saved new not cold object to not cold schema with job id ${job.id}`);
+    }
+
+    Log.info(`moving client to matched not booked from job ${job.id}`);
+    if (client.status !== "prospect" || client.pipeline_stage.id === PipelineStage.FeedbackRequested) {
         Log.info("client does not meet requirements to move to matched not booked stage");
         return;
     }
@@ -99,7 +122,6 @@ export const moveToMatchedAndBooked = async (lesson: LessonObject, job: JobObjec
     });
 
     // remove matched not booked email that is supposed to send after 3 days here
-    const contractor = await getContractorById(lesson.cjas[0].contractor);
     if (!contractor) {
         Log.info(`no contractor found with id ${lesson.cjas[0].contractor}`);
         return;
@@ -115,23 +137,6 @@ export const moveToMatchedAndBooked = async (lesson: LessonObject, job: JobObjec
     if (awaitingBookingEmail) {
         await ScheduleMail.findByIdAndDelete(awaitingBookingEmail._id);
         Log.info(`awaiting booking email deleted from DB with _id ${awaitingBookingEmail._id}`);
-    }
-
-    // add to not cold clients DB if not already there
-    const notCold = await NotCold.findOne({
-        job_id: job.id,
-        client_id: client.id,
-        tutor_id: contractor.id
-    }).exec();
-    if (!notCold) {
-        await new NotCold({
-            client_id: client.id,
-            client_name: getUserFullName(client.user),
-            job_id: job.id,
-            tutor_id: contractor.id,
-            tutor_name: getUserFullName(contractor.user)
-        }).save();
-        Log.info(`saved new not cold object to not cold schema with job id ${job.id}`);
     }
 };
 
