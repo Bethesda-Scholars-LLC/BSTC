@@ -28,6 +28,12 @@ const main = async () => {
             },
         }));
 
+        // Middleware to log incoming requests
+        app.use((req, res, next) => {
+            Log.info(`[${req.method}] ${req.url}`);
+            next();
+        });
+
         app.use("/pub", express.static("public"));
         app.use("/app/*", express.static("public/dist"));
         app.use("/api", apiRouter);
