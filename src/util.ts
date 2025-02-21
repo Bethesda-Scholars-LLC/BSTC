@@ -95,9 +95,13 @@ if(requiredEnvs.reduce((prev, val) => {
 ){
     const missingFields = requiredEnvs.filter(v => !envKeys.includes(v));
     if(missingFields.length === 1){
-        Log.debug(missingFields[0]+" is required in the env and it is missing");
+        Log.info(missingFields[0]+" is required in the env and it is missing");
+        Log.error(missingFields[0]+" is required in the env and it is missing");
     } else {
-        Log.debug(missingFields.reduce(
+        Log.info(missingFields.reduce(
+            (prev: string, v: string, i: number, arr: string[]) => prev+(i === arr.length-1 ? `and ${v}` : `${v}, `), ""
+        )+" are required in the .env and they are missing");
+        Log.error(missingFields.reduce(
             (prev: string, v: string, i: number, arr: string[]) => prev+(i === arr.length-1 ? `and ${v}` : `${v}, `), ""
         )+" are required in the .env and they are missing");
     }
