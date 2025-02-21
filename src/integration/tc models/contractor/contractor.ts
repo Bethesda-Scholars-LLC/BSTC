@@ -127,6 +127,20 @@ export const getNewContractorDetails = (contractor: ContractorObject): UpdateCon
 
 export const updateContractorDetails = async (contractor: ContractorObject) => {
     Log.info(`updating contractor details ${contractor.id}`);
+
+    const phoneNumber = getAttrByMachineName("phone_number", contractor.extra_attrs);
+    const address = getAttrByMachineName("home_street_address", contractor.extra_attrs);
+    const city = getAttrByMachineName("city", contractor.extra_attrs);
+    const zipCode = getAttrByMachineName("zipcode", contractor.extra_attrs);
+
+    // preventing infinite loop
+    if (contractor.user.mobile === phoneNumber?.value &&
+        contractor.user.street === address?.value &&
+        contractor.user.town === city?.value &&
+        contractor.user.postcode === zipCode?.value
+    ) {
+        return;
+    }
     await updateContractor(getNewContractorDetails(contractor));
 };
 
@@ -136,6 +150,11 @@ export const popTutorFromCAs = async (contractor: ContractorObject) => {
     const dbAwaitings = await AwaitingClient.find({
         tutor_ids: contractor.id
     }).exec();
+
+    if (!dbAwaitings || dbAwaitings.length === 0) {
+        Log.info(`no awaiting client from DB with contractor=${contractor.id}`);
+        return;
+    }
     Log.info(`sucessfully found awaiting client from DB with contractor=${contractor.id}`);
 
     for (let i = 0; i < dbAwaitings.length; i++) {
