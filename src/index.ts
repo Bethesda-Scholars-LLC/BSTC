@@ -48,7 +48,6 @@ const main = async () => {
         Log.debug("Status map synchronization complete.");
 
         app.use("/hook", hookRouter);
-        // app.use("/hook", express.raw({ type: "application/json" }), hookRouter);
 
         // NOT FOUND MAKE SURE AT BOTTOM
         app.use((_req, res) => {
