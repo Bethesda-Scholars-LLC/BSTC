@@ -49,7 +49,6 @@ const main = async () => {
 
         app.use("/hook", hookRouter);
 
-
         // NOT FOUND MAKE SURE AT BOTTOM
         app.use((_req, res) => {
             return res.redirect("/app");
