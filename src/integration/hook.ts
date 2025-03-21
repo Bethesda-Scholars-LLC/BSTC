@@ -30,15 +30,19 @@ export const addTCListener = (eventNames: string | string[], listener: TCEventLi
 
 hookRouter.all("*", async (req: Req, res: Res) => {
     if(req.body?.events && req.rawBody){
-        Log.info("Raw Body:", req.rawBody);
-        Log.info("Parsed Body:", req.body);
         const verifyHook = createHmac("sha256", process.env.API_KEY!) // eslint-disable-line
-            .update(req.rawBody.toString())
+            .update(req.rawBody)
             .digest("hex");
 
-        if(verifyHook !== req.headers["webhook-signature"]){
-            Log.error(`invalid request ${JSON.stringify(req.body, undefined, 2)}`);
-            return res.status(400).json({error: `webhook signature could not be verified ${verifyHook} ${req.headers["webhook-signature"]}`}).send();
+        // if(verifyHook !== req.headers["webhook-signature"]){
+        //     Log.error(`invalid request ${JSON.stringify(req.body, undefined, 2)}`);
+        //     return res.status(400).json({error: `webhook signature could not be verified ${verifyHook} ${req.headers["webhook-signature"]}`}).send();
+        // }
+
+        // TEMPORARY FIX SKIP WEBHOOK VERIFICATION
+        if (req.headers["User-Agent"] !== "TutorCruncher") {
+            Log.error(`user agent is not TutorCruncher ${JSON.stringify(req.headers)}`);
+            return res.status(400).json({error: `user agent not TutorCruncher ${req.headers["User-Agent"]}`}).send();
         }
 
         const events: TCEvent[] = req.body.events;

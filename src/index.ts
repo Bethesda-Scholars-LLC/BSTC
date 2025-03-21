@@ -25,7 +25,7 @@ const main = async () => {
         app.use(cors());
         app.use(json({
             verify: (req: Req, _, buf) => {
-                req.rawBody = buf;
+                req.rawBody = buf.toString();
             },
         }));
 
