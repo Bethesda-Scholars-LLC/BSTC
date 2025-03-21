@@ -40,9 +40,9 @@ hookRouter.all("*", async (req: Req, res: Res) => {
         // }
 
         // TEMPORARY FIX SKIP WEBHOOK VERIFICATION
-        if (req.headers["User-Agent"] !== "TutorCruncher") {
+        if (req.headers["user-agent"] !== "TutorCruncher") {
             Log.error(`user agent is not TutorCruncher ${JSON.stringify(req.headers)}`);
-            return res.status(400).json({error: `user agent not TutorCruncher ${req.headers["User-Agent"]}`}).send();
+            return res.status(400).json({error: `user agent not TutorCruncher ${req.headers["user-agent"]}`}).send();
         }
 
         const events: TCEvent[] = req.body.events;
