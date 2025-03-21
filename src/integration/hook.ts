@@ -46,8 +46,9 @@ hookRouter.all("*", async (req: Req, res: Res) => {
         Log.info("Events Length:", Array.isArray(events) ? events.length : "Not an array");
 
         for(let i = 0; i < events.length; i++){
-            Log.debug(events[i].action);
+            Log.info(events[i].action);
             const cbs = listeners[events[i].action];
+            Log.info(cbs);
             if(!cbs)
                 continue;
             Log.info(JSON.stringify({
