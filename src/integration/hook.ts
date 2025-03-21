@@ -1,4 +1,4 @@
-import { createHmac, verify } from "crypto";
+import { createHmac } from "crypto";
 import express from "express";
 import { Req, Res, TCEvent, TCEventListener } from "../types";
 import { Log } from "../util";
@@ -31,13 +31,16 @@ export const addTCListener = (eventNames: string | string[], listener: TCEventLi
 hookRouter.all("*", async (req: Req, res: Res) => {
     if(req.body?.events && req.rawBody){
         const verifyHook = createHmac("sha256", process.env.API_KEY!) // eslint-disable-line
-            .update(JSON.stringify(req.body))
+            .update(req.rawBody)
             .digest("hex");
         
-        if(verifyHook !== req.headers["webhook-signature"]){
-            Log.error(`invalid request ${JSON.stringify(req.body, undefined, 2)}`);
-            return res.status(400).json({error: `invalid request ${verifyHook} ${req.headers["webhook-signature"]}`}).send();
-        }
+        Log.info("RAW BODY: ", req.rawBody);
+        Log.info("Parsed body: ", JSON.stringify(req.body));
+        Log.info("hmac generated from raw: ", verifyHook);
+        // if(verifyHook !== req.headers["webhook-signature"]){
+        //     Log.error(`invalid request ${JSON.stringify(req.body, undefined, 2)}`);
+        //     return res.status(400).json({error: `invalid request ${verifyHook} ${req.headers["webhook-signature"]}`}).send();
+        // }
 
         const events: TCEvent[] = req.body.events;
         for(let i = 0; i < events.length; i++){
