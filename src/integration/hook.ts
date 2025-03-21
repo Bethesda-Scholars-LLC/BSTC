@@ -30,10 +30,11 @@ export const addTCListener = (eventNames: string | string[], listener: TCEventLi
 
 hookRouter.all("*", async (req: Req, res: Res) => {
     if(req.body?.events && req.rawBody){
-        Log.info("Raw Body:", req.rawBody?.toString()); // Ensure it's unmodified
+        const rawBodyBuffer = Buffer.isBuffer(req.body) ? req.body : Buffer.from(req.body);
+        Log.info("Raw Body:", rawBodyBuffer.toString()); // Ensure it's unmodified
         Log.info("Parsed Body:", req.body);
         const verifyHook = createHmac("sha256", process.env.API_KEY!) // eslint-disable-line
-            .update(req.body)
+            .update(rawBodyBuffer)
             .digest("hex");
 
         if(verifyHook !== req.headers["webhook-signature"]){

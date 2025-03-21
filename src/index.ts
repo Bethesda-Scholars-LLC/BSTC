@@ -23,11 +23,12 @@ const main = async () => {
 
         const app = express();
         app.use(cors());
-        app.use(json({
-            verify: (req: Req, _, buf) => {
-                req.rawBody = buf; // Keep as buffer, avoid string conversion
-            },
-        }));
+        app.use(json());
+        // app.use(json({
+        //     verify: (req: Req, _, buf) => {
+        //         req.rawBody = buf; // Keep as buffer, avoid string conversion
+        //     },
+        // }));
 
         // Middleware to log incoming requests
         app.use((req, res, next) => {
@@ -47,8 +48,9 @@ const main = async () => {
         await syncStatusMap();
         Log.debug("Status map synchronization complete.");
 
-        app.use("/hook", hookRouter);
-
+        // Apply express.raw() ONLY to the webhook route
+        // app.use("/hook", hookRouter);
+        app.use("/hook", express.raw({ type: "application/json" }), hookRouter);
 
         // NOT FOUND MAKE SURE AT BOTTOM
         app.use((_req, res) => {
