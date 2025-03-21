@@ -38,8 +38,8 @@ hookRouter.all("*", async (req: Req, res: Res) => {
         //     Log.debug(`invalid request ${JSON.stringify(req.body, undefined, 2)}`);
         //     return res.status(400).json({error: `invalid request ${verifyHook} ${req.headers["webhook-signature"]}`}).send();
         // }
-
-        Log.debug(req.body);
+        
+        Log.info(req.body);
         const events: TCEvent[] = req.body.events;
         for(let i = 0; i < events.length; i++){
             Log.debug(events[i].action);
