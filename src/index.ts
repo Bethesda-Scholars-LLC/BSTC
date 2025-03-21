@@ -25,7 +25,7 @@ const main = async () => {
         app.use(cors());
         app.use(json({
             verify: (req: Req, _, buf) => {
-                req.rawBody = buf.toString();
+                req.rawBody = buf;
             },
         }));
 
@@ -47,7 +47,6 @@ const main = async () => {
         await syncStatusMap();
         Log.debug("Status map synchronization complete.");
 
-        // Apply express.raw() ONLY to the webhook route
         app.use("/hook", hookRouter);
         // app.use("/hook", express.raw({ type: "application/json" }), hookRouter);
 
