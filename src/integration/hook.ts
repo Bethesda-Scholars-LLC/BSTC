@@ -39,18 +39,13 @@ hookRouter.all("*", async (req: Req, res: Res) => {
         //     return res.status(400).json({error: `invalid request ${verifyHook} ${req.headers["webhook-signature"]}`}).send();
         // }
         
-        Log.info(JSON.stringify(req.body, null, 2));
         const events: TCEvent[] = req.body.events;
-        Log.info("Events Type:", typeof events);
-        Log.info("Events Raw:", JSON.stringify(events, null, 2));
-        Log.info("Events Length:", Array.isArray(events) ? events.length : "Not an array");
-
         for(let i = 0; i < events.length; i++){
-            Log.info(events[i].action);
             const cbs = listeners[events[i].action];
-            Log.info(cbs);
-            if(!cbs)
+            if(!cbs) {
+                Log.info(`No listener for this action ${events[i].action}`);
                 continue;
+            }
             Log.info(JSON.stringify({
                 eventName: events[i].action,
                 webhookSignature: req.headers["webhook-signature"],
