@@ -30,11 +30,11 @@ export const addTCListener = (eventNames: string | string[], listener: TCEventLi
 
 hookRouter.all("*", async (req: Req, res: Res) => {
     if(req.body?.events && req.rawBody){
-        const rawBodyBuffer = Buffer.isBuffer(req.body) ? req.body : Buffer.from(req.body);
-        Log.info("Raw Body:", rawBodyBuffer.toString()); // Ensure it's unmodified
+        // const rawBodyBuffer = Buffer.isBuffer(req.body) ? req.body : Buffer.from(req.body);
+        Log.info("Raw Body:", req.rawBody); // Ensure it's unmodified
         Log.info("Parsed Body:", req.body);
         const verifyHook = createHmac("sha256", process.env.API_KEY!) // eslint-disable-line
-            .update(rawBodyBuffer)
+            .update(req.rawBody)
             .digest("hex");
 
         if(verifyHook !== req.headers["webhook-signature"]){
@@ -42,11 +42,7 @@ hookRouter.all("*", async (req: Req, res: Res) => {
             return res.status(400).json({error: `webhook signature could not be verified ${verifyHook} ${req.headers["webhook-signature"]}`}).send();
         }
 
-        // Convert raw body to JSON after verification
-        const parsedBody = JSON.parse(rawBodyBuffer.toString());
-        Log.info(parsedBody);
-
-        const events: TCEvent[] = parsedBody.events;
+        const events: TCEvent[] = req.body.events;   // USE RIGHT EVENT
         for(let i = 0; i < events.length; i++){
             Log.debug(events[i].action);
             const cbs = listeners[events[i].action];

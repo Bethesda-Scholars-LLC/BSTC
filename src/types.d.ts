@@ -4,7 +4,7 @@ import { Request, Response } from "express";
  * @type Alias for Express.Request
  */
 export type Req = Request & {
-    rawBody?: Buffer
+    rawBody?: string
 };
 
 /**
