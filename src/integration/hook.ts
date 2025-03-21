@@ -41,6 +41,8 @@ hookRouter.all("*", async (req: Req, res: Res) => {
         
         Log.info(req.body);
         const events: TCEvent[] = req.body.events;
+        Log.info(req.body.events);
+        Log.info(events);
         for(let i = 0; i < events.length; i++){
             Log.debug(events[i].action);
             const cbs = listeners[events[i].action];
