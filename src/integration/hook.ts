@@ -42,8 +42,10 @@ hookRouter.all("*", async (req: Req, res: Res) => {
             return res.status(400).json({error: `webhook signature could not be verified ${verifyHook} ${req.headers["webhook-signature"]}`}).send();
         }
 
-        Log.debug(req.body);
-        const events: TCEvent[] = req.body.events;
+        // Convert raw body to JSON after verification
+        const parsedBody = JSON.parse(rawBodyBuffer.toString());
+
+        const events: TCEvent[] = parsedBody.events;
         for(let i = 0; i < events.length; i++){
             Log.debug(events[i].action);
             const cbs = listeners[events[i].action];
