@@ -35,6 +35,8 @@ hookRouter.all("*", async (req: Req, res: Res) => {
             .digest("hex");
         
         const headerSignature = req.headers["webhook-signature"]?? req.headers["Webhook-Signature"];
+        Log.info("-----------------");
+        Log.info(`${req.rawBody}`);
         Log.info("hmac generated: ", verifyHook);
         Log.info("hmac given:     ", headerSignature);
         // if(verifyHook !== req.headers["webhook-signature"]){
