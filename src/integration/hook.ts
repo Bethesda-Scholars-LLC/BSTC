@@ -31,13 +31,13 @@ export const addTCListener = (eventNames: string | string[], listener: TCEventLi
 hookRouter.all("*", async (req: Req, res: Res) => {
     if(req.body?.events && req.rawBody){
         const verifyHook = createHmac("sha256", process.env.API_KEY!) // eslint-disable-line
-            .update(req.rawBody)
+            .update(req.body)
             .digest("hex");
 
-        // if(verifyHook !== req.headers["webhook-signature"]){
-        //     Log.debug(`invalid request ${JSON.stringify(req.body, undefined, 2)}`);
-        //     return res.status(400).json({error: `invalid request ${verifyHook} ${req.headers["webhook-signature"]}`}).send();
-        // }
+        if(verifyHook !== req.headers["webhook-signature"]){
+            Log.debug(`invalid request ${JSON.stringify(req.body, undefined, 2)}`);
+            return res.status(400).json({error: `invalid request ${verifyHook} ${req.headers["webhook-signature"]}`}).send();
+        }
         
         const events: TCEvent[] = req.body.events;
         for(let i = 0; i < events.length; i++){
