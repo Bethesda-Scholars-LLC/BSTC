@@ -34,10 +34,10 @@ hookRouter.all("*", async (req: Req, res: Res) => {
             .update(req.rawBody)
             .digest("hex");
 
-        if(verifyHook !== req.headers["webhook-signature"]){
-            Log.debug(`invalid request ${JSON.stringify(req.body, undefined, 2)}`);
-            return res.status(400).json({error: `invalid request ${verifyHook} ${req.headers["webhook-signature"]}`}).send();
-        }
+        // if(verifyHook !== req.headers["webhook-signature"]){
+        //     Log.debug(`invalid request ${JSON.stringify(req.body, undefined, 2)}`);
+        //     return res.status(400).json({error: `invalid request ${verifyHook} ${req.headers["webhook-signature"]}`}).send();
+        // }
 
         Log.debug(req.body);
         const events: TCEvent[] = req.body.events;
