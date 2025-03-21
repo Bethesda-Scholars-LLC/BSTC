@@ -34,9 +34,9 @@ hookRouter.all("*", async (req: Req, res: Res) => {
             .update(req.rawBody)
             .digest("hex");
         
-        Log.info("RAW BODY: ", req.rawBody);
-        Log.info("Parsed body: ", JSON.stringify(req.body));
-        Log.info("hmac generated from raw: ", verifyHook);
+        const headerSignature = req.headers["webhook-signature"]?? req.headers["Webhook-Signature"];
+        Log.info("hmac generated: ", verifyHook);
+        Log.info("hmac given:     ", headerSignature);
         // if(verifyHook !== req.headers["webhook-signature"]){
         //     Log.error(`invalid request ${JSON.stringify(req.body, undefined, 2)}`);
         //     return res.status(400).json({error: `invalid request ${verifyHook} ${req.headers["webhook-signature"]}`}).send();
