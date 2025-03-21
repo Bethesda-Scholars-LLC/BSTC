@@ -44,6 +44,7 @@ hookRouter.all("*", async (req: Req, res: Res) => {
 
         // Convert raw body to JSON after verification
         const parsedBody = JSON.parse(rawBodyBuffer.toString());
+        Log.info(parsedBody);
 
         const events: TCEvent[] = parsedBody.events;
         for(let i = 0; i < events.length; i++){
