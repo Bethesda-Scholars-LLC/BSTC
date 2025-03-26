@@ -7,6 +7,7 @@ import { cleanPhoneNumber, getUserFirstName, getUserFullName } from "../integrat
 import { JobObject } from "../integration/tc models/service/types";
 import { getTutorPronouns } from "./firstLesson";
 import { capitalize, getAttrByMachineName, calcStripeFee, PROD, BUSINESS_EMAIL_FROM, Log } from "../util";
+import { extractFieldFromJob } from "../algo/algo";
 
 export const clientMatchedMail = (tutor: ContractorObject, client: ClientObject, job: JobObject): MailOptions => {
     return {
@@ -18,16 +19,6 @@ export const clientMatchedMail = (tutor: ContractorObject, client: ClientObject,
     };
 };
 
-const getSubjectFromJob = (job: JobObject) => {
-    Log.info(`Getting subject from job ${job.id}`);
-    const subjectArr = job.description.split("Classes needed tutoring in:**");
-    if (subjectArr.length <= 1){
-        Log.info(`No subject associated with job ${job.id}`);
-        return null;
-    }
-    return subjectArr[1].split("\n**")[0].trim();
-};
-
 const ClientMatched = (props: {tutor: ContractorObject, client: ClientObject, job: JobObject}) => {
     const tutorPronouns = getTutorPronouns(props.tutor);
     const tutorName = getUserFirstName(props.tutor.user);
@@ -35,7 +26,7 @@ const ClientMatched = (props: {tutor: ContractorObject, client: ClientObject, jo
     const tutorGrade = getAttrByMachineName("grade_1", props.tutor.extra_attrs)?.value;
     const tutorSchool = getAttrByMachineName("school_1", props.tutor.extra_attrs)?.value;
     const stripeFee = calcStripeFee(props.job.dft_charge_rate);
-    const subjects = getSubjectFromJob(props.job);
+    const subjects = extractFieldFromJob(props.job, "classes needed tutoring in");
     return <p style={{margin: "0"}}>
         Hi {getUserFirstName(props.client.user)},
         <br/>
