@@ -15,11 +15,7 @@ export type ContractorObject = {
         year: number
         governing_body: string
     }[]
-    skills: {
-        id: number,
-        subject: string,
-        qual_level: string
-    }[]
+    skills: skillType[],
     institutions: {
         id: number,
         name: string,
@@ -61,4 +57,26 @@ export type UpdateContractorPayload = {
     },
     status?: string,
     extra_attrs?: {[key: string]: any}
+};
+
+export type skillType = {
+    id: number,
+        contractor: {
+            id: number,
+            first_name: string,
+            last_name: string,
+            email: string,
+            url: string
+        },
+        subject: {
+            id: number,
+            name: string,
+            category_id: number,
+            category_name: string
+        },
+        qual_level: {
+            id: number,
+            name: string,
+            ranking: number
+        }
 };

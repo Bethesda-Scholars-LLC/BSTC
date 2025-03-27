@@ -2,9 +2,9 @@ import { Mutex } from "async-mutex";
 import { Duration } from "ts-duration";
 import { addTCListener } from "../integration/hook";
 import { getContractorById, setTutorBias } from "../integration/tc models/contractor/contractor";
-import { ContractorObject } from "../integration/tc models/contractor/types";
+import { ContractorObject, skillType } from "../integration/tc models/contractor/types";
 import LessonModel, { ILesson } from "../models/lesson";
-import TutorModel, { ITutor } from "../models/tutor";
+import TutorModel, { ITutor, TutorSkill } from "../models/tutor";
 import { TCEvent } from "../types";
 import { Log, getAttrByMachineName } from "../util";
 
@@ -248,14 +248,15 @@ function tutorFromContractor(con: ContractorObject): ITutor | null {
             gender: genderNum,
             phone_number: (con.user.mobile??con.user.phone)??undefined,
             // only keep the highest skill level for any given subject
+            // create new skill object of type TutorSkill interface
             skills: con.skills
-                .reduce((prev: {id: number, subject: string, qual_level: string}[], cur) => {
+                .reduce((prev: skillType[], cur: skillType) => {
                     let merged = false;
                     for(let i = 0; i < prev.length; i++) {
-                        if(prev[i].subject === cur.subject) {
+                        if(prev[i].subject.name === cur.subject.name) {
                             merged = true;
-                            const newLevel = skillsHierarchy.indexOf(cur.qual_level.toLowerCase());
-                            if(newLevel > skillsHierarchy.indexOf(prev[i].qual_level.toLowerCase()))
+                            const newLevel = skillsHierarchy.indexOf(cur.qual_level.name.toLowerCase());
+                            if(newLevel > skillsHierarchy.indexOf(prev[i].qual_level.name.toLowerCase()))
                                 prev[i].qual_level = cur.qual_level;
                         }
                     }
@@ -264,9 +265,9 @@ function tutorFromContractor(con: ContractorObject): ITutor | null {
                     return [...prev, cur];
                 }, []).map(val => {
                     return {
-                        subject: val.subject,
-                        skillLevel: skillsHierarchy.indexOf(val.qual_level.toLowerCase()),
-                        levelName: val.qual_level.toLowerCase()
+                        subject: val.subject.name,
+                        skillLevel: skillsHierarchy.indexOf(val.qual_level.name.toLowerCase()),
+                        levelName: val.qual_level.name.toLowerCase()
                     };
                 }),
             gpa: isNaN(parsedGpa) ? undefined : parsedGpa,
