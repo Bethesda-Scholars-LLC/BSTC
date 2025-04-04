@@ -1,8 +1,8 @@
 import { Duration } from "ts-duration";
 import ApiFetcher from "./api/fetch";
 import { getRandomClient } from "./integration/tc models/client/client";
-import { getContractorById, getMinimumContractorUpdate, getRandomContractor, setContractFilledOut, setTutorBias, updateContractor } from "./integration/tc models/contractor/contractor";
-import { ContractorObject } from "./integration/tc models/contractor/types";
+import { getContractorById, getRandomContractor, setContractFilledOut, setTutorBias, updateContractorById } from "./integration/tc models/contractor/contractor";
+import { ContractorObject, UpdateContractorPayload } from "./integration/tc models/contractor/types";
 import { getManyServices, getMinimumJobUpdate, getRandomService, getServiceById, updateServiceById, updateServiceStatus } from "./integration/tc models/service/service";
 import { DumbJob, JobObject } from "./integration/tc models/service/types";
 import { getUserFullName } from "./integration/tc models/user/user";
@@ -40,12 +40,12 @@ const getManyLessons = async (page?: number): Promise<ManyResponse<LessonObject>
 
 const _setContractFilledOutToFalse = async (contractor: ContractorObject) => {
     try {
-        Log.debug(`checking ${contractor.user.first_name} ${contractor.user.last_name} contract filled out`);
+        Log.debug(`checking ${contractor.first_name} ${contractor.last_name} contract filled out`);
 
         // this should be the function that each contractor
         if(contractor.status === "approved" && getAttrByMachineName("contract_filled_out", contractor.extra_attrs)?.value === "True") {
             await setContractFilledOut(contractor, false);
-            Log.debug("updated " + contractor.user.first_name + " " + contractor.user.last_name);
+            Log.debug("updated " + contractor.first_name + " " + contractor.last_name);
         }
     } catch (error) {
         Log.error("Error: ", error);
@@ -54,11 +54,11 @@ const _setContractFilledOutToFalse = async (contractor: ContractorObject) => {
 
 const _setContractorStatusToDormant = async (contractor: ContractorObject) => {
     try {
-        Log.debug(`checking ${contractor.user.first_name} ${contractor.user.last_name} contract filled out`);
+        Log.debug(`checking ${contractor.first_name} ${contractor.last_name} contract filled out`);
         if(contractor.status === "approved" && getAttrByMachineName("contract_filled_out", contractor.extra_attrs)?.value === "False") {
-            const defaultTutor = getMinimumContractorUpdate(contractor);
+            const defaultTutor: UpdateContractorPayload = {};
             defaultTutor.status = "dormant";
-            await updateContractor(defaultTutor);
+            await updateContractorById(contractor.id, defaultTutor);
         }
     } catch (error) {
         Log.error("Error: ", error);
@@ -67,14 +67,14 @@ const _setContractorStatusToDormant = async (contractor: ContractorObject) => {
 
 const _sendReferrals = async (contractor: ContractorObject) => {
     try {
-        Log.debug(`checking ${contractor.user.first_name} ${contractor.user.last_name} approved`);
+        Log.debug(`checking ${contractor.first_name} ${contractor.last_name} approved`);
 
         if(contractor.status === "approved") {
             transporterPascal.sendMail(tutorReferralMail(contractor), (err) => {
                 if (err)
                     Log.error(err);
             });
-            Log.debug("sent referral email to " + contractor.user.first_name + " " + contractor.user.last_name);
+            Log.debug("sent referral email to " + contractor.first_name + " " + contractor.last_name);
         }
     } catch (error) {
         Log.error("Error: ", error);

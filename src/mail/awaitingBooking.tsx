@@ -11,13 +11,13 @@ import ManagerSignature from "./managerSignature";
 export const awaitingBookingMail = (contractor: ContractorObject, client: ClientObject, job: JobObject): MailOpts => {
     return {
         from: MANAGER_EMAIL_FROM, // eslint-disable-line,
-        to: PROD ? client.user.email : process.env.TEST_EMAIL_ADDRESS,
+        to: PROD ? client.email : process.env.TEST_EMAIL_ADDRESS,
         cc: [process.env.MANAGER_EMAIL_ADDRESS!, process.env.BUSINESS_EMAIL_ADDRESS!],
         email_type: EmailTypes.AwaitingBooking,
         client_id: client.id,
-        client_name: getUserFullName(client.user),
+        client_name: getUserFullName(client),
         contractor_id: contractor.id,
-        contractor_name: getUserFirstName(contractor.user),
+        contractor_name: getUserFirstName(contractor),
         job_id: job.id,
         subject: `Booking a Lesson for ${job.rcrs[0]?.recipient_name.split(" ")[0] ?? "Your Child"}`,
         html: ReactDOMServer.renderToString(<AwaitingBooking contractor={contractor} client={client} job={job}/>)
@@ -26,10 +26,10 @@ export const awaitingBookingMail = (contractor: ContractorObject, client: Client
 
 const AwaitingBooking = (props: {contractor: ContractorObject, client: ClientObject, job: JobObject}) => {
     return <p style={{margin: 0}}>
-        Hi {getUserFirstName(props.client.user)},
+        Hi {getUserFirstName(props.client)},
         <br/>
         <br/>
-        Just checking in if you were able to book a lesson with {getUserFirstName(props.contractor.user)}. Let me know if there are any scheduling issues.
+        Just checking in if you were able to book a lesson with {getUserFirstName(props.contractor)}. Let me know if there are any scheduling issues.
         <br/>
         <br/>
         Thanks,

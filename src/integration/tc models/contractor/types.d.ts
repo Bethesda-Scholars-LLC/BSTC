@@ -2,7 +2,21 @@ import { APIUser } from "../user/types";
 
 export type ContractorObject = {
     id: number
-    user: APIUser
+    first_name: string
+    last_name: string
+    email: string
+    mobile: string
+    phone: string
+    photo: string | null
+    street: string
+    state: string
+    town: string
+    country: number
+    postcode: string
+    latitude: number
+    longitude: number
+    date_created: string
+    timezone: string
     status: string
     charge_via_branch: boolean
     default_rate: number
@@ -39,22 +53,20 @@ export type ContractorObject = {
 }
 
 export type UpdateContractorPayload = {
-    user: {
-        email: string,
-        last_name: string,
-        mobile?: string,
-        street?: string,
-        postcode?: string,
-        town?: string
-        first_name?: string
-        phone?: string
-        state?: string
-        country?: number
-        latitude?: number
-        longitude?: number
-        date_created?: string
-        timezone?: string
-    },
+    email?: string,
+    last_name?: string,
+    mobile?: string,
+    street?: string,
+    postcode?: string,
+    town?: string
+    first_name?: string
+    phone?: string
+    state?: string
+    country?: number
+    latitude?: number
+    longitude?: number
+    date_created?: string
+    timezone?: string
     status?: string,
     extra_attrs?: {[key: string]: any}
 };

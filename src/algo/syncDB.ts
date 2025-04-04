@@ -31,7 +31,7 @@ const _syncAllDBContractors = async () => {
             tutor.applications_accepted_valid_until = new Date(Date.now() + Duration.hour(24 * 14).milliseconds);
 
             tutor.school_full_name = getAttrByMachineName("school_1", contractor.extra_attrs)?.value;
-            tutor.date_created = new Date(contractor.user.date_created);
+            tutor.date_created = new Date(contractor.date_created);
 
             await tutor.save();
         }
@@ -47,7 +47,7 @@ const _syncAllDBContractors = async () => {
  *   applications_accepted_valid_until: new Date(Date.now() + Duration.hour(24 * 14).milliseconds),
  *
  *   school_full_name: getAttrByMachineName("school_1", con.extra_attrs)!.value,
- *   date_created: new Date(con.user.date_created),
+ *   date_created: new Date(con.date_created),
 **/
 
 // uncomment to sync entire tutorCruncher db

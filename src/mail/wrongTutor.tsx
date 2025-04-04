@@ -11,14 +11,14 @@ export const wrongTutorMail = (job: JobObject, client: ClientObject | null, cont
     return {
         from: BUSINESS_EMAIL_FROM,
         to: process.env.BUSINESS_EMAIL_ADDRESS,
-        subject: `${client ? getUserFirstName(client.user) : "Unknown Client" } Booked Wrong Lesson`,
+        subject: `${client ? getUserFirstName(client) : "Unknown Client" } Booked Wrong Lesson`,
         html: ReactDOMServer.renderToString(<WrongTutor job={job} client={client} contractor={contractor}/>)
     };
 };
 
 const WrongTutor = (props: {job: JobObject, client: ClientObject | null, contractor: ContractorObject | null}) => {
-    const clientFullName = props.client ? getUserFullName(props.client.user) : "Unknown Client";
-    const contractorFullName = props.contractor ? getUserFullName(props.contractor.user) : "Unknown Tutor";
+    const clientFullName = props.client ? getUserFullName(props.client) : "Unknown Client";
+    const contractorFullName = props.contractor ? getUserFullName(props.contractor) : "Unknown Tutor";
 
     return <p style={{margin: 0}}>
         This is a notification that {clientFullName} has booked a lesson with {contractorFullName}. The job's ID is <a href={`https://secure.tutorcruncher.com/cal/service/${props.job.id}/`}>{props.job.id}</a>.

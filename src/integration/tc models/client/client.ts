@@ -22,14 +22,14 @@ export enum ClientManager {
     Miles=2255432
 }
 
-export const updateClient = async (data: UpdateClientPayload) => {
+export const updateClientById = async (id: number, data: UpdateClientPayload) => {
     try {
-        Log.info(`updating client ${data.user.email} through API`);
-        await ApiFetcher.sendRequest("/clients/", {
+        Log.info(`updating client ${id} through API`);
+        await ApiFetcher.sendRequest(`/clients/${id}`, {
             method: "POST",
-            data
+            data: data
         });
-        Log.info(`successfully updated client ${data.user.email} through API`);
+        Log.info(`successfully updated client ${id} through API`);
     } catch(e) {
         Log.error(e);
     }
@@ -51,14 +51,14 @@ export const getRandomClient = async (): Promise<ClientObject | null> => {
 };
 
 
-export const getMinimumClientUpdate = (client: ClientObject): UpdateClientPayload => {
-    return {
-        user: {
-            email: client.user.email,
-            last_name: client.user.last_name
-        }
-    };
-};
+// export const getMinimumClientUpdate = (client: ClientObject): UpdateClientPayload => {
+//     return {
+//         user: {
+//             email: client.user.email,
+//             last_name: client.user.last_name
+//         }
+//     };
+// };
 
 export const getClientById = async (id: number): Promise<ClientObject | null> => {
     try {
@@ -90,10 +90,10 @@ export const moveToMatchedAndBooked = async (lesson: LessonObject, job: JobObjec
     if (!notCold && (job.status === "in-progress" || job.status === "gone-cold")) {
         await new NotCold({
             client_id: client.id,
-            client_name: getUserFullName(client.user),
+            client_name: getUserFullName(client),
             job_id: job.id,
             tutor_id: contractor.id,
-            tutor_name: getUserFullName(contractor.user)
+            tutor_name: getUserFullName(contractor)
         }).save();
         Log.info(`saved new not cold object to not cold schema with job id ${job.id}`);
     }
@@ -116,10 +116,7 @@ export const moveToMatchedAndBooked = async (lesson: LessonObject, job: JobObjec
         return;
     }
 
-    await updateClient({
-        ...getMinimumClientUpdate(client),
-        pipeline_stage: PipelineStage.MatchedAndBooked
-    });
+    await updateClientById(client.id, { pipeline_stage: PipelineStage.MatchedAndBooked});
 
     // remove matched not booked email that is supposed to send after 3 days here
     if (!contractor) {

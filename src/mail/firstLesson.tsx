@@ -14,9 +14,9 @@ import ManagerSignature from "./managerSignature";
 
 export const FirstLesson = (props: { job: JobObject, tutor: ContractorObject, client: ClientObject }) => {
     const tutorFirstName = props.job.conjobs[0].name.split(" ")[0];
-    const tutorPhoneNumber = cleanPhoneNumber(props.tutor.user.mobile);
-    const tutorEmailAddress = props.tutor.user.email;
-    const userFirstName = getUserFirstName(props.client.user);
+    const tutorPhoneNumber = cleanPhoneNumber(props.tutor.mobile);
+    const tutorEmailAddress = props.tutor.email;
+    const userFirstName = getUserFirstName(props.client);
     const pronouns = getTutorPronouns(props.tutor);
     const studentName = props.job.rcrs[0]?.recipient_name.split(" ")[0] ?? "your child";
 
@@ -74,7 +74,7 @@ export const queueFirstLessonComplete = async (job: JobObject) => {
         return;
 
     const tutorFirstName = job.conjobs[0].name.split(" ")[0];
-    const userEmail = client.user.email;
+    const userEmail = client.email;
 
     await queueEmail(PROD ? day : Duration.second(10), {
         from: MANAGER_EMAIL_FROM, // eslint-disable-line

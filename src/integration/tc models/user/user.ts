@@ -1,9 +1,10 @@
 import { capitalize } from "../../../util";
-import { APIUser } from "./types";
+import { ClientObject } from "../client/types";
+import { ContractorObject } from "../contractor/types";
 
-export const getUserFirstName = (user: APIUser) => capitalize(user.first_name ?? user.last_name).trim();
+export const getUserFirstName = (user: ContractorObject | ClientObject) => capitalize(user.first_name ?? user.last_name).trim();
 
-export const getUserFullName = (user: APIUser) => `${getUserFirstName(user)} ${user.first_name ? capitalize(user.last_name) : ""}`.trim();
+export const getUserFullName = (user: ContractorObject | ClientObject) => `${getUserFirstName(user)} ${user.first_name ? capitalize(user.last_name) : ""}`.trim();
 
 export const cleanPhoneNumber = (inPhone: string) => {
     let phone = inPhone.replace(/\D/g, "");

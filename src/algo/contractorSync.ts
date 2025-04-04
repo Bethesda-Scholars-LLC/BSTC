@@ -216,8 +216,8 @@ function tutorFromContractor(con: ContractorObject): ITutor | null {
         // .map(val => {return {...val, qual_level: [val.qual_level]};})
         Log.info(`returning new contractor object ${con.id}`);
         return {
-            first_name: con.user.first_name,
-            last_name: con.user.last_name,
+            first_name: con.first_name,
+            last_name: con.last_name,
             cruncher_id: con.id,
             deleted_on: undefined,
 
@@ -228,10 +228,10 @@ function tutorFromContractor(con: ContractorObject): ITutor | null {
             applications_accepted_valid_until: new Date(Date.now() + Duration.hour(24 * 14).milliseconds),
 
             school_full_name: getAttrByMachineName("school_1", con.extra_attrs)?.value,
-            date_created: new Date(con.user.date_created),
+            date_created: new Date(con.date_created),
 
-            lat: con.user.latitude,
-            lon: con.user.longitude,
+            lat: con.latitude,
+            lon: con.longitude,
             grade: gradeNum,
 
             recent_hours: 0,
@@ -246,7 +246,7 @@ function tutorFromContractor(con: ContractorObject): ITutor | null {
             bias: biasValue,
             stars: getAttrByMachineName("rating", con.extra_attrs)?.value.split("/")[0],
             gender: genderNum,
-            phone_number: (con.user.mobile??con.user.phone)??undefined,
+            phone_number: (con.mobile??con.phone)??undefined,
             // only keep the highest skill level for any given subject
             // create new skill object of type TutorSkill interface
             skills: con.skills

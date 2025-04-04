@@ -8,7 +8,7 @@ import { EmailTypes, MailOpts } from "./mail";
 export const tutorReferralMail = (contractor: ContractorObject): MailOpts => {
     return {
         from: BUSINESS_EMAIL_FROM,
-        to: PROD ? contractor.user.email : (process.env.TEST_EMAIL_ADDRESS ?? contractor.user.email),
+        to: PROD ? contractor.email : (process.env.TEST_EMAIL_ADDRESS ?? contractor.email),
         email_type: EmailTypes.Referral,
         subject: "Referral Program",
         html: ReactDOMServer.renderToString(<ReferralEmail contractor={contractor}/>)
@@ -20,7 +20,7 @@ const ReferralEmail = (props: {contractor: ContractorObject}) => {
         paddingLeft: "20px"
     };
     return <p style={{margin: 0}}>
-        Hi {getUserFirstName(props.contractor.user)},
+        Hi {getUserFirstName(props.contractor)},
         <br/>
         <br/>
         Welcome to Bethesda Scholars' Referral Program. Tell your friends to sign up as a tutor!

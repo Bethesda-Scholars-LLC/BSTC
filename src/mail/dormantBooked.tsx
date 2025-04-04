@@ -16,7 +16,7 @@ export const dormantBookedMail = (job: JobObject, client: ClientObject | null): 
 };
 
 const DormantBooked = (props: {job: JobObject, client: ClientObject | null}) => {
-    const clientFullName = props.client ? getUserFullName(props.client.user) : "Unknown Client";
+    const clientFullName = props.client ? getUserFullName(props.client) : "Unknown Client";
 
     return <p style={{margin: 0}}>
         This is a notification that {clientFullName} has booked a lesson. The job's ID is <a href={`https://secure.tutorcruncher.com/cal/service/${props.job.id}/`}>{props.job.id}</a>.

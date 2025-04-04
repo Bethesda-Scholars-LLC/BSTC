@@ -2,7 +2,21 @@ import { APIUser } from "./userTypes";
 
 export type ClientObject = {
     id: number
-    user: APIUser,
+    first_name: string
+    last_name: string
+    email: string
+    mobile: string
+    phone: string
+    photo: string | null
+    street: string
+    state: string
+    town: string
+    country: number
+    postcode: string
+    latitude: number
+    longitude: number
+    date_created: string
+    timezone: string
     status: string
     is_taxable: boolean
     notify_via_email: boolean
@@ -48,10 +62,8 @@ export type ClientObject = {
 };
 
 export type UpdateClientPayload = {
-    user: {
-        email: string
-        last_name: string
-    }
+    email?: string
+    last_name?: string
     pipeline_stage?: null | number
     extra_attrs?: {[key: string]: string}
     status?: string

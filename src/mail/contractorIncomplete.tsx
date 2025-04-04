@@ -16,11 +16,11 @@ export const hasContractorCompletedProfile = (contractor: ContractorObject): boo
 };
 
 export const contractorIncompleteMail = (contractor: ContractorObject): MailOpts => {
-    const tutorFullName = getUserFullName(contractor.user);
+    const tutorFullName = getUserFullName(contractor);
 
     return {
         from: BUSINESS_EMAIL_FROM, // eslint-disable-line,
-        to: PROD ? contractor.user.email : (process.env.TEST_EMAIL_ADDRESS ?? "services@bethesdascholars.com"),
+        to: PROD ? contractor.email : (process.env.TEST_EMAIL_ADDRESS ?? "services@bethesdascholars.com"),
         cc: process.env.BUSINESS_EMAIL_ADDRESS,
         subject: `[REQUIRED ACTION] Profile Completion Requested for ${tutorFullName}`,
         html: ReactDOMServer.renderToString(<ContractorIncomplete contractor={contractor} />),
@@ -30,7 +30,7 @@ export const contractorIncompleteMail = (contractor: ContractorObject): MailOpts
 };
 
 const ContractorIncomplete = ({contractor}: { contractor: ContractorObject }) => {
-    const tutorName = getUserFirstName(contractor.user);
+    const tutorName = getUserFirstName(contractor);
 
     return <p style={{ margin: 0 }}>
         Hi {tutorName},

@@ -13,9 +13,9 @@ export const awaitingAvailMail = (contractor: ContractorObject, client: ClientOb
         to: PROD ? process.env.BUSINESS_EMAIL_ADDRESS : (process.env.TEST_EMAIL_ADDRESS),
         email_type: EmailTypes.AwaitingAvail,
         client_id: client.id,
-        client_name: getUserFullName(client.user),
+        client_name: getUserFullName(client),
         contractor_id: contractor.id,
-        contractor_name: getUserFirstName(contractor.user),
+        contractor_name: getUserFirstName(contractor),
         job_id: job.id,
         subject: "TUTOR HAS NOT SET AVAILABILITY",
         html: ReactDOMServer.renderToString(<AwaitingAvail contractor={contractor} client={client} job={job}/>)
@@ -24,8 +24,8 @@ export const awaitingAvailMail = (contractor: ContractorObject, client: ClientOb
 
 const AwaitingAvail = (props: {contractor: ContractorObject, client: ClientObject, job: JobObject}) => {
     return <p style={{margin: 0}}>
-        This is a notification that {getUserFullName(props.contractor.user)} not set their availability in 24 hours.&nbsp;
-        {capitalize(getUserFullName(props.client.user))} is waiting on {getUserFirstName(props.contractor.user)} to update their availability.&nbsp;
+        This is a notification that {getUserFullName(props.contractor)} not set their availability in 24 hours.&nbsp;
+        {capitalize(getUserFullName(props.client))} is waiting on {getUserFirstName(props.contractor)} to update their availability.&nbsp;
         The job's ID is <a href={`https://secure.tutorcruncher.com/cal/service/${props.job.id}/`}>{props.job.id}</a>. Auto invoicing has not been set on this job's settings.
         <br/>
         <br/>

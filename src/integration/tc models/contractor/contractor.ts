@@ -15,7 +15,7 @@ import { Log, PROD, capitalize, getAttrByMachineName, randomChoice } from "../..
 import { addTCListener } from "../../hook";
 import { ChargeCat, createAdHocCharge } from "../ad hoc/adHoc";
 import { ApplicationObject } from "../application/types";
-import { ClientManager, getClientById, getMinimumClientUpdate, moveToMatchedAndBooked, updateClient } from "../client/client";
+import { ClientManager, getClientById, moveToMatchedAndBooked, updateClientById } from "../client/client";
 import { PipelineStage, addedContractorToService, getServiceById, onLessonComplete } from "../service/service";
 import { DumbUser } from "../user/types";
 import { getUserFullName } from "../user/user";
@@ -47,14 +47,14 @@ export const getContractorById = async (id: number): Promise<ContractorObject | 
     }
 };
 
-export const updateContractor = async (data: UpdateContractorPayload) => {
+export const updateContractorById = async (id:number, data: UpdateContractorPayload) => {
     try {
-        Log.info(`updating contractor ${data.user.email}`);
-        const contractor = await ApiFetcher.sendRequest("/contractors/", {
+        Log.info(`updating contractor ${id} through API`);
+        const contractor = await ApiFetcher.sendRequest(`/contractors/${id}`, {
             method: "POST",
-            data
+            data: data
         });
-        Log.info(`sucessfully updated contractor ${data.user.email}`);
+        Log.info(`sucessfully updated contractor ${id} through API`);
         await SyncContractor(contractor.data.role as any);
     } catch (e) {
         Log.error(e);
@@ -75,44 +75,42 @@ export const getRandomContractor = async (): Promise<ContractorObject | null> =>
     return null;
 };
 
-export const getMinimumContractorUpdate = (tutor: {user: { email: string, last_name: string }}): UpdateContractorPayload => {
-    return {
-        user: {
-            email: tutor.user.email,
-            last_name: tutor.user.last_name
-        },
-    };
-};
+// export const getMinimumContractorUpdate = (tutor: {user: { email: string, last_name: string }}): UpdateContractorPayload => {
+//     return {
+//         user: {
+//             email: tutor.user.email,
+//             last_name: tutor.user.last_name
+//         },
+//     };
+// };
 
-export const setTutorBias = async (contractor: {user: { email: string, last_name: string }}, value: -1 | 0 | 1) => {
-    Log.info(`setting tutor bias for tutor ${contractor.user.email}`);
-    const defaultTutor = getMinimumContractorUpdate(contractor);
+export const setTutorBias = async (contractor: ContractorObject, value: -1 | 0 | 1) => {
+    Log.info(`setting tutor bias for tutor ${contractor.email}`);
+    const defaultTutor: UpdateContractorPayload = {};
 
     defaultTutor.extra_attrs = { bias: value.toString() };
 
-    await updateContractor(defaultTutor);
+    await updateContractorById(contractor.id, defaultTutor);
 };
 
 export const setContractFilledOut = async (contractor: ContractorObject, value: boolean) => {
-    const defaultTutor = getMinimumContractorUpdate(contractor);
+    const defaultTutor: UpdateContractorPayload = {};
 
     defaultTutor.extra_attrs = { contract_filled_out: value };
 
-    await updateContractor(defaultTutor);
+    await updateContractorById(contractor.id, defaultTutor);
 };
 
 export const getNewContractorDetails = (contractor: ContractorObject): UpdateContractorPayload => {
     Log.info(`getting new contractor details ${contractor.id}`);
-    const defaultTutor = getMinimumContractorUpdate(contractor);
     const phoneNumber = getAttrByMachineName("phone_number", contractor.extra_attrs);
     const address = getAttrByMachineName("home_street_address", contractor.extra_attrs);
     const city = getAttrByMachineName("city", contractor.extra_attrs);
     const zipCode = getAttrByMachineName("zipcode", contractor.extra_attrs);
     const school = getAttrByMachineName("school_1", contractor.extra_attrs);
-    const tutorUser = contractor.user;
+    const tutorUser = contractor;
 
-    defaultTutor.user = {
-        ...defaultTutor.user,
+    const defaultTutor: UpdateContractorPayload = {
         mobile: phoneNumber?.value ?? tutorUser.mobile,
         street: address?.value ?? tutorUser.street,
         town: city?.value ?? tutorUser.town,
@@ -134,14 +132,14 @@ export const updateContractorDetails = async (contractor: ContractorObject) => {
     const zipCode = getAttrByMachineName("zipcode", contractor.extra_attrs);
 
     // preventing infinite loop
-    if (contractor.user.mobile === phoneNumber?.value &&
-        contractor.user.street === address?.value &&
-        contractor.user.town === city?.value &&
-        contractor.user.postcode === zipCode?.value
+    if (contractor.mobile === phoneNumber?.value &&
+        contractor.street === address?.value &&
+        contractor.town === city?.value &&
+        contractor.postcode === zipCode?.value
     ) {
         return;
     }
-    await updateContractor(getNewContractorDetails(contractor));
+    await updateContractorById(contractor.id, getNewContractorDetails(contractor));
 };
 
 export const popTutorFromCAs = async (contractor: ContractorObject) => {
@@ -210,10 +208,7 @@ export const popTutorFromCAs = async (contractor: ContractorObject) => {
             Log.info(`sucessfully deleted client from client awaiting DB id ${awaitingClient._id}`);
 
             if (client.status === "prospect" && client.pipeline_stage.id === PipelineStage.AvailabilityNotBooked) {
-                await updateClient({
-                    ...getMinimumClientUpdate(client),
-                    pipeline_stage: PipelineStage.MatchedNotBooked
-                });
+                await updateClientById(client.id, { pipeline_stage: PipelineStage.MatchedNotBooked });
             }
 
             continue;
@@ -263,7 +258,7 @@ addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<ContractorObjec
 
         if (Object.values(recruiterIds).includes(referrerId)) {
             await createAdHocCharge({
-                description: `Thank you for referring ${getUserFullName(contractor.user)} to Bethesda Scholars!`,
+                description: `Thank you for referring ${getUserFullName(contractor)} to Bethesda Scholars!`,
                 date_occurred: new Date(Date.now()).toISOString().replace("T", " ").split(".")[0],
                 category: ChargeCat.Referral,
                 contractor: referrerId,
@@ -271,7 +266,7 @@ addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<ContractorObjec
             });
         } else {
             await createAdHocCharge({
-                description: `Thank you for referring ${getUserFullName(contractor.user)} to Bethesda Scholars!`,
+                description: `Thank you for referring ${getUserFullName(contractor)} to Bethesda Scholars!`,
                 date_occurred: new Date(Date.now()).toISOString().replace("T", " ").split(".")[0],
                 category: ChargeCat.Referral,
                 contractor: referrerId,

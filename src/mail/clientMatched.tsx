@@ -12,7 +12,7 @@ import { extractFieldFromJob } from "../algo/algo";
 export const clientMatchedMail = (tutor: ContractorObject, client: ClientObject, job: JobObject): MailOptions => {
     return {
         from: BUSINESS_EMAIL_FROM, // eslint-disable-line
-        to: PROD ? client.user.email : (process.env.TEST_EMAIL_ADDRESS ?? client.user.email),
+        to: PROD ? client.email : (process.env.TEST_EMAIL_ADDRESS ?? client.email),
         cc: process.env.BUSINESS_EMAIL_ADDRESS,
         subject: `Tutor for ${job.rcrs[0].recipient_name.split(" ")[0]}`,
         html: ReactDOMServer.renderToString(<ClientMatched tutor={tutor} client={client} job={job}/>)
@@ -21,23 +21,23 @@ export const clientMatchedMail = (tutor: ContractorObject, client: ClientObject,
 
 const ClientMatched = (props: {tutor: ContractorObject, client: ClientObject, job: JobObject}) => {
     const tutorPronouns = getTutorPronouns(props.tutor);
-    const tutorName = getUserFirstName(props.tutor.user);
+    const tutorName = getUserFirstName(props.tutor);
     const studentName = props.job.rcrs[0].recipient_name.split(" ")[0];
     const tutorGrade = getAttrByMachineName("grade_1", props.tutor.extra_attrs)?.value;
     const tutorSchool = getAttrByMachineName("school_1", props.tutor.extra_attrs)?.value;
     const stripeFee = calcStripeFee(props.job.dft_charge_rate);
     const subjects = extractFieldFromJob(props.job, "classes needed tutoring in");
     return <p style={{margin: "0"}}>
-        Hi {getUserFirstName(props.client.user)},
+        Hi {getUserFirstName(props.client)},
         <br/>
         <br/>
-        We have found a tutor for {studentName}! {capitalize(tutorPronouns.possesive)} name is {getUserFullName(props.tutor.user)}.
+        We have found a tutor for {studentName}! {capitalize(tutorPronouns.possesive)} name is {getUserFullName(props.tutor)}.
          Here are some brief details about {tutorPronouns.pronouns[1]} - you can view {tutorPronouns.possesive} full bio when booking a lesson.
         <ul style={{listStyleType: "none", marginLeft: "15px", padding: "0"}}>
             {tutorGrade && <li><b>Tutor Grade: </b>{tutorGrade}</li>}
             {tutorSchool && <li><b>Tutor School: </b>{tutorSchool}</li>}
-            {props.tutor.user.mobile && <li><b>Phone Number: </b>{cleanPhoneNumber(props.tutor.user.mobile)}</li>}
-            {props.tutor.user.email && <li><b>Email: </b>{props.tutor.user.email}</li>}
+            {props.tutor.mobile && <li><b>Phone Number: </b>{cleanPhoneNumber(props.tutor.mobile)}</li>}
+            {props.tutor.email && <li><b>Email: </b>{props.tutor.email}</li>}
             {subjects && <li><b>Subjects: </b>{subjects}</li>}
         </ul>
         {props.job.dft_location && <>

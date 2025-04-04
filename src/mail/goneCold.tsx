@@ -12,16 +12,16 @@ import ManagerSignature from "./managerSignature";
 export const goneColdMail = (job: JobObject, client: ClientObject | null, contractor: ContractorObject | null): MailOptions => {
     return {
         from: MANAGER_EMAIL_FROM, // eslint-disable-line,
-        to: PROD ? (client?.user.email ?? process.env.BUSINESS_EMAIL_ADDRESS) : (process.env.TEST_EMAIL_ADDRESS ?? "services@bethesdascholars.com"),
+        to: PROD ? (client?.email ?? process.env.BUSINESS_EMAIL_ADDRESS) : (process.env.TEST_EMAIL_ADDRESS ?? "services@bethesdascholars.com"),
         cc: [process.env.BUSINESS_EMAIL_ADDRESS!, process.env.MANAGER_EMAIL_ADDRESS!],
-        subject: `Lessons with ${contractor ? getUserFirstName(contractor.user) : ""}`,
+        subject: `Lessons with ${contractor ? getUserFirstName(contractor) : ""}`,
         html: ReactDOMServer.renderToString(<GoneCold job={job} client={client} contractor={contractor}/>)
     };
 };
 
 const GoneCold = (props: {job: JobObject, client: ClientObject | null, contractor: ContractorObject | null}) => {
-    const clientName = props.client ? getUserFirstName(props.client.user) : "";
-    const tutorName = props.contractor ? getUserFirstName(props.contractor.user) : "";
+    const clientName = props.client ? getUserFirstName(props.client) : "";
+    const tutorName = props.contractor ? getUserFirstName(props.contractor) : "";
     const allPronouns = props.contractor ? getTutorPronouns(props.contractor) : {pronouns: ""};
 
     return <p style={{margin: 0}}>

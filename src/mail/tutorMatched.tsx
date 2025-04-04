@@ -10,14 +10,14 @@ import { BUSINESS_EMAIL_FROM, PROD } from "../util";
 const tutorMatchedMail = (tutor: ContractorObject, client: ClientObject | null, job: JobObject): MailOptions => {
     return {
         from: BUSINESS_EMAIL_FROM, // eslint-disable-line
-        to: PROD ? tutor.user.email : (process.env.TEST_EMAIL_ADDRESS ?? tutor.user.email),
+        to: PROD ? tutor.email : (process.env.TEST_EMAIL_ADDRESS ?? tutor.email),
         subject: "You have been assigned to a client",
         html: ReactDOMServer.renderToString(<TutorMatched tutor={tutor} client={client} job={job}/>)
     };
 };
 
 const TutorMatched = (props: {tutor: ContractorObject, client: ClientObject | null, job: JobObject}) => {
-    const tutorName = getUserFirstName(props.tutor.user);
+    const tutorName = getUserFirstName(props.tutor);
     const smallIndent: CSSProperties = {
         paddingLeft: "10px"
     };
@@ -53,17 +53,17 @@ const TutorMatched = (props: {tutor: ContractorObject, client: ClientObject | nu
         </ol>
         <b>Client Information:</b>
         <div style={{marginLeft: "20px"}}>
-            Parent Name: {getUserFullName(props.client?.user)}
+            Parent Name: {props.client && getUserFullName(props.client)}
             <br/>
             Student Name: {props.job.rcrs[0].recipient_name}
-            {props.client?.user.phone &&
+            {props.client?.phone &&
                 <>
                     <br/>
-                    Parent Phone Number: {cleanPhoneNumber(props.client?.user.phone)}
+                    Parent Phone Number: {cleanPhoneNumber(props.client?.phone)}
                 </>
             }
             <br/>
-            Parent Email: {props.client?.user.email}
+            Parent Email: {props.client?.email}
         </div>
         <br/>
         Your lessons will take place {location}&nbsp;

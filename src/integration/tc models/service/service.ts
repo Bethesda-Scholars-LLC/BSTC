@@ -15,12 +15,13 @@ import TutorModel from "../../../models/tutor";
 import { ManyResponse, TCEvent } from "../../../types";
 import { Log, PROD, capitalize, getAttrByMachineName, randomChoice } from "../../../util";
 import { addTCListener } from "../../hook";
-import { getClientById, getMinimumClientUpdate, updateClient } from "../client/client";
-import { ClientObject } from "../client/types";
-import { getContractorById, getMinimumContractorUpdate, setTutorBias, updateContractor } from "../contractor/contractor";
+import { getClientById, updateClientById } from "../client/client";
+import { ClientObject, UpdateClientPayload } from "../client/types";
+import { getContractorById, setTutorBias, updateContractorById } from "../contractor/contractor";
 import { LessonObject } from "../lesson/types";
 import { getUserFullName } from "../user/user";
 import { DumbJob, JobObject, UpdateServicePayload } from "./types";
+import { UpdateContractorPayload } from "../contractor/types";
 
 const exemptClients = ["soueid.erica@gmail.com", "bego.cortina@me.com", "eakhtarzandi@nationaljournal.com",
                         "marisa.michnick@gmail.com", "sanazshojaie@hotmail.com", "roxana.grieve@gmail.com",
@@ -200,7 +201,7 @@ export const setJobRate = async (client: ClientObject, job: JobObject, outOfStat
         payRate += 10;
     }
 
-    if (exemptClients.includes(client.user.email)) {
+    if (exemptClients.includes(client.email)) {
         chargeRate = 45;
         payRate = 25;
     }
@@ -240,7 +241,7 @@ addTCListener("REQUESTED_A_SERVICE", async (event: TCEvent<JobObject>) => {
         }
 
         // set school
-        const updatePayload = getMinimumClientUpdate(client);
+        const updatePayload: UpdateClientPayload = {};
         updatePayload.status = "prospect";
         updatePayload.pipeline_stage = PipelineStage.NewClient;
         updatePayload.extra_attrs = { student_school: school.value.split(" ").map(capitalize).join(" ") };
@@ -262,7 +263,7 @@ addTCListener("REQUESTED_A_SERVICE", async (event: TCEvent<JobObject>) => {
         }*/
         
         await setJobRate(client, job, outOfState);
-        await updateClient(updatePayload);
+        await updateClientById(client.id, updatePayload);
     }
     Log.info("sucessfully executed all tasks for this callback function");
 });
@@ -334,11 +335,11 @@ export const addedContractorToService = async (job: JobObject) => {
                     
                     await TutorModel.updateOne({cruncher_id: contractor.id}, {bias: 0}).exec();
 
-                    const defaultTutor = getMinimumContractorUpdate(contractor);
+                    const defaultTutor: UpdateContractorPayload = {};
 
                     defaultTutor.extra_attrs = { bias: "0" };
 
-                    await updateContractor(defaultTutor);
+                    await updateContractorById(contractor.id, defaultTutor);
 
                     const clientJobRelation = (await AwaitingClient.findOne({
                         client_id: client.id,
@@ -348,10 +349,10 @@ export const addedContractorToService = async (job: JobObject) => {
                     if (clientJobRelation === null) {
                         await new AwaitingClient({
                             client_id: client.id,
-                            client_name: getUserFullName(client.user),
+                            client_name: getUserFullName(client),
                             job_id: job.id,
                             tutor_ids: [contractor.id],
-                            tutor_names: [getUserFullName(contractor.user)]
+                            tutor_names: [getUserFullName(contractor)]
                         }).save();
                         // otherwise update current one
                     } else {
@@ -378,10 +379,7 @@ export const addedContractorToService = async (job: JobObject) => {
         }
 
         if (client && client.status === "prospect" && client.pipeline_stage.id === PipelineStage.NewClient) {
-            await updateClient({
-                ...getMinimumClientUpdate(client),
-                pipeline_stage: PipelineStage.AvailabilityNotBooked
-            });
+            await updateClientById(client.id, { pipeline_stage: PipelineStage.AvailabilityNotBooked });
         }
     }
 
@@ -411,9 +409,9 @@ export const onLessonComplete = async (job: JobObject, client_id: number) => {
             if (job.labels[i].id === Labels.firstLessonComplete) {
                 Log.info("queueing first lesson complete mail");
                 await queueFirstLessonComplete(job);
-                const updatePayload = getMinimumClientUpdate(client);
+                const updatePayload: UpdateClientPayload = {};
                 updatePayload.pipeline_stage = PipelineStage.FeedbackRequested;
-                await updateClient(updatePayload);
+                await updateClientById(client.id, updatePayload);
                 return;
             }
         }
