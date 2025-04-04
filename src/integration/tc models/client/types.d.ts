@@ -7,7 +7,7 @@ export type ClientObject = {
     email: string
     mobile: string
     phone: string
-    photo: string | null
+    photo: string | null | undefined
     street: string
     state: string
     town: string
