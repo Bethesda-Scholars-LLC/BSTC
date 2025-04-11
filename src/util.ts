@@ -40,6 +40,7 @@ export namespace Log {
 
     /* Same as error logger, except doesn't send notification */
     export const warn = (message?: any, ...optionalParams: any[]) => {
+        info(message, ...optionalParams);
         log(console.error, message, "ERROR", ...optionalParams);
     };
 
