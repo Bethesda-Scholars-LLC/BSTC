@@ -55,7 +55,7 @@ export const updateContractorById = async (id:number, data: UpdateContractorPayl
             data: data
         });
         Log.info(`sucessfully updated contractor ${id} through API`);
-        await SyncContractor(contractor.data.role as any);
+        await SyncContractor(contractor as any);
     } catch (e) {
         Log.error(e);
     }
