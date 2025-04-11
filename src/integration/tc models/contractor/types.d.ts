@@ -7,7 +7,7 @@ export type ContractorObject = {
     email: string
     mobile: string
     phone: string
-    photo: string | null | undefined
+    photo?: string | null | undefined
     street: string
     state: string
     town: string
