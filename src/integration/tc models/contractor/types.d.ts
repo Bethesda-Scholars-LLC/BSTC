@@ -7,7 +7,6 @@ export type ContractorObject = {
     email: string
     mobile: string
     phone: string
-    photo?: string | null | undefined
     street: string
     state: string
     town: string
@@ -17,6 +16,7 @@ export type ContractorObject = {
     longitude: number
     date_created: string
     timezone: string
+    photo: string | null | undefined
     status: string
     charge_via_branch: boolean
     default_rate: number
