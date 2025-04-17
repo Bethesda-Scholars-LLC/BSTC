@@ -23,7 +23,7 @@ import { ContractorObject, UpdateContractorPayload } from "./types";
 import TutorModel from "../../../models/tutor";
 
 const recruiterIds = {
-    evelynGoldin: 2850125
+    // evelynGoldin: 2850125
 };
 
 export const getManyContractors = async (page?: number): Promise<ManyResponse<DumbUser> | null> => {
