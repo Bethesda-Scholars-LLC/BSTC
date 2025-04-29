@@ -25,7 +25,7 @@ export enum ClientManager {
 export const updateClientById = async (id: number, data: UpdateClientPayload) => {
     try {
         Log.info(`updating client ${id} through API`);
-        await ApiFetcher.sendRequest(`/clients/${id}`, {
+        await ApiFetcher.sendRequest(`/clients/${id}/`, {
             method: "POST",
             data: data
         });

@@ -38,7 +38,7 @@ export const getManyContractors = async (page?: number): Promise<ManyResponse<Du
 export const getContractorById = async (id: number): Promise<ContractorObject | null> => {
     try {
         Log.info(`retrieving contractor ${id} from API`);
-        const contractor = (await ApiFetcher.sendRequest(`/contractors/${id}`))?.data as ContractorObject;
+        const contractor = (await ApiFetcher.sendRequest(`/contractors/${id}/`))?.data as ContractorObject;
         Log.info(`successfully retrieved contractor ${contractor.id} from API`);
         return contractor;
     } catch (e) {
