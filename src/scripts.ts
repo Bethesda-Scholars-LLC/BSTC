@@ -22,7 +22,7 @@ const SKIP_CONTRACTORS: number[] = [];
 
 const getContractors = async (page?: number): Promise<ManyResponse<ContractorObject> | null> => {
     try {
-        return (await ApiFetcher.sendRequest(`/contractors?page=${page ?? 1}`))?.data;
+        return (await ApiFetcher.sendRequest(`/contractors/?page=${page ?? 1}`))?.data;
     } catch(e) {
         Log.error(e);
         return null;
@@ -31,7 +31,7 @@ const getContractors = async (page?: number): Promise<ManyResponse<ContractorObj
 
 const getManyLessons = async (page?: number): Promise<ManyResponse<LessonObject> | null> => {
     try {
-        return (await ApiFetcher.sendRequest(`/appointments?page=${Math.max(page ?? 1, 1)}`))?.data as ManyResponse<LessonObject>;
+        return (await ApiFetcher.sendRequest(`/appointments/?page=${Math.max(page ?? 1, 1)}`))?.data as ManyResponse<LessonObject>;
     } catch (e) {
         Log.error(e);
         return null;

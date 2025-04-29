@@ -83,7 +83,7 @@ export const getServiceById = async (id: number): Promise<JobObject | null> => {
 
 export const getManyServices = async (page?: number): Promise<ManyResponse<DumbJob> | null> => {
     try {
-        return (await ApiFetcher.sendRequest(`/services?page=${Math.max(page ?? 1, 1)}`))?.data as ManyResponse<DumbJob>;
+        return (await ApiFetcher.sendRequest(`/services/?page=${Math.max(page ?? 1, 1)}`))?.data as ManyResponse<DumbJob>;
     } catch (e) {
         Log.error(e);
         return null;

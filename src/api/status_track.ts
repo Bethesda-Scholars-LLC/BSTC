@@ -145,7 +145,7 @@ export const syncStatusMap = async () => {
     // loop through each page
     for(let page = 1; ; page++) {
         Log.debug(`Syncing status map page ${page}`);
-        const currResp: ManyResponse<DumbJob> = (await ApiFetcher.sendRequest(`/services?last_updated_gte=${twoMonthsAgo}&page=${page}`)).data;
+        const currResp: ManyResponse<DumbJob> = (await ApiFetcher.sendRequest(`/services/?last_updated_gte=${twoMonthsAgo}&page=${page}`)).data;
 
         for(let i = 0; i < currResp.results.length; i++) {
             Log.debug(`Syncing job ${(page - 1) * 100 + i}`);

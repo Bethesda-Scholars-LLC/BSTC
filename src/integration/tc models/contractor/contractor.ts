@@ -28,7 +28,7 @@ const recruiterIds = {
 
 export const getManyContractors = async (page?: number): Promise<ManyResponse<DumbUser> | null> => {
     try {
-        return (await ApiFetcher.sendRequest(`/contractors?page=${Math.max(page ?? 1, 1)}`))?.data as ManyResponse<DumbUser>;
+        return (await ApiFetcher.sendRequest(`/contractors/?page=${Math.max(page ?? 1, 1)}`))?.data as ManyResponse<DumbUser>;
     } catch (e) {
         Log.error(e);
         return null;

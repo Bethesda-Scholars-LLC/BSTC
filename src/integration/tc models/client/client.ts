@@ -63,7 +63,7 @@ export const getRandomClient = async (): Promise<ClientObject | null> => {
 export const getClientById = async (id: number): Promise<ClientObject | null> => {
     try {
         Log.info(`retreiving client ${id} from API`);
-        const client = (await ApiFetcher.sendRequest(`/clients/${id}`))?.data as ClientObject;
+        const client = (await ApiFetcher.sendRequest(`/clients/${id}/`))?.data as ClientObject;
         Log.info(`successfully retrieved client ${client.id} from API`);
         return client;
     } catch(e) {
