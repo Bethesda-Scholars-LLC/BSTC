@@ -50,7 +50,7 @@ export const getContractorById = async (id: number): Promise<ContractorObject | 
 export const updateContractorById = async (id:number, data: UpdateContractorPayload) => {
     try {
         Log.info(`updating contractor ${id} through API`);
-        const contractor = await ApiFetcher.sendRequest(`/contractors/${id}`, {
+        const contractor = await ApiFetcher.sendRequest(`/contractors/${id}/`, {
             method: "POST",
             data: data
         });
