@@ -482,13 +482,13 @@ addTCListener("CHANGED_SERVICE_STATUS", async (event: TCEvent<JobObject>) => {
 
             // COMMENT AFTER THANKSGIVING AND CHRISTMAS
             
-            transporterManager.sendMail(goneColdMail(job, client, contractor), (err) => {
-                if (err)
-                    Log.error(err);
-            });
-            Log.info(`sucessfully sent gone cold mail for job ${job.id}`);
+            // transporterManager.sendMail(goneColdMail(job, client, contractor), (err) => {
+            //     if (err)
+            //         Log.error(err);
+            // });
+            // Log.info(`sucessfully sent gone cold mail for job ${job.id}`);
             
-            await updateServiceStatus(job, "in-progress");
+            // await updateServiceStatus(job, "in-progress");
         }
     }
     Log.info("sucessfully executed all tasks for this callback function");
