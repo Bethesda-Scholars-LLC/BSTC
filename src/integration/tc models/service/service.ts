@@ -480,7 +480,7 @@ addTCListener("CHANGED_SERVICE_STATUS", async (event: TCEvent<JobObject>) => {
         }).exec();
         if (notCold) {
 
-            // COMMENT AFTER THANKSGIVING AND CHRISTMAS
+            // COMMENT TO DISABLE COLD JOBS
             
             // transporterManager.sendMail(goneColdMail(job, client, contractor), (err) => {
             //     if (err)
