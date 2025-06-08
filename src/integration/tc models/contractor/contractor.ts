@@ -29,12 +29,12 @@ const recruiterIds = {
 export const screeners: Screener[] = [
     {
         name: "Miles Bradley",
-        id: 2255432,
+        id: 1972957,
         email: "milestbradley@gmail.com"
     },
     {
         name: "Pascal Bell",
-        id: 1615330,
+        id: 1732355,
         email: "pascal@bethesdascholars.com"
     }
 ];
@@ -263,6 +263,7 @@ addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<ContractorObjec
              pay_contractor: screeningRate
          });
 
+         Log.info("Sending screening email");
          transporterPascal.sendMail(ContractorScreenedEmail(contractor, screener), (err) => {
              if (err)
                  Log.error(err);
