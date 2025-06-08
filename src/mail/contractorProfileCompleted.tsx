@@ -5,12 +5,14 @@ import { ContractorObject } from "../integration/tc models/contractor/types";
 import { getUserFirstName, getUserFullName } from "../integration/tc models/user/user";
 import { BUSINESS_EMAIL_FROM, PROD } from "../util";
 import { EmailTypes, MailOpts } from "./mail";
+import { screeners } from "../integration/tc models/contractor/contractor";
 
 export const contractorProfileCompleteEmail = (contractor: ContractorObject): MailOpts => {
+    const screenerEmails = screeners.map(screener => screener.email);
     return {
         from: BUSINESS_EMAIL_FROM, // eslint-disable-line,
         to: PROD ? process.env.BUSINESS_EMAIL_ADDRESS : (process.env.TEST_EMAIL_ADDRESS),
-        cc: ["spencerbradley1351@gmail.com", "pascal@bethesdascholars.com"], // copy who is responsible for screenings
+        cc: [...screenerEmails, "pascal@bethesdascholars.com"], // copy who is responsible for screenings
         email_type: EmailTypes.ProfileComplete,
         contractor_id: contractor.id,
         contractor_name: getUserFirstName(contractor),

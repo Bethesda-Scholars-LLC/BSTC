@@ -97,6 +97,12 @@ Currently recruiters are paid $20 for referrals while all other tutors are paid 
 1. add recruiters to `recruiterIds` variable
 2. in webhook `CHANGED_CONTRACTOR_STATUS` add logic after line 238
 
+### Adding Screeners
+Currently screeners are paid $17.5 for screening a tutor. Add more/update screeners in `contractor.ts` **Screeners must have a contractor account on TutorCruncher.**
+1. add screeners to `screeners` variable
+2. change pay using `screeningRate` variable 
+3. in webhook `CHANGED_CONTRACTOR_STATUS` add logic
+
 ### Adding Exempt Clients
 Currently there are 12 clients exempt from extra lesson fees including in person fees, higher level subject fees, etc. These clients will only be charged $45 regardless of their tutoring request (except test prep). To change this, modify `service.ts`:
 1. add to `exemptClients` variable
@@ -109,7 +115,7 @@ Currently there are 12 clients exempt from extra lesson fees including in person
 | `REQUESTED_A_SERVICE`               | Change job's name to only include tutors first name and last initial. And set job default location based on description. Moves client to New Client pipeline and sets client manager accordingly. Capitalizes school name properly. Sets job rate to $40 for elementary school tutoring. |
 | `ADDED_CONTRACTOR_TO_SERVICE`       | Change job's status to in progress, and move pipeline stage on client to availability not set. Also sets `looking_for_job` custom field to false. Sets custom pay rate to $28 for special tutors. Adds tutor/job to database if not already in there. Creates ad hoc payment for referral if tutor profile has referral code. Schedules mail to send to managment if tutor has not set availability in 24 hours. |
 | `REMOVED_CONTRACTOR_FROM_SERVICE`   | This removes the tutor from the jobs stored in database if there are any. |
-| `CHANGED_CONTRACTOR_STATUS`         | Sets `looking_for_job` custom field to true when tutor is approved. Sets phone number, address, and capitalizes school when approved as well. Sends email with referral instructions and referral code when approved.|
+| `CHANGED_CONTRACTOR_STATUS`         | Sets `looking_for_job` custom field to true when tutor is approved. Sets phone number, address, and capitalizes school when approved as well. Sends email with referral instructions and referral code when approved. Adds ad hoc payment for screener when screener changes contractor status. |
 | `ADD_LABEL_TO_SERVICE`              | Checks for first lesson complete and sends feedback email. Moves client down pipeline. |
 | `MARKED_AN_APPOINTMENT_AS_COMPLETE` | Checks for first lesson complete and sends feedback email. Moves client down pipeline. |
 | `EDITED_AVAILABILITY`               | Removes tutor/service from the database if they are stored there. Sends email to client with tutor details. Deletes scheduled mail for email type `awaiting_availability` if one existed. Schedules mail that sends to client if they have not booked in 3 days. |

@@ -10,7 +10,7 @@ import { queueEmail } from "../../../mail/queueMail";
 import { tutorReferralMail } from "../../../mail/tutorReferral";
 import AwaitingClient, { popTutorFromCA } from "../../../models/clientAwaiting";
 import ScheduleMail from "../../../models/scheduledEmail";
-import { ManyResponse, TCEvent } from "../../../types";
+import { Actor, ManyResponse, Screener, TCEvent } from "../../../types";
 import { Log, PROD, capitalize, getAttrByMachineName, randomChoice } from "../../../util";
 import { addTCListener } from "../../hook";
 import { ChargeCat, createAdHocCharge } from "../ad hoc/adHoc";
@@ -21,10 +21,24 @@ import { DumbUser } from "../user/types";
 import { getUserFullName } from "../user/user";
 import { ContractorObject, UpdateContractorPayload } from "./types";
 import TutorModel from "../../../models/tutor";
+import { ContractorScreenedEmail } from "../../../mail/contractorScreened";
 
 const recruiterIds = {
     // evelynGoldin: 2850125
 };
+export const screeners: Screener[] = [
+    {
+        name: "Miles Bradley",
+        id: 2255432,
+        email: "milestbradley@gmail.com"
+    },
+    {
+        name: "Pascal Bell",
+        id: 1615330,
+        email: "pascal@bethesdascholars.com"
+    }
+];
+const screeningRate = 17.5;
 
 export const getManyContractors = async (page?: number): Promise<ManyResponse<DumbUser> | null> => {
     try {
@@ -271,6 +285,25 @@ addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<ContractorObjec
                 category: ChargeCat.Referral,
                 contractor: referrerId,
                 pay_contractor: 15.0
+            });
+        }
+
+        // if screener changed status and new status is rejected/approved
+        const actor = event.actor;
+        const screener = screeners.find(screener => screener.id === actor.id);
+        if (screener && (contractor.status === "approved" || contractor.status === "rejected")) {
+            Log.info(`logging screening pay for screener ${screener.id}`);
+            await createAdHocCharge({
+                description: `${getUserFullName(contractor)} ${contractor.id} Screened: ${contractor.status}`,
+                date_occurred: new Date(Date.now()).toISOString().replace("T", " ").split(".")[0],
+                category: ChargeCat.Screening,
+                contractor: screener.id,
+                pay_contractor: screeningRate
+            });
+
+            transporterPascal.sendMail(ContractorScreenedEmail(contractor, screener), (err) => {
+                if (err)
+                    Log.error(err);
             });
         }
     }

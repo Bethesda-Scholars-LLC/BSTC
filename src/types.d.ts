@@ -20,14 +20,19 @@ export type TCEvent<SubjectType = any> = {
     verb: string,
     timestamp: string,
     branch: number,
-    actor: {
-        name: string,
-        id: number,
-        user_id: number,
-        url: string
-    },
+    actor: Actor,
     subject: SubjectType,
 };
+
+/**
+ * @type Tutorcruncher actor
+ */
+export type Actor = {
+    name: string,
+    id: number,
+    user_id: number,
+    url: string
+}
 
 /**
  * @type Function that takes TCEvent, and does whatever with it
@@ -47,4 +52,10 @@ export type ManyResponse<T> = {
     next: string | null
     previous: string | null
     results: T[]
+}
+
+export type Screener = {
+    name: string,
+    id: number,
+    email: string
 }

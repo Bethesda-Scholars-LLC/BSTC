@@ -12,7 +12,8 @@ export enum EmailTypes {
     FirstLesson="first_lesson",
     AwaitingBooking="awaiting_booking",
     AwaitingAvail="awaiting_availability",
-    ContractorIncomplete="contractor_incomplete"
+    ContractorIncomplete="contractor_incomplete",
+    Screening="screening"
 }
 
 export interface MailOpts extends MailOptions {
