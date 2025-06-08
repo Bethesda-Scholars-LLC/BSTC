@@ -54,8 +54,10 @@ export type ManyResponse<T> = {
     results: T[]
 }
 
+// screener id is the admin id, contractor_id is the contractor id for the ad hoc charge
 export type Screener = {
     name: string,
     id: number,
     email: string
+    contractor_id: number
 }

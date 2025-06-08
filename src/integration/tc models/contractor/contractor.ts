@@ -29,13 +29,15 @@ const recruiterIds = {
 export const screeners: Screener[] = [
     {
         name: "Miles Bradley",
-        id: 1972957,
-        email: "milestbradley@gmail.com"
+        id: 2255432,
+        email: "milestbradley@gmail.com",
+        contractor_id: 1972957
     },
     {
         name: "Pascal Bell",
-        id: 1732355,
-        email: "pascal@bethesdascholars.com"
+        id: 1615330,
+        email: "pascal@bethesdascholars.com",
+        contractor_id: 1732355
     }
 ];
 const screeningRate = 17.5;
@@ -259,7 +261,7 @@ addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<ContractorObjec
              description: `${getUserFullName(contractor)} ${contractor.id} Screened: ${contractor.status}`,
              date_occurred: new Date(Date.now()).toISOString().replace("T", " ").split(".")[0],
              category: ChargeCat.Screening,
-             contractor: screener.id,
+             contractor: screener.contractor_id,
              pay_contractor: screeningRate
          });
 
