@@ -10,7 +10,7 @@ import { queueEmail } from "../../../mail/queueMail";
 import { tutorReferralMail } from "../../../mail/tutorReferral";
 import AwaitingClient, { popTutorFromCA } from "../../../models/clientAwaiting";
 import ScheduleMail from "../../../models/scheduledEmail";
-import { Actor, ManyResponse, Screener, TCEvent } from "../../../types";
+import { ManyResponse, Screener, TCEvent } from "../../../types";
 import { Log, PROD, capitalize, getAttrByMachineName, randomChoice } from "../../../util";
 import { addTCListener } from "../../hook";
 import { ChargeCat, createAdHocCharge } from "../ad hoc/adHoc";
@@ -32,12 +32,6 @@ export const screeners: Screener[] = [
         id: 2255432,
         email: "milestbradley@gmail.com",
         contractor_id: 1972957
-    },
-    {
-        name: "Pascal Bell",
-        id: 1615330,
-        email: "pascal@bethesdascholars.com",
-        contractor_id: 1732355
     }
 ];
 const screeningRate = 17.5;
@@ -254,7 +248,6 @@ addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<ContractorObjec
      // if screener changed status and new status is rejected/approved
      const actor = event.actor;
      const screener = screeners.find(screener => screener.id === actor.id);
-     Log.info(`Status: ${contractor.status}, actorId: ${actor.id}, screener: ${JSON.stringify(screener)}`);
      if (screener && (contractor.status === "approved" || contractor.status === "rejected")) {
          Log.info(`logging screening pay for screener ${screener.id}`);
          await createAdHocCharge({
