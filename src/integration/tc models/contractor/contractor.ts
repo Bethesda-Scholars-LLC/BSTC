@@ -249,6 +249,26 @@ const day = Duration.hour(24);
 addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<ContractorObject>) => {
     const contractor = event.subject;
 
+     // if screener changed status and new status is rejected/approved
+     const actor = event.actor;
+     const screener = screeners.find(screener => screener.id === actor.id);
+     Log.info(`Status: ${contractor.status}, actorId: ${actor.id}, screener: ${JSON.stringify(screener)}`);
+     if (screener && (contractor.status === "approved" || contractor.status === "rejected")) {
+         Log.info(`logging screening pay for screener ${screener.id}`);
+         await createAdHocCharge({
+             description: `${getUserFullName(contractor)} ${contractor.id} Screened: ${contractor.status}`,
+             date_occurred: new Date(Date.now()).toISOString().replace("T", " ").split(".")[0],
+             category: ChargeCat.Screening,
+             contractor: screener.id,
+             pay_contractor: screeningRate
+         });
+
+         transporterPascal.sendMail(ContractorScreenedEmail(contractor, screener), (err) => {
+             if (err)
+                 Log.error(err);
+         });
+     }
+
     if (contractor.status === "approved") {
         await setTutorBias(contractor, 1);
         Log.info(`sucessfully updated contractor ${contractor.id} through API`);
@@ -285,26 +305,6 @@ addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<ContractorObjec
                 category: ChargeCat.Referral,
                 contractor: referrerId,
                 pay_contractor: 15.0
-            });
-        }
-
-        // if screener changed status and new status is rejected/approved
-        const actor = event.actor;
-        const screener = screeners.find(screener => screener.id === actor.id);
-        Log.info(`Status: ${contractor.status}, actorId: ${actor.id}, screener: ${JSON.stringify(screener)}`);
-        if (screener && (contractor.status === "approved" || contractor.status === "rejected")) {
-            Log.info(`logging screening pay for screener ${screener.id}`);
-            await createAdHocCharge({
-                description: `${getUserFullName(contractor)} ${contractor.id} Screened: ${contractor.status}`,
-                date_occurred: new Date(Date.now()).toISOString().replace("T", " ").split(".")[0],
-                category: ChargeCat.Screening,
-                contractor: screener.id,
-                pay_contractor: screeningRate
-            });
-
-            transporterPascal.sendMail(ContractorScreenedEmail(contractor, screener), (err) => {
-                if (err)
-                    Log.error(err);
             });
         }
     }
