@@ -291,6 +291,7 @@ addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<ContractorObjec
         // if screener changed status and new status is rejected/approved
         const actor = event.actor;
         const screener = screeners.find(screener => screener.id === actor.id);
+        Log.info(`Status: ${contractor.status}, actorId: ${actor.id}, screener: ${JSON.stringify(screener)}`);
         if (screener && (contractor.status === "approved" || contractor.status === "rejected")) {
             Log.info(`logging screening pay for screener ${screener.id}`);
             await createAdHocCharge({
