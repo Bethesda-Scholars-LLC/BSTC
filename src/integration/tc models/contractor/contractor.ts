@@ -22,6 +22,7 @@ import { getUserFullName } from "../user/user";
 import { ContractorObject, UpdateContractorPayload } from "./types";
 import TutorModel from "../../../models/tutor";
 import { ContractorScreenedEmail } from "../../../mail/contractorScreened";
+import ScreeningModel from "../../../models/screenings";
 
 const recruiterIds = {
     // evelynGoldin: 2850125
@@ -244,11 +245,12 @@ addTCListener("EDITED_A_CONTRACTOR", async (event: TCEvent<ContractorObject>) =>
 const day = Duration.hour(24);
 addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<ContractorObject>) => {
     const contractor = event.subject;
-
-     // if screener changed status and new status is rejected/approved
      const actor = event.actor;
      const screener = screeners.find(screener => screener.id === actor.id);
-     if (screener && (contractor.status === "approved" || contractor.status === "rejected")) {
+     const screenedAlready = await ScreeningModel.exists({tutor_id: contractor.id}).exec();
+     
+     // if contractor hasn't been screened and was screened by a current screener
+     if (!screenedAlready && screener && (contractor.status === "approved" || contractor.status === "rejected")) {
          Log.info(`logging screening pay for screener ${screener.id}`);
          await createAdHocCharge({
              description: `${getUserFullName(contractor)} ${contractor.id} Screened: ${contractor.status}`,
@@ -262,6 +264,15 @@ addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<ContractorObjec
          transporterPascal.sendMail(ContractorScreenedEmail(contractor, screener), (err) => {
              if (err)
                  Log.error(err);
+         });
+         
+         Log.info("Creating new screening object to add to screening db");
+         ScreeningModel.create({
+            tutor_id: contractor.id,
+            status: contractor.status,
+            screener_id: screener.id,
+            screener_name: screener.name,
+            date: new Date()
          });
      }
 
