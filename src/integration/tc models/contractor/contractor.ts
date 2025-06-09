@@ -33,6 +33,12 @@ export const screeners: Screener[] = [
         id: 2255432,
         email: "milestbradley@gmail.com",
         contractor_id: 1972957
+    },
+    {
+        name: "Pascal Bell",
+        id: 1615330,
+        email: "pascal@bethesdascholars.com",
+        contractor_id: 1732355
     }
 ];
 const screeningRate = 17.5;
