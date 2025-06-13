@@ -8,6 +8,9 @@ import { EmailTypes, MailOpts } from "./mail";
 import { screeners } from "../integration/tc models/contractor/contractor";
 
 export const contractorProfileCompleteEmail = (contractor: ContractorObject): MailOpts => {
+    // TODO: implement round robin sending to the screener, use index that increments each time
+    // don't send to all screeners
+
     const screenerEmails = screeners.map(screener => screener.email);
     return {
         from: BUSINESS_EMAIL_FROM, // eslint-disable-line,
