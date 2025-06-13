@@ -2,6 +2,7 @@ import ApiFetcher from "../../../api/fetch";
 import { dormantBookedMail } from "../../../mail/dormantBooked";
 import { EmailTypes, transporterPascal } from "../../../mail/mail";
 import { wrongTutorMail } from "../../../mail/wrongTutor";
+import { wrongTutorToManagementMail } from "../../../mail/wrongTutorToClient";
 import NotCold from "../../../models/notCold";
 import ScheduleMail from "../../../models/scheduledEmail";
 import { ManyResponse, TCEvent } from "../../../types";
@@ -194,6 +195,10 @@ addTCListener("BOOKED_AN_APPOINTMENT", async (event: TCEvent<LessonObject>) => {
         }
         const contractor = await getContractorById(job.conjobs[0].contractor);
         transporterPascal.sendMail(wrongTutorMail(job, client, contractor), (err) => {
+            if(err)
+                Log.error(err);
+        });
+        transporterPascal.sendMail(wrongTutorToManagementMail(job, client, contractor), (err) => {
             if(err)
                 Log.error(err);
         });
