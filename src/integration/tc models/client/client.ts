@@ -2,7 +2,7 @@ import ApiFetcher from "../../../api/fetch";
 import { dormantBookedMail } from "../../../mail/dormantBooked";
 import { EmailTypes, transporterPascal } from "../../../mail/mail";
 import { wrongTutorMail } from "../../../mail/wrongTutor";
-import { wrongTutorToManagementMail } from "../../../mail/wrongTutorToClient";
+import { wrongTutorToManagementMail } from "../../../mail/wrongTutorToManagement";
 import NotCold from "../../../models/notCold";
 import ScheduleMail from "../../../models/scheduledEmail";
 import { ManyResponse, TCEvent } from "../../../types";
