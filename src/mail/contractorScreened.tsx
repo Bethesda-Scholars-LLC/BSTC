@@ -6,7 +6,6 @@ import { getUserFullName } from "../integration/tc models/user/user";
 import { BUSINESS_EMAIL_FROM, PROD } from "../util";
 import { EmailTypes, MailOpts } from "./mail";
 import { Screener } from "../types";
-import { screeners } from "../integration/tc models/contractor/contractor";
 
 export const ContractorScreenedEmail = (contractor: ContractorObject, screener: Screener): MailOpts => {
     return {

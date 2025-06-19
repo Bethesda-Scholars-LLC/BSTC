@@ -29,10 +29,16 @@ const recruiterIds = {
 };
 export const screeners: Screener[] = [
     {
-        name: "Miles Bradley",
-        id: 2255432,
-        email: "milestbradley@gmail.com",
-        contractor_id: 1972957
+        name: "Sadie Eisenberg",
+        id: 4690405,
+        email: "sadie.a.eisenberg@gmail.com",
+        contractor_id: 1786600
+    },
+    {
+        name: "Cody Paul",
+        id: 4690408,
+        email: "clp99@cornell.edu",
+        contractor_id: 1696149
     }
 ];
 const screeningRate = 17.5;

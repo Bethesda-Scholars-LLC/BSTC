@@ -3,19 +3,25 @@ import React from "react";
 import ReactDOMServer from "react-dom/server";
 import { ContractorObject } from "../integration/tc models/contractor/types";
 import { getUserFirstName, getUserFullName } from "../integration/tc models/user/user";
-import { BUSINESS_EMAIL_FROM, PROD } from "../util";
+import { BUSINESS_EMAIL_FROM, Log, PROD } from "../util";
 import { EmailTypes, MailOpts } from "./mail";
 import { screeners } from "../integration/tc models/contractor/contractor";
 
-export const contractorProfileCompleteEmail = (contractor: ContractorObject): MailOpts => {
-    // TODO: implement round robin sending to the screener, use index that increments each time
-    // don't send to all screeners
+let screenerIndex = 0;
+let lastContractorId = 0;
 
-    const screenerEmails = screeners.map(screener => screener.email);
+export const contractorProfileCompleteEmail = (contractor: ContractorObject): MailOpts => {
+    if (contractor.id !== lastContractorId) {
+        screenerIndex = (screenerIndex >= screeners.length - 1) ? 0 : screenerIndex + 1;
+        lastContractorId = contractor.id;
+    }
+    const screener = screeners[screenerIndex];
+    Log.info(`Sending contractorProfileCompleteEmail to screener ${screener.name}`);
+
     return {
         from: BUSINESS_EMAIL_FROM, // eslint-disable-line,
         to: PROD ? process.env.BUSINESS_EMAIL_ADDRESS : (process.env.TEST_EMAIL_ADDRESS),
-        cc: [...screenerEmails, "pascal@bethesdascholars.com"], // copy who is responsible for screenings
+        cc: [screener.email, "pascal@bethesdascholars.com"], // copy who is responsible for screenings
         email_type: EmailTypes.ProfileComplete,
         contractor_id: contractor.id,
         contractor_name: getUserFirstName(contractor),
