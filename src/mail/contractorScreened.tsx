@@ -9,11 +9,10 @@ import { Screener } from "../types";
 import { screeners } from "../integration/tc models/contractor/contractor";
 
 export const ContractorScreenedEmail = (contractor: ContractorObject, screener: Screener): MailOpts => {
-    const screenerEmails = screeners.map(screener => screener.email);
     return {
         from: BUSINESS_EMAIL_FROM, // eslint-disable-line,
         to: PROD ? process.env.BUSINESS_EMAIL_ADDRESS : (process.env.TEST_EMAIL_ADDRESS),
-        cc: [...screenerEmails, "pascal@bethesdascholars.com"], // copy screeners and management
+        cc: [screener.email, "pascal@bethesdascholars.com"], // copy screeners and management
         email_type: EmailTypes.Screening,
         subject: `Screening Added by ${screener.name}`,
         html: ReactDOMServer.renderToString(<ContractorScreened contractor={contractor} screener={screener}/>)
