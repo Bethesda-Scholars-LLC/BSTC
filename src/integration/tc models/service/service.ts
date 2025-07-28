@@ -22,6 +22,7 @@ import { LessonObject } from "../lesson/types";
 import { getUserFullName } from "../user/user";
 import { DumbJob, JobObject, UpdateServicePayload } from "./types";
 import { UpdateContractorPayload } from "../contractor/types";
+import { clients2025F } from "../client/clients2025F";
 
 const exemptClients = ["soueid.erica@gmail.com", "bego.cortina@me.com", "eakhtarzandi@nationaljournal.com",
                         "marisa.michnick@gmail.com", "sanazshojaie@hotmail.com", "roxana.grieve@gmail.com",
@@ -186,19 +187,27 @@ export const setJobRate = async (client: ClientObject, job: JobObject, outOfStat
                        checkSubject(subject, "ib"));
     const satACT = (checkSubject(subject, "sat") || checkSubject(subject, "act"));
     let chargeRate = 40;
-    let payRate = 25;
+    let payRate = 22.5;
 
     if (!studentGrade || studentGrade.value !== "1st-5th grade")
         chargeRate += 5;
+        payRate += 2.5;
     if (location && location.value === "In-person lessons at my house")
         chargeRate += 5;
+        payRate += 2.5;
     if (outOfState)
         chargeRate += 10;
     if (apPrecalcIB && !satACT) {
         chargeRate += 5;
+        payRate += 2.5;
     } else if (satACT) {
         chargeRate += 15;
         payRate += 10;
+    }
+
+    // add new client fee
+    if (!clients2025F.has(client.email)) {
+        payRate += 2;
     }
 
     if (exemptClients.includes(client.email)) {
