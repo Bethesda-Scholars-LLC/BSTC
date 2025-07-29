@@ -25,13 +25,13 @@ const WrongTutorToClient = (props: {job: JobObject, client: ClientObject | null,
         Hi {clientFirstName},
         <br />
         <br />
-        We saw that you recently booked a lesson with {tutorName}. You are receiving this email because TutorCruncher has indicated that {tutorName} is not your assigned tutor and may not be available.
-         Our team is checking on {tutorName}'s availability and will confirm with you whether the lesson will take place.
+        You recently booked a lesson with {tutorName}. TutorCruncher has indicated that {tutorName} is not your assigned tutor and is assigned to a different client.
+         We are checking on {tutorName}'s availability and will confirm with you whether the lesson will take place.
         <br />
         <br />
         If you have not been matched with an assigned tutor, please note that it takes 1-3 days to for our team to identify the right tutor for your needs,
-         and we ask that you do not book any lessons with other tutors during time.
-         If you have an assigned tutor, please only book lessons with this assigned tutor unless directed otherwise by Bethesda Scholars.
+         and we ask that you do not book any lessons with other tutors during this time.
+        If you have an assigned tutor, please only book lessons with this assigned tutor unless directed otherwise by Bethesda Scholars.
         <br />
         <br />
         If {tutorName} is your assigned tutor, there has been an error in our system and you can proceed as usual.
