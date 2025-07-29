@@ -28,7 +28,7 @@ const WrongTutor = (props: {job: JobObject, client: ClientObject | null, contrac
         You are not currently assigned to this client, but the client may need a cover tutor if their normal tutor was not available at that time.
         <br />
         <br />
-        <b>Please hold off on confirming the lesson at this time. Reply to this email if you are available for the lesson.</b>
+        <b>Please hold off on confirming the lesson, and instead reply to this email if you are available for the lesson.</b>
         <br />
         <br />
         Thanks,
