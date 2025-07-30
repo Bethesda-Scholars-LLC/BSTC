@@ -206,7 +206,7 @@ export const setJobRate = async (client: ClientObject, job: JobObject, outOfStat
     }
 
     // add new client fee
-    if (!clients2025F.has(client.email)) {
+    if (!clients2025F.has(client.email) && !satACT) {
         payRate += 2;
     }
 
