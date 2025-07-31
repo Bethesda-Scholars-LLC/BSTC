@@ -2,6 +2,8 @@ import ApiFetcher from "../../../api/fetch";
 import { dormantBookedMail } from "../../../mail/dormantBooked";
 import { EmailTypes, transporterPascal } from "../../../mail/mail";
 import { wrongTutorMail } from "../../../mail/wrongTutor";
+import { wrongTutorToClientMail } from "../../../mail/wrongTutorToClient";
+import { wrongTutorToManagementMail } from "../../../mail/wrongTutorToManagement";
 import NotCold from "../../../models/notCold";
 import ScheduleMail from "../../../models/scheduledEmail";
 import { ManyResponse, TCEvent } from "../../../types";
@@ -197,7 +199,15 @@ addTCListener("BOOKED_AN_APPOINTMENT", async (event: TCEvent<LessonObject>) => {
             if(err)
                 Log.error(err);
         });
-        Log.info("sucessfully sent wront tutor mail");
+        transporterPascal.sendMail(wrongTutorToManagementMail(job, client, contractor), (err) => {
+            if(err)
+                Log.error(err);
+        });
+        transporterPascal.sendMail(wrongTutorToClientMail(job, client, contractor), (err) => {
+            if(err)
+                Log.error(err);
+        });
+        Log.info("sucessfully sent wrong tutor mail");
         return;
     }
 
