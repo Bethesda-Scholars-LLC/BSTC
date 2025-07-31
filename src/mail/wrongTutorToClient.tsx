@@ -6,12 +6,12 @@ import { ContractorObject } from "../integration/tc models/contractor/types";
 import { JobObject } from "../integration/tc models/service/types";
 import { getUserFirstName } from "../integration/tc models/user/user";
 import { BUSINESS_EMAIL_FROM, PROD } from "../util";
-import { getTutorPronouns } from "./firstLesson";
 
 export const wrongTutorToClientMail = (job: JobObject, client: ClientObject | null, contractor: ContractorObject | null): MailOptions => {
     return {
         from: BUSINESS_EMAIL_FROM, // eslint-disable-line,
         to: client?.email ?? (process.env.TEST_EMAIL_ADDRESS ?? "services@bethesdascholars.com"),
+        cc: process.env.BUSINESS_EMAIL_ADDRESS,
         subject: "Lesson Booked With Wrong Tutor",
         html: ReactDOMServer.renderToString(<WrongTutorToClient job={job} client={client} contractor={contractor}/>)
     };
