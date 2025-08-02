@@ -189,14 +189,17 @@ export const setJobRate = async (client: ClientObject, job: JobObject, outOfStat
     let chargeRate = 40;
     let payRate = 22.5;
 
-    if (!studentGrade || studentGrade.value !== "1st-5th grade")
+    if (!studentGrade || studentGrade.value !== "1st-5th grade") {
         chargeRate += 5;
         payRate += 2.5;
-    if (location && location.value === "In-person lessons at my house")
+    }
+    if (location && location.value === "In-person lessons at my house") {
         chargeRate += 5;
         payRate += 2.5;
-    if (outOfState)
+    }
+    if (outOfState) {
         chargeRate += 10;
+    }
     if (apPrecalcIB && !satACT) {
         chargeRate += 5;
         payRate += 2.5;
@@ -207,14 +210,12 @@ export const setJobRate = async (client: ClientObject, job: JobObject, outOfStat
 
     // add new client fee
     if (!clients2025F.has(client.email) && !satACT) {
-        payRate += 2;
+        chargeRate += 2;
     }
 
     if (exemptClients.includes(client.email)) {
         chargeRate = 45;
-        payRate = 25;
     }
-
     const jobUpdate = getMinimumJobUpdate(job);
     jobUpdate.dft_charge_rate = chargeRate;
     jobUpdate.dft_contractor_rate = payRate;
