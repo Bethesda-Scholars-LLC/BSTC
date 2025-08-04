@@ -34,7 +34,7 @@ const WrongTutorToClient = (props: {job: JobObject, client: ClientObject | null,
          If you have an assigned tutor, please only book lessons with this assigned tutor unless directed otherwise by Bethesda Scholars.
         <br />
         <br />
-        If {tutorName} is your assigned tutor, there has been an error in our system and you can proceed as usual.
+        <b>If {tutorName} is your assigned tutor, there has been an error in our system and you can proceed as usual.</b>
         <br />
         <br />
         To help speed up the process, please reply to this email with any context on why {tutorName} is requested.
