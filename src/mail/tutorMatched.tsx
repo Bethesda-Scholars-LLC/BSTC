@@ -40,7 +40,10 @@ const TutorMatched = (props: {tutor: ContractorObject, client: ClientObject | nu
                     <li>Once logged in, click on the blue "Actions" button below your initials and select "Set availability."</li>
                 </ol>
             </li>
-            <li><b>IMPORTANT:</b> Read the following <b><a href="https://drive.google.com/file/d/11GxFXEul-JDDqlAe0w0ZRiaghQDT8Amn/view">tutoring guidelines</a></b> thoroughly before your first lesson. Please note that this is <b>an ongoing commitment throughout the year</b>, and you are expected to be <b>responsive and professional</b> with your client.</li>
+            <li>
+                <b>IMPORTANT:</b> Read the following <b><a href="https://drive.google.com/file/d/11GxFXEul-JDDqlAe0w0ZRiaghQDT8Amn/view">tutoring guidelines</a></b> thoroughly before your first lesson. Please note that this is <b>an ongoing commitment throughout the year</b>, and you are expected to be <b>responsive and professional</b> with your client.
+                 Please also read this important <a href="https://drive.google.com/file/d/1ZwRXXG9sLvIvLKU9LPg0OugfZ3tfT-qk/view?usp=sharing">infographic</a>
+            </li>
             <li>
                 When your client books a lesson with you, you will be notified and must accept the lesson. If the booked time no longer works with your schedule, decline the lesson and <b>contact your client to reschedule a different time.</b>
                 <ol style={smallIndent} type="a">
