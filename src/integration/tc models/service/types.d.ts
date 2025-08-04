@@ -59,7 +59,7 @@ export type JobObject = {
     sales_codes: number,
     sr_premium: string,
     status: string,
-    total_apt_units: decimal
+    total_apt_units: number
 };
 
 export type DumbJob = {
