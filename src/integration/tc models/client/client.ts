@@ -1,6 +1,7 @@
 import ApiFetcher from "../../../api/fetch";
 import { dormantBookedMail } from "../../../mail/dormantBooked";
-import { EmailTypes, transporterPascal } from "../../../mail/mail";
+import { EmailTypes, transporterManager, transporterPascal } from "../../../mail/mail";
+import { requestTipMail } from "../../../mail/requestTip";
 import { wrongTutorMail } from "../../../mail/wrongTutor";
 import { wrongTutorToClientMail } from "../../../mail/wrongTutorToClient";
 import { wrongTutorToManagementMail } from "../../../mail/wrongTutorToManagement";
@@ -98,6 +99,15 @@ export const moveToMatchedAndBooked = async (lesson: LessonObject, job: JobObjec
             tutor_name: getUserFullName(contractor)
         }).save();
         Log.info(`saved new not cold object to not cold schema with job id ${job.id}`);
+    }
+
+    if (job.total_apt_units >= 5.0 && job.total_apt_units < 6.0) {
+        transporterManager.sendMail(requestTipMail(client, contractor), (err) => {
+            if (err) {
+                Log.error(err);
+            }
+        });
+        Log.info(`sent tipping email to client ${client.id}`);
     }
 
     Log.info(`moving client to matched not booked from job ${job.id}`);
