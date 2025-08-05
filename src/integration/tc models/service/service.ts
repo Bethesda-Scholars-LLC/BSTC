@@ -23,6 +23,7 @@ import { getUserFullName } from "../user/user";
 import { DumbJob, JobObject, UpdateServicePayload } from "./types";
 import { UpdateContractorPayload } from "../contractor/types";
 import { clients2025F } from "../client/clients2025F";
+import { requestTipMail } from "../../../mail/requestTip";
 
 const exemptClients = ["soueid.erica@gmail.com", "bego.cortina@me.com", "eakhtarzandi@nationaljournal.com",
                         "marisa.michnick@gmail.com", "sanazshojaie@hotmail.com", "roxana.grieve@gmail.com",
@@ -409,6 +410,16 @@ export const onLessonComplete = async (job: JobObject, client_id: number) => {
     if (!client) {
         Log.info(`no client found with id ${client_id}`);
         return;
+    }
+    
+    const contractor = await getContractorById(job.conjobs[0].contractor);
+    if (contractor && job.total_apt_units >= 5.0 && job.total_apt_units < 6.0) {
+        transporterManager.sendMail(requestTipMail(client, contractor), (err) => {
+            if (err) {
+                Log.error(err);
+            }
+        });
+        Log.info(`sent tipping email to client ${client.id}`);
     }
 
     // matched and booked and only one lesson on the job and only one lesson on the job
