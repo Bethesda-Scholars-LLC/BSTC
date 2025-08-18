@@ -215,7 +215,7 @@ export const setJobRate = async (client: ClientObject, job: JobObject, outOfStat
     }
 
     if (exemptClients.includes(client.email)) {
-        chargeRate = 45;
+        chargeRate = Math.min(50, chargeRate);
     }
     const jobUpdate = getMinimumJobUpdate(job);
     jobUpdate.dft_charge_rate = chargeRate;
