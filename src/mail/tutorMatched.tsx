@@ -45,6 +45,9 @@ const TutorMatched = (props: {tutor: ContractorObject, client: ClientObject | nu
                  Please also read this important <a href="https://drive.google.com/file/d/1ZwRXXG9sLvIvLKU9LPg0OugfZ3tfT-qk/view?usp=sharing">infographic</a>
             </li>
             <li>
+                Please review our <a href="https://sites.google.com/bethesdascholars.com/tutorresources">tutoring resources database</a> for any related resources that may be helpful for this job.
+            </li>
+            <li>
                 When your client books a lesson with you, you will be notified and must accept the lesson. If the booked time no longer works with your schedule, decline the lesson and <b>contact your client to reschedule a different time.</b>
                 <ol style={smallIndent} type="a">
                     <li style={{fontStyle: "italic"}}>You may coordinate lessons through text with the client, just make sure that the coordinated time is booked on TutorCruncher, so we can pay you accordingly.</li>
