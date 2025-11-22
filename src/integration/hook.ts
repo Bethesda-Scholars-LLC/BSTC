@@ -34,7 +34,7 @@ hookRouter.all("*", async (req: Req, res: Res) => {
             .update(req.rawBody)
             .digest("hex");
         
-        if(verifyHook !== req.headers["webhook-signature"]){
+        if(verifyHook !== req.headers["Webhook-Signature"]){
             Log.error(`invalid request ${JSON.stringify(req.body, undefined, 2)}`);
             return res.status(400).json({error: `invalid request ${verifyHook} ${req.headers["webhook-signature"]}`}).send();
         }
