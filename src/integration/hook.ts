@@ -33,8 +33,6 @@ hookRouter.all("*", async (req: Req, res: Res) => {
         const verifyHook = createHmac("sha256", process.env.API_KEY!) // eslint-disable-line
             .update(req.rawBody)
             .digest("hex");
-        Log.info("verifyHook ", verifyHook);
-        Log.info("signature ", req.headers["webhook-signature"]);
 
         if(verifyHook !== req.headers["webhook-signature"]){
             Log.error(`invalid request ${JSON.stringify(req.body, undefined, 2)}`);
