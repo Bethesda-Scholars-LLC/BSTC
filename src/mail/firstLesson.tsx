@@ -90,7 +90,7 @@ export const queueFirstLessonComplete = async (job: JobObject) => {
                     Just wanted to check in on the lesson with ${tutorFirstName} - how did it go? Would you like to continue lessons with ${getTutorPronouns(tutor)}?
                     <br>
                     <br>
-                    If you would like to schedule more lessons, ${tutorFirstName}'s email is ${tutorEmail}. It might make scheduling easier, just remember to book the lesson after a time is coordinated.
+                    If you would like to schedule more lessons, ${tutorFirstName}'s email is ${tutorEmail}. It might make scheduling easier, just remember to book the lesson after a time is coordinated. If scheduling issues arise on a certain week, don't hesitate to reach out as we have other tutors available who can cover.
                     <br>
                     <br>
                     Thanks,
