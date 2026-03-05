@@ -31,6 +31,9 @@ const GoneCold = (props: {job: JobObject, client: ClientObject | null, contracto
         I noticed you have not had a lesson with {tutorName} in a while. Just wanted to check in whether you are still interested in lessons with {allPronouns.pronouns[1]}.
         <br/>
         <br/>
+        We have cover tutors if scheduling has recently been difficult. Or if the fit is no longer working out, we are happy to find a different tutor.
+        <br/>
+        <br/>
         Please let me know.
         <br/>
         <br/>
