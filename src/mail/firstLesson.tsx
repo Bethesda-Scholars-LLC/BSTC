@@ -29,7 +29,7 @@ export const FirstLesson = (props: { job: JobObject, tutor: ContractorObject, cl
             <br />
             <br />
             If you have not gotten in contact with {tutorFirstName}, {pronouns.possesive} {tutorPhoneNumber ? ` phone number is ${tutorPhoneNumber}` : ` email address is ${tutorEmailAddress}`}.
-            It might make scheduling easier, just remember to book the lesson after a time is coordinated.
+            It might make scheduling easier, just remember to book the lesson after a time is coordinated.  If scheduling issues arise on a certain week, don't hesitate to reach out as we have other tutors available who can cover.
         </>}
         <br />
         <br />
