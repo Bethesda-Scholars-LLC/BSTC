@@ -134,7 +134,7 @@ export const apiHeaders = {
     Authorization: `token ${process.env.API_KEY}`
 };
 
-const baseUrl = "https://secure.tutorcruncher.com/api/";
+const baseUrl = "https://app.tutorcruncher.com/api/";
 
 export const isObject = (obj: any): boolean => typeof obj === "object" && !Array.isArray(obj) && obj !== null;
 
