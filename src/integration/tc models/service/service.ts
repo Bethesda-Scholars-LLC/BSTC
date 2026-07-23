@@ -413,7 +413,7 @@ export const onLessonComplete = async (job: JobObject, client_id: number) => {
     }
     
     const contractor = await getContractorById(job.conjobs[0].contractor);
-    if (contractor && job.total_apt_units >= 5.0 && job.total_apt_units < 6.0) {
+    if (contractor && job.total_apt_units >= 3.0 && job.total_apt_units < 4.0) {
         transporterManager.sendMail(requestTipMail(client, contractor), (err) => {
             if (err) {
                 Log.error(err);
