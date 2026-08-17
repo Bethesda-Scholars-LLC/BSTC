@@ -187,7 +187,7 @@ export const setJobRate = async (client: ClientObject, job: JobObject, outOfStat
                        checkSubject(subject, "prec") ||
                        checkSubject(subject, "ib"));
     const satACT = (checkSubject(subject, "sat") || checkSubject(subject, "act"));
-    let chargeRate = 40;
+    let chargeRate = 43;
     let payRate = 22.5;
 
     if (!studentGrade || studentGrade.value !== "1st-5th grade") {
@@ -209,10 +209,10 @@ export const setJobRate = async (client: ClientObject, job: JobObject, outOfStat
         payRate += 10;
     }
 
-    // add new client fee
-    if (!clients2025F.has(client.email) && !satACT) {
-        chargeRate += 2;
-    }
+    // add new client fee 2025F
+    // if (!clients2025F.has(client.email) && !satACT) {
+    //     chargeRate += 2;
+    // }
 
     if (exemptClients.includes(client.email)) {
         chargeRate = Math.min(50, chargeRate);
@@ -503,13 +503,13 @@ addTCListener("CHANGED_SERVICE_STATUS", async (event: TCEvent<JobObject>) => {
 
             // COMMENT TO DISABLE COLD JOBS
             
-            // transporterManager.sendMail(goneColdMail(job, client, contractor), (err) => {
-            //     if (err)
-            //         Log.error(err);
-            // });
-            // Log.info(`sucessfully sent gone cold mail for job ${job.id}`);
+            transporterManager.sendMail(goneColdMail(job, client, contractor), (err) => {
+                if (err)
+                    Log.error(err);
+            });
+            Log.info(`sucessfully sent gone cold mail for job ${job.id}`);
             
-            // await updateServiceStatus(job, "in-progress");
+            await updateServiceStatus(job, "in-progress");
         }
     }
     Log.info("sucessfully executed all tasks for this callback function");
