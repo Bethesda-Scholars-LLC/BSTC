@@ -1,5 +1,7 @@
 import { Schema, model, Types } from "mongoose";
 
+const ONE_WEEK_SECONDS = 7 * 24 * 60 * 60;
+
 export interface IClientAwaiting {
     _id: Types.ObjectId
     client_id: number
@@ -7,6 +9,7 @@ export interface IClientAwaiting {
     job_id: number
     tutor_ids: number[]
     tutor_names?: string[]
+    createdAt: Date
 }
 
 export const popTutorFromCA = <T>(cAwaiting: T, tId: number): T => {
@@ -34,7 +37,12 @@ const clientAwaitingSchema = new Schema<IClientAwaiting>({
     tutor_names: {
         type: [String],
         required: false
-    }
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now,
+        expires: ONE_WEEK_SECONDS
+      }
 });
 
 const AwaitingClient = model("client_awaiting", clientAwaitingSchema);
