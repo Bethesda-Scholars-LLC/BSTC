@@ -27,12 +27,14 @@ const ClientMatched = (props: {tutor: ContractorObject, client: ClientObject, jo
     const tutorSchool = getAttrByMachineName("school_1", props.tutor.extra_attrs)?.value;
     const stripeFee = calcStripeFee(props.job.dft_charge_rate);
     const subjects = extractFieldFromJob(props.job, "classes needed tutoring in");
+    const tutorProfileLink = `https://www.bethesdascholars.com/tutor-profile#${props.tutor.id}-${props.tutor.first_name}-${props.tutor.last_name[0]}`;
+    
     return <p style={{margin: "0"}}>
         Hi {getUserFirstName(props.client)},
         <br/>
         <br/>
         We have found a tutor for {studentName}! {capitalize(tutorPronouns.possesive)} name is {getUserFullName(props.tutor)}.
-         Here are some brief details about {tutorPronouns.pronouns[1]} - you can view {tutorPronouns.possesive} full bio when booking a lesson.
+         Below are some brief details about {tutorPronouns.pronouns[1]}. Please click <a href={tutorProfileLink}>here</a> to see her full profile.
         <ul style={{listStyleType: "none", marginLeft: "15px", padding: "0"}}>
             {tutorGrade && <li><b>Tutor Grade: </b>{tutorGrade}</li>}
             {tutorSchool && <li><b>Tutor School: </b>{tutorSchool}</li>}

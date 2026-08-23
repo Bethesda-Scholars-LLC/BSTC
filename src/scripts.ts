@@ -1,7 +1,7 @@
 import { Duration } from "ts-duration";
 import ApiFetcher from "./api/fetch";
 import { getRandomClient } from "./integration/tc models/client/client";
-import { getContractorById, getRandomContractor, setContractFilledOut, setTutorBias, updateContractorById } from "./integration/tc models/contractor/contractor";
+import { ContractorLabels, addContractorLabel, getContractorById, getRandomContractor, removeContractorLabel, setContractFilledOut, setTutorBias, updateContractorById } from "./integration/tc models/contractor/contractor";
 import { ContractorObject, UpdateContractorPayload } from "./integration/tc models/contractor/types";
 import { getManyServices, getMinimumJobUpdate, getRandomService, getServiceById, updateServiceById, updateServiceStatus } from "./integration/tc models/service/service";
 import { DumbJob, JobObject } from "./integration/tc models/service/types";
@@ -78,6 +78,21 @@ const _sendReferrals = async (contractor: ContractorObject) => {
         }
     } catch (error) {
         Log.error("Error: ", error);
+    }
+};
+
+const _updateLabels = async (contractor: ContractorObject) => {
+    try {
+        Log.debug(`checking ${contractor.first_name} ${contractor.last_name} approved`);
+        const publicProfile = (contractor.labels.map((label) => label.id).includes(ContractorLabels.Public_Profile))
+        Log.debug(`${contractor.first_name} ${contractor.last_name} has public profile: ${publicProfile}`);
+        if (contractor.status === "approved" && !publicProfile) {
+            await addContractorLabel(contractor.id, ContractorLabels.Public_Profile);
+        } else if (contractor.status !== "approved" && publicProfile) {
+            await removeContractorLabel(contractor.id, ContractorLabels.Public_Profile);
+        }
+    } catch (e) {
+        Log.error(e);
     }
 };
 
@@ -218,6 +233,7 @@ if (!PROD) {
     if (RUN_SCRIPTS) {
         Log.debug("Running scripts.ts");
         // doSomethingAllContractors(async (c: ContractorObject) => {
+            // await _updateLabels(c);
             // await _setContractFilledOutToFalse(c);
             // await _sendReferrals(c);
             // await _setContractorStatusToDormant(c);
