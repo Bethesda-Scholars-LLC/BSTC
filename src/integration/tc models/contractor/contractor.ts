@@ -19,7 +19,7 @@ import { ClientManager, getClientById, moveToMatchedAndBooked, updateClientById 
 import { PipelineStage, addedContractorToService, getServiceById, onLessonComplete } from "../service/service";
 import { DumbUser } from "../user/types";
 import { getUserFullName } from "../user/user";
-import { ContractorObject, UpdateContractorPayload } from "./types";
+import { ContractorObject, UpdateContractorLabelPayload, UpdateContractorPayload } from "./types";
 import TutorModel from "../../../models/tutor";
 import { ContractorScreenedEmail } from "../../../mail/contractorScreened";
 import ScreeningModel from "../../../models/screenings";
@@ -27,6 +27,12 @@ import ScreeningModel from "../../../models/screenings";
 const recruiterIds = {
     // evelynGoldin: 2850125
 };
+
+export enum ContractorLabels {
+    Public_Profile = 169935,
+    Invited_To_Interview = 169934
+}
+
 export const screeners: Screener[] = [
     {
         name: "Sadie Eisenberg",
@@ -73,6 +79,36 @@ export const updateContractorById = async (id:number, data: UpdateContractorPayl
         });
         Log.info(`sucessfully updated contractor ${id} through API`);
         await SyncContractor(contractor.data as any);
+    } catch (e) {
+        Log.error(e);
+    }
+};
+
+export const addContractorLabel = async (contractor_id:number, label_id:number) => {
+    try {
+        Log.info(`adding label ${label_id} to contractor ${contractor_id} through API`);
+        await ApiFetcher.sendRequest(`/contractors/${contractor_id}/add_label/`, {
+            method: "POST",
+            data: {
+                label: label_id
+            } as UpdateContractorLabelPayload
+        });
+        Log.info(`sucessfully added label ${label_id} to contractor ${contractor_id} through API`);
+    } catch (e) {
+        Log.error(e);
+    }
+};
+
+export const removeContractorLabel = async (contractor_id:number, label_id:number) => {
+    try {
+        Log.info(`removing label ${label_id} from contractor ${contractor_id} through API`);
+        await ApiFetcher.sendRequest(`/contractors/${contractor_id}/remove_label/`, {
+            method: "POST",
+            data: {
+                label: label_id
+            } as UpdateContractorLabelPayload
+        });
+        Log.info(`sucessfully removed label ${label_id} to contractor ${contractor_id} through API`);
     } catch (e) {
         Log.error(e);
     }
@@ -286,6 +322,9 @@ addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<ContractorObjec
         await setTutorBias(contractor, 1);
         Log.info(`sucessfully updated contractor ${contractor.id} through API`);
 
+        await addContractorLabel(contractor.id, ContractorLabels.Public_Profile);
+        await removeContractorLabel(contractor.id, ContractorLabels.Invited_To_Interview);
+
         const tutorDb = await TutorModel.findOne({cruncher_id: contractor.id}).exec();
         if (!tutorDb) {
             Log.info(`no contractor ${contractor.id} found in db and date approved not updated`);
@@ -320,6 +359,8 @@ addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<ContractorObjec
                 pay_contractor: 15.0
             });
         }
+    } else if (contractor.status === "dormant") {
+        await removeContractorLabel(contractor.id, ContractorLabels.Public_Profile);
     }
     Log.info("sucessfully executed all tasks for this callback function");
 });

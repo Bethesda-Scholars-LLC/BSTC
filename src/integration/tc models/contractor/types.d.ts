@@ -71,6 +71,10 @@ export type UpdateContractorPayload = {
     extra_attrs?: {[key: string]: any}
 };
 
+export type UpdateContractorLabelPayload = {
+    label: number
+}
+
 export type skillType = {
     id: number,
     contractor: {
