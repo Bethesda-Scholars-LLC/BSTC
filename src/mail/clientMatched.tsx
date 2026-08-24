@@ -34,13 +34,14 @@ const ClientMatched = (props: {tutor: ContractorObject, client: ClientObject, jo
         <br/>
         <br/>
         We have found a tutor for {studentName}! {capitalize(tutorPronouns.possesive)} name is {getUserFullName(props.tutor)}.
-         Below are some brief details about {tutorPronouns.pronouns[1]}. Please click <a href={tutorProfileLink}>here</a> to see her full profile.
+         Below are some brief details about {tutorPronouns.pronouns[1]}. You will also see a link to {studentName}'s full profile.
         <ul style={{listStyleType: "none", marginLeft: "15px", padding: "0"}}>
             {tutorGrade && <li><b>Tutor Grade: </b>{tutorGrade}</li>}
             {tutorSchool && <li><b>Tutor School: </b>{tutorSchool}</li>}
             {props.tutor.mobile && <li><b>Phone Number: </b>{cleanPhoneNumber(props.tutor.mobile)}</li>}
             {props.tutor.email && <li><b>Email: </b>{props.tutor.email}</li>}
             {subjects && <li><b>Subjects: </b>{subjects}</li>}
+            <li><b>Full Profile: </b>{tutorProfileLink}</li>
         </ul>
         {props.job.dft_location && <>
             Lessons will be {props.job.dft_location?.name}.
