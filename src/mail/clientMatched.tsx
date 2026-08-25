@@ -41,7 +41,7 @@ const ClientMatched = (props: {tutor: ContractorObject, client: ClientObject, jo
             {props.tutor.mobile && <li><b>Phone Number: </b>{cleanPhoneNumber(props.tutor.mobile)}</li>}
             {props.tutor.email && <li><b>Email: </b>{props.tutor.email}</li>}
             {subjects && <li><b>Subjects: </b>{subjects}</li>}
-            <li><b>Full Profile: </b>{tutorProfileLink}</li>
+            <li><b>Full Profile: </b><a href={tutorProfileLink}>Click here</a></li>
         </ul>
         {props.job.dft_location && <>
             Lessons will be {props.job.dft_location?.name}.
