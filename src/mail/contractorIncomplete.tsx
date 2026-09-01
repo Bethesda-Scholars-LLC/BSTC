@@ -36,8 +36,8 @@ const ContractorIncomplete = ({contractor}: { contractor: ContractorObject }) =>
         Hi {tutorName},
         <br />
         <br />
-        You have not completed your profile. You are missing either your <b>bio or your teaching skills</b> in your profile.
-        Please complete these fields by editing your profile and clicking the blue actions button below your initials on your dashboard.
+        You have not completed your profile. You are missing either your <b>bio or your teaching skills</b> in your profile. 
+        Please read carefully and follow the <b><a href="https://drive.google.com/file/d/1_Fal3cDQvhZMmuiVM963JH574ULC_Hwv/view">application instructions.</a></b>
         <br />
         <br />
         We will not be able to review your application until this is complete. <b>When this has been completed, please click&nbsp;
