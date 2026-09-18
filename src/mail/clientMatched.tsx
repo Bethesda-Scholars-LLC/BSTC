@@ -34,7 +34,7 @@ const ClientMatched = (props: {tutor: ContractorObject, client: ClientObject, jo
         <br/>
         <br/>
         We have found a tutor for {studentName}! {capitalize(tutorPronouns.possesive)} name is {getUserFullName(props.tutor)}.
-         Below are some brief details about {tutorPronouns.pronouns[1]}. You will also see a link to {studentName}'s full profile.
+         Below are some brief details about {tutorPronouns.pronouns[1]}. You will also see a link to {tutorName}'s full profile.
         <ul style={{listStyleType: "none", marginLeft: "15px", padding: "0"}}>
             {tutorGrade && <li><b>Tutor Grade: </b>{tutorGrade}</li>}
             {tutorSchool && <li><b>Tutor School: </b>{tutorSchool}</li>}
