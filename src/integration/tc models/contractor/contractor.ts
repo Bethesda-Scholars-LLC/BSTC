@@ -84,6 +84,10 @@ export const updateContractorById = async (id:number, data: UpdateContractorPayl
     }
 };
 
+export const hasContractorLabel = (contractor: ContractorObject, label: ContractorLabels) => {
+    return contractor.labels.some(contractorLabel => contractorLabel.id === label);
+};
+
 export const addContractorLabel = async (contractor_id:number, label_id:number) => {
     try {
         Log.info(`adding label ${label_id} to contractor ${contractor_id} through API`);
@@ -292,7 +296,8 @@ addTCListener("CHANGED_CONTRACTOR_STATUS", async (event: TCEvent<ContractorObjec
      const screenedAlready = await ScreeningModel.exists({tutor_id: contractor.id}).exec();
      
      // if contractor hasn't been screened and was screened by a current screener
-     if (!screenedAlready && screener && (contractor.status === "approved" || contractor.status === "rejected")) {
+     if (hasContractorLabel(contractor, ContractorLabels.Invited_To_Interview) && !screenedAlready &&
+      screener && (contractor.status === "approved" || contractor.status === "rejected")) {
          Log.info(`logging screening pay for screener ${screener.id}`);
          await createAdHocCharge({
              description: `${getUserFullName(contractor)} ${contractor.id} Screened: ${contractor.status}`,
